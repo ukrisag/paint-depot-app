@@ -1,0 +1,105 @@
+<div class="bg-gray-50 min-h-screen">
+  <div class="container mx-auto px-4 py-12">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ pageTitle }}</h1>
+      <p class="text-gray-600">พบสินค้า {{ products.length }} รายการ</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- Filters Sidebar -->
+      <aside class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-lg font-semibold text-gray-900">ตัวกรอง</h2>
+            @if (selectedCategoryId || selectedBrandId) {
+              <button (click)="clearFilters()" class="text-sm text-primary-600 hover:text-primary-700">
+                ล้างทั้งหมด
+              </button>
+            }
+          </div>
+
+          <!-- Category Filter -->
+          <div class="mb-8">
+            <h3 class="font-medium text-gray-900 mb-4">หมวดหมู่</h3>
+            <div class="space-y-2">
+              <label class="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded">
+                <input
+                  type="radio"
+                  name="category"
+                  [checked]="!selectedCategoryId"
+                  (change)="filterByCategory()"
+                  class="text-primary-600 focus:ring-primary-500"
+                />
+                <span class="ml-3 text-gray-700">ทั้งหมด</span>
+              </label>
+              @for (category of categories; track category.id) {
+                <label class="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded">
+                  <input
+                    type="radio"
+                    name="category"
+                    [checked]="selectedCategoryId === category.id"
+                    (change)="filterByCategory(category.id)"
+                    class="text-primary-600 focus:ring-primary-500"
+                  />
+                  <span class="ml-3 text-gray-700">{{ category.name }}</span>
+                </label>
+              }
+            </div>
+          </div>
+
+          <!-- Brand Filter -->
+          <div>
+            <h3 class="font-medium text-gray-900 mb-4">แบรนด์</h3>
+            <div class="space-y-2">
+              <label class="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded">
+                <input
+                  type="radio"
+                  name="brand"
+                  [checked]="!selectedBrandId"
+                  (change)="filterByBrand()"
+                  class="text-primary-600 focus:ring-primary-500"
+                />
+                <span class="ml-3 text-gray-700">ทั้งหมด</span>
+              </label>
+              @for (brand of brands; track brand.id) {
+                <label class="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded">
+                  <input
+                    type="radio"
+                    name="brand"
+                    [checked]="selectedBrandId === brand.id"
+                    (change)="filterByBrand(brand.id)"
+                    class="text-primary-600 focus:ring-primary-500"
+                  />
+                  <span class="ml-3 text-gray-700">{{ brand.name }}</span>
+                </label>
+              }
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Products Grid -->
+      <main class="lg:col-span-3">
+        @if (loading) {
+          <div class="flex justify-center py-20">
+            <div class="animate-spin h-8 w-8 border-2 border-primary-600 border-t-transparent rounded-full"></div>
+          </div>
+        } @else if (products.length === 0) {
+          <div class="bg-white rounded-lg shadow-sm p-12 text-center">
+            <p class="text-gray-500 text-lg">ไม่พบสินค้าที่ตรงกับเงื่อนไข</p>
+            <button (click)="clearFilters()" class="mt-4 text-primary-600 hover:text-primary-700">
+              ล้างตัวกรอง
+            </button>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            @for (product of products; track product.id) {
+              <app-product-card [product]="product"></app-product-card>
+            }
+          </div>
+        }
+      </main>
+    </div>
+  </div>
+</div>

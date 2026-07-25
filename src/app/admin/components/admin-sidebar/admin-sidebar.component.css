@@ -1,0 +1,22 @@
+/* Sidebar Styles */
+:host {
+  display: block;
+}
+
+/* Custom scrollbar for navigation */
+nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+nav::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+nav::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
+}
+
+nav::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}

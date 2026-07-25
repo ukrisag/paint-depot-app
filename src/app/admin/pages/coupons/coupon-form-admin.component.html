@@ -1,0 +1,251 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">
+      {{ isEditMode ? 'แก้ไขคูปอง' : 'เพิ่มคูปองใหม่' }}
+    </h1>
+    <p class="text-gray-600 mt-1">
+      {{ isEditMode ? 'แก้ไขข้อมูลคูปองส่วนลดในระบบ' : 'เพิ่มคูปองส่วนลดใหม่เข้าสู่ระบบ' }}
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+    {{ error }}
+  </div>
+
+  <!-- Form -->
+  <form *ngIf="!loading" [formGroup]="couponForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Basic Information Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">ข้อมูลพื้นฐาน</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Coupon Code -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            โค้ดคูปอง <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="code"
+            (input)="onCodeInput($event)"
+            [class]="isFieldInvalid('code')
+              ? 'w-full px-4 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 font-mono uppercase'
+              : 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono uppercase'"
+            placeholder="เช่น SAVE20"
+          />
+          <p *ngIf="isFieldInvalid('code')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('code') }}
+          </p>
+          <p class="mt-1 text-xs text-gray-500">โค้ดจะถูกแปลงเป็นตัวพิมพ์ใหญ่โดยอัตโนมัติ</p>
+        </div>
+
+        <!-- Discount Type -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            ประเภทส่วนลด <span class="text-red-500">*</span>
+          </label>
+          <div class="flex gap-4">
+            <label class="flex items-center">
+              <input
+                type="radio"
+                formControlName="type"
+                value="Percentage"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+              />
+              <span class="ml-2 text-sm text-gray-700">เปอร์เซ็นต์ (%)</span>
+            </label>
+            <label class="flex items-center">
+              <input
+                type="radio"
+                formControlName="type"
+                value="FixedAmount"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+              />
+              <span class="ml-2 text-sm text-gray-700">จำนวนเงิน (฿)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Discount Value -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            มูลค่าส่วนลด <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <input
+              type="number"
+              formControlName="value"
+              [class]="isFieldInvalid('value')
+                ? 'w-full px-4 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500'
+                : 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'"
+              placeholder="0"
+              step="0.01"
+              min="0"
+            />
+            <span class="absolute right-3 top-2.5 text-gray-500">
+              {{ couponForm.get('type')?.value === 'Percentage' ? '%' : '฿' }}
+            </span>
+          </div>
+          <p *ngIf="isFieldInvalid('value')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('value') }}
+          </p>
+        </div>
+
+        <!-- Min Purchase Amount -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            ยอดสั่งซื้อขั้นต่ำ
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-2.5 text-gray-500">฿</span>
+            <input
+              type="number"
+              formControlName="minPurchaseAmount"
+              class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+            />
+          </div>
+          <p class="mt-1 text-xs text-gray-500">ถ้าไม่ระบุจะไม่มีขั้นต่ำ</p>
+        </div>
+
+        <!-- Max Discount Amount (for Percentage only) -->
+        <div *ngIf="couponForm.get('type')?.value === 'Percentage'">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            ส่วนลดสูงสุด
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-2.5 text-gray-500">฿</span>
+            <input
+              type="number"
+              formControlName="maxDiscountAmount"
+              class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+            />
+          </div>
+          <p class="mt-1 text-xs text-gray-500">จำกัดจำนวนเงินส่วนลดสูงสุด (สำหรับส่วนลดเปอร์เซ็นต์)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Limits Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">จำนวนครั้งในการใช้งาน</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Total Usage Limit -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            จำนวนครั้งทั้งหมด
+          </label>
+          <input
+            type="number"
+            formControlName="usageLimitTotal"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="ไม่จำกัด"
+            min="1"
+            step="1"
+          />
+          <p class="mt-1 text-xs text-gray-500">จำนวนครั้งที่สามารถใช้คูปองนี้ได้ทั้งหมด (ถ้าไม่ระบุจะไม่จำกัด)</p>
+        </div>
+
+        <!-- Per User Usage Limit -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            จำนวนครั้งต่อผู้ใช้
+          </label>
+          <input
+            type="number"
+            formControlName="usageLimitPerUser"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="ไม่จำกัด"
+            min="1"
+            step="1"
+          />
+          <p class="mt-1 text-xs text-gray-500">จำนวนครั้งที่ผู้ใช้แต่ละคนสามารถใช้คูปองนี้ได้ (ถ้าไม่ระบุจะไม่จำกัด)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validity Period Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">ระยะเวลาใช้งาน</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Valid From -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            เริ่มใช้งานตั้งแต่
+          </label>
+          <input
+            type="date"
+            formControlName="validFrom"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <p class="mt-1 text-xs text-gray-500">วันที่เริ่มต้นให้ใช้คูปองนี้ได้</p>
+        </div>
+
+        <!-- Valid Until -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            ใช้งานได้ถึงวันที่
+          </label>
+          <input
+            type="date"
+            formControlName="validUntil"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <p class="mt-1 text-xs text-gray-500">วันที่สิ้นสุดการใช้คูปองนี้</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">สถานะ</h2>
+
+      <div class="flex items-center">
+        <input
+          type="checkbox"
+          formControlName="isActive"
+          id="isActive"
+          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        />
+        <label for="isActive" class="ml-3 block text-sm font-medium text-gray-700">
+          เปิดใช้งานคูปอง
+        </label>
+      </div>
+      <p class="ml-7 text-xs text-gray-500 mt-1">คูปองที่เปิดใช้งานจะสามารถใช้งานได้ตามระยะเวลาที่กำหนด</p>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-end">
+      <button
+        type="button"
+        (click)="onCancel()"
+        [disabled]="submitting"
+        class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        ยกเลิก
+      </button>
+      <button
+        type="submit"
+        [disabled]="submitting || couponForm.invalid"
+        class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      >
+        <span *ngIf="submitting" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+        <span>{{ isEditMode ? 'บันทึกการแก้ไข' : 'เพิ่มคูปอง' }}</span>
+      </button>
+    </div>
+  </form>
+</div>

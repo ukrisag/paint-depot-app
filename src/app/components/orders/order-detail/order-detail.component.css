@@ -1,0 +1,171 @@
+/* Order Detail Component Styles */
+
+/* Timeline animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Table hover effect */
+tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Timeline line animation */
+.timeline-line {
+  transition: height 0.3s ease;
+}
+
+/* Button effects */
+button {
+  transition: all 0.2s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Status badge animations */
+.status-badge {
+  transition: all 0.3s ease;
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Card shadow on hover */
+.shadow-md {
+  transition: box-shadow 0.3s ease;
+}
+
+/* Responsive table scrolling */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f7fafc;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background-color: #cbd5e0;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background-color: #a0aec0;
+}
+
+/* Print styles */
+@media print {
+  .bg-gray-50 {
+    background: white;
+  }
+
+  button {
+    display: none;
+  }
+
+  .shadow-md {
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+
+  .no-print {
+    display: none;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .text-3xl {
+    font-size: 1.875rem;
+  }
+
+  .text-xl {
+    font-size: 1.125rem;
+  }
+
+  table {
+    font-size: 0.875rem;
+  }
+}
+
+/* Timeline step indicator */
+.timeline-step {
+  position: relative;
+}
+
+.timeline-step::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 40px;
+  width: 2px;
+  height: calc(100% - 40px);
+  background: #e5e7eb;
+}
+
+.timeline-step:last-child::before {
+  display: none;
+}
+
+/* Smooth color transitions for status changes */
+.status-transition {
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+a:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Disabled state */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Custom scrollbar for notes */
+.notes-container {
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.notes-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notes-container::-webkit-scrollbar-thumb {
+  background-color: #cbd5e0;
+  border-radius: 3px;
+}

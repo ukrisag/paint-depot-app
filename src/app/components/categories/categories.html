@@ -1,0 +1,21 @@
+<div class="bg-white min-h-screen">
+  <div class="container mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">หมวดหมู่สินค้า</h1>
+
+    @if (loading) {
+      <div class="text-center py-16 text-gray-500">กำลังโหลด...</div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (category of categories; track category.id) {
+          <div
+            (click)="goToCategory(category.id)"
+            class="p-6 border rounded-lg hover:shadow-lg transition-shadow cursor-pointer"
+          >
+            <h3 class="text-xl font-medium text-gray-900 mb-2">{{ category.name }}</h3>
+            <p class="text-gray-600 text-sm">{{ category.description }}</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paint Depot - API Debug Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #f97316;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        button {
+            background: #f97316;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #ea580c;
+        }
+        .result {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        .warning {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        .info {
+            background: #dbeafe;
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Paint Depot - API Debug Tool</h1>
+        <p>เครื่องมือสำหรับตรวจสอบการทำงานของ API</p>
+    </div>
+
+    <div class="container">
+        <h2>📊 API Status</h2>
+        <button onclick="checkAPIStatus()">ตรวจสอบ API Connection</button>
+        <div id="status-result"></div>
+    </div>
+
+    <div class="container">
+        <h2>📦 Products API</h2>
+        <button onclick="testProductsAPI()">ทดสอบ GET /api/Products</button>
+        <button onclick="testProductDetail()">ทดสอบ GET /api/Products/1</button>
+        <button onclick="testProductBySlug()">ทดสอบ GET /api/Products/slug/toa-4seasons-2in1-exterior-matt</button>
+        <div id="products-result"></div>
+    </div>
+
+    <div class="container">
+        <h2>🏷️ Brands API</h2>
+        <button onclick="testBrandsAPI()">ทดสอบ GET /api/Brands</button>
+        <div id="brands-result"></div>
+    </div>
+
+    <div class="container">
+        <h2>📁 Categories API</h2>
+        <button onclick="testCategoriesAPI()">ทดสอบ GET /api/Categories</button>
+        <div id="categories-result"></div>
+    </div>
+
+    <div class="container">
+        <h2>🔍 ผลการตรวจสอบทั้งหมด</h2>
+        <button onclick="runAllTests()">🚀 รันทุกการทดสอบ</button>
+        <div id="summary-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5259';
+        let testResults = {
+            status: null,
+            products: null,
+            productDetail: null,
+            productBySlug: null,
+            brands: null,
+            categories: null
+        };
+
+        async function checkAPIStatus() {
+            const resultDiv = document.getElementById('status-result');
+            resultDiv.innerHTML = '<div class="result info">กำลังตรวจสอบ...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/Products?pageNumber=1&pageSize=1`);
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    testResults.status = 'success';
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ API ทำงานปกติ</h3>
+                            <pre>URL: ${API_BASE}
+Status: ${response.status} ${response.statusText}
+Response Time: ${new Date().toLocaleTimeString('th-TH')}</pre>
+                        </div>
+                    `;
+                } else {
+                    testResults.status = 'error';
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ API ตอบกลับแต่มี error</h3>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                testResults.status = 'error';
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ ไม่สามารถเชื่อมต่อ API ได้</h3>
+                        <pre>Error: ${error.message}
+
+แนะนำ:
+1. ตรวจสอบว่า Backend API รันอยู่หรือไม่ (dotnet run)
+2. ตรวจสอบว่า URL ถูกต้อง: ${API_BASE}
+3. ตรวจสอบ CORS configuration</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function testProductsAPI() {
+            const resultDiv = document.getElementById('products-result');
+            resultDiv.innerHTML = '<div class="result info">กำลังโหลด Products...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/Products?pageNumber=1&pageSize=12`);
+                const data = await response.json();
+
+                console.log('Products API Response:', data);
+
+                if (response.ok && data.success) {
+                    const products = data.data?.items || [];
+                    testResults.products = 'success';
+
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Products API ทำงานปกติ</h3>
+                            <div class="stats">
+                                <div class="stat-card">
+                                    <h3>จำนวนสินค้า</h3>
+                                    <div class="value">${data.data?.totalItems || 0}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>หน้าปัจจุบัน</h3>
+                                    <div class="value">${data.data?.page || 1}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>Items/หน้า</h3>
+                                    <div class="value">${products.length}</div>
+                                </div>
+                            </div>
+                            <h4>ตัวอย่างสินค้า (3 รายการแรก):</h4>
+                            <pre>${JSON.stringify(products.slice(0, 3), null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    testResults.products = 'error';
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Products API Error</h3>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                testResults.products = 'error';
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Error</h3>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function testProductDetail() {
+            const resultDiv = document.getElementById('products-result');
+            resultDiv.innerHTML += '<div class="result info">กำลังโหลด Product Detail (ID=1)...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/Products/1`);
+                const data = await response.json();
+
+                console.log('Product Detail API Response:', data);
+
+                if (response.ok && data.success && data.data) {
+                    testResults.productDetail = 'success';
+                    const product = data.data;
+
+                    resultDiv.innerHTML += `
+                        <div class="result success">
+                            <h3>✅ Product Detail API ทำงานปกติ</h3>
+                            <h4>Product ID: ${product.id}</h4>
+                            <ul>
+                                <li><strong>Name:</strong> ${product.name}</li>
+                                <li><strong>Slug:</strong> ${product.slug}</li>
+                                <li><strong>Price:</strong> ฿${product.basePrice}</li>
+                                <li><strong>Images:</strong> ${product.images?.length || 0} รูป</li>
+                                <li><strong>Variants:</strong> ${product.variants?.length || 0} รายการ</li>
+                            </ul>
+                            <h4>Full Data:</h4>
+                            <pre>${JSON.stringify(product, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    testResults.productDetail = 'error';
+                    resultDiv.innerHTML += `
+                        <div class="result error">
+                            <h3>❌ Product Detail Error</h3>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                testResults.productDetail = 'error';
+                resultDiv.innerHTML += `
+                    <div class="result error">
+                        <h3>❌ Error</h3>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function testProductBySlug() {
+            const resultDiv = document.getElementById('products-result');
+            const slug = 'toa-4seasons-2in1-exterior-matt';
+            resultDiv.innerHTML += `<div class="result info">กำลังโหลด Product by Slug (${slug})...</div>`;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/Products/slug/${slug}`);
+                const data = await response.json();
+
+                console.log('Product by Slug API Response:', data);
+
+                if (response.ok && data.success && data.data) {
+                    testResults.productBySlug = 'success';
+                    const product = data.data;
+
+                    resultDiv.innerHTML += `
+                        <div class="result success">
+                            <h3>✅ Product by Slug API ทำงานปกติ</h3>
+                            <p><strong>Found:</strong> ${product.name}</p>
+                        </div>
+                    `;
+                } else {
+                    testResults.productBySlug = 'error';
+                    resultDiv.innerHTML += `
+                        <div class="result warning">
+                            <h3>⚠️ Product by Slug ไม่พบข้อมูล</h3>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                testResults.productBySlug = 'error';
+                resultDiv.innerHTML += `
+                    <div class="result error">
+                        <h3>❌ Error</h3>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function testBrandsAPI() {
+            const resultDiv = document.getElementById('brands-result');
+            resultDiv.innerHTML = '<div class="result info">กำลังโหลด Brands...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/Brands`);
+                const data = await response.json();
+
+                console.log('Brands API Response:', data);
+
+                if (response.ok && data.success) {
+                    const brands = data.data || [];
+                    testResults.brands = 'success';
+
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Brands API ทำงานปกติ</h3>
+                            <p><strong>จำนวนแบรนด์:</strong> ${brands.length}</p>
+                            <h4>รายชื่อแบรนด์:</h4>
+                            <ul>
+                                ${brands.map(b => `<li>${b.name} (ID: ${b.id})</li>`).join('')}
+                            </ul>
+                            <h4>Full Data:</h4>
+                            <pre>${JSON.stringify(brands, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    testResults.brands = 'error';
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Brands API Error</h3>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                testResults.brands = 'error';
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Error</h3>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function testCategoriesAPI() {
+            const resultDiv = document.getElementById('categories-result');
+            resultDiv.innerHTML = '<div class="result info">กำลังโหลด Categories...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/Categories`);
+                const data = await response.json();
+
+                console.log('Categories API Response:', data);
+
+                if (response.ok && data.success) {
+                    const categories = data.data || [];
+                    testResults.categories = 'success';
+
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Categories API ทำงานปกติ</h3>
+                            <p><strong>จำนวนหมวดหมู่:</strong> ${categories.length}</p>
+                            <h4>รายชื่อหมวดหมู่:</h4>
+                            <ul>
+                                ${categories.map(c => `<li>${c.name} (ID: ${c.id}) ${c.parentId ? '↳ SubCategory' : ''}</li>`).join('')}
+                            </ul>
+                            <h4>Full Data:</h4>
+                            <pre>${JSON.stringify(categories, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    testResults.categories = 'error';
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Categories API Error</h3>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                testResults.categories = 'error';
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Error</h3>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function runAllTests() {
+            const resultDiv = document.getElementById('summary-result');
+            resultDiv.innerHTML = '<div class="result info"><h3>🚀 กำลังรันการทดสอบทั้งหมด...</h3></div>';
+
+            await checkAPIStatus();
+            await testProductsAPI();
+            await testProductDetail();
+            await testProductBySlug();
+            await testBrandsAPI();
+            await testCategoriesAPI();
+
+            const successCount = Object.values(testResults).filter(r => r === 'success').length;
+            const totalTests = Object.keys(testResults).length;
+            const allPassed = successCount === totalTests;
+
+            resultDiv.innerHTML = `
+                <div class="result ${allPassed ? 'success' : 'warning'}">
+                    <h3>${allPassed ? '✅ ผ่านทุกการทดสอบ!' : '⚠️ มีบางการทดสอบที่ไม่ผ่าน'}</h3>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <h3>ผ่านการทดสอบ</h3>
+                            <div class="value">${successCount}/${totalTests}</div>
+                        </div>
+                    </div>
+                    <h4>รายละเอียด:</h4>
+                    <ul>
+                        ${Object.entries(testResults).map(([key, value]) =>
+                            `<li>${value === 'success' ? '✅' : '❌'} ${key}: ${value || 'ยังไม่ได้ทดสอบ'}</li>`
+                        ).join('')}
+                    </ul>
+                    ${!allPassed ? `
+                        <h4>📝 แนะนำการแก้ไข:</h4>
+                        <ol>
+                            <li>ตรวจสอบว่า Backend API รันอยู่ที่ http://localhost:5259</li>
+                            <li>ตรวจสอบว่ามีข้อมูลในฐานข้อมูล (รัน seed data)</li>
+                            <li>ตรวจสอบ CORS configuration ใน backend</li>
+                            <li>ดู Console log ใน Browser Developer Tools</li>
+                        </ol>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            console.log('API Debug Tool loaded. Ready to test!');
+        });
+    </script>
+</body>
+</html>

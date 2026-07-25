@@ -1,0 +1,66 @@
+<header class="bg-white shadow-md h-16 flex items-center justify-between px-4 lg:px-6">
+  <!-- Left Section: Menu Toggle & Breadcrumb -->
+  <div class="flex items-center gap-4">
+    <!-- Mobile Menu Toggle -->
+    <button
+      (click)="onToggleSidebar()"
+      class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+      aria-label="Toggle menu">
+      <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+
+    <!-- Desktop Menu Toggle -->
+    <button
+      (click)="onToggleSidebar()"
+      class="hidden lg:block p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+      aria-label="Toggle sidebar">
+      <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+
+    <!-- Breadcrumb (Optional) -->
+    <div class="hidden md:block">
+      <h1 class="text-xl font-semibold text-gray-800">ระบบจัดการ Paint Depot</h1>
+    </div>
+  </div>
+
+  <!-- Right Section: User Info & Actions -->
+  <div class="flex items-center gap-2 lg:gap-4">
+    <!-- Back to Site -->
+    <a
+      routerLink="/"
+      class="hidden sm:flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      <span>กลับสู่เว็บไซต์</span>
+    </a>
+
+    <!-- User Info -->
+    <div class="hidden lg:flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
+      <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+        <span class="text-white font-semibold text-sm">
+          {{ userName.charAt(0).toUpperCase() }}
+        </span>
+      </div>
+      <div class="text-sm">
+        <p class="font-medium text-gray-800">{{ userName }}</p>
+        <p class="text-xs text-gray-500">ผู้ดูแลระบบ</p>
+      </div>
+    </div>
+
+    <!-- Logout Button -->
+    <button
+      (click)="logout()"
+      class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+      title="ออกจากระบบ">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+      </svg>
+      <span class="hidden sm:inline">ออกจากระบบ</span>
+    </button>
+  </div>
+</header>

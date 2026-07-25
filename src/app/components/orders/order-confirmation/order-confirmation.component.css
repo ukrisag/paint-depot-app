@@ -1,0 +1,47 @@
+/* Order Confirmation Component Styles */
+
+/* Animation for success checkmark */
+@keyframes checkmark {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.bg-green-100 svg {
+  animation: checkmark 0.6s ease-out;
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.2s ease;
+}
+
+/* Print styles */
+@media print {
+  .bg-gray-50 {
+    background: white;
+  }
+
+  button {
+    display: none;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+
+  .text-xl {
+    font-size: 1.25rem;
+  }
+}

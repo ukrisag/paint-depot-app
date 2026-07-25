@@ -1,0 +1,29 @@
+<div class="min-h-screen bg-gray-100">
+  <!-- Admin Header -->
+  <app-admin-header
+    (toggleSidebar)="toggleSidebar()"
+    class="fixed top-0 left-0 right-0 z-30">
+  </app-admin-header>
+
+  <div class="pt-16 flex">
+    <!-- Sidebar -->
+    <app-admin-sidebar
+      [isOpen]="isSidebarOpen()"
+      (close)="closeSidebar()"
+      class="fixed lg:static z-20">
+    </app-admin-sidebar>
+
+    <!-- Overlay for mobile -->
+    @if (isSidebarOpen()) {
+      <div
+        class="fixed inset-0 bg-black bg-opacity-50 z-10 lg:hidden"
+        (click)="closeSidebar()">
+      </div>
+    }
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 lg:p-8 transition-all duration-300">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

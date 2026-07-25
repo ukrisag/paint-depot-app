@@ -1,0 +1,18 @@
+/* Custom animations for about page */
+.prose {
+  max-width: none;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Map container hover effect */
+iframe {
+  transition: transform 0.3s ease;
+}
+
+iframe:hover {
+  transform: scale(1.01);
+}

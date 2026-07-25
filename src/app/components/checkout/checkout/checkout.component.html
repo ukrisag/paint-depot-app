@@ -1,0 +1,519 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="container mx-auto px-4 max-w-7xl">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">ชำระเงิน</h1>
+      <p class="text-gray-600">กรุณากรอกข้อมูลเพื่อทำการสั่งซื้อสินค้า</p>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="mb-8">
+      <div class="flex items-center justify-center">
+        <!-- Step 1 -->
+        <div class="flex items-center">
+          <div
+            class="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all"
+            [class.bg-primary-600]="currentStep >= 1"
+            [class.border-primary-600]="currentStep >= 1"
+            [class.text-white]="currentStep >= 1"
+            [class.border-gray-300]="currentStep < 1"
+            [class.text-gray-400]="currentStep < 1"
+          >
+            <span class="font-semibold">1</span>
+          </div>
+          <div class="ml-2 hidden sm:block">
+            <p class="text-sm font-medium" [class.text-primary-600]="currentStep >= 1" [class.text-gray-500]="currentStep < 1">
+              ข้อมูลจัดส่ง
+            </p>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="w-12 sm:w-24 h-0.5 mx-2" [class.bg-primary-600]="currentStep >= 2" [class.bg-gray-300]="currentStep < 2"></div>
+
+        <!-- Step 2 -->
+        <div class="flex items-center">
+          <div
+            class="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all"
+            [class.bg-primary-600]="currentStep >= 2"
+            [class.border-primary-600]="currentStep >= 2"
+            [class.text-white]="currentStep >= 2"
+            [class.border-gray-300]="currentStep < 2"
+            [class.text-gray-400]="currentStep < 2"
+          >
+            <span class="font-semibold">2</span>
+          </div>
+          <div class="ml-2 hidden sm:block">
+            <p class="text-sm font-medium" [class.text-primary-600]="currentStep >= 2" [class.text-gray-500]="currentStep < 2">
+              วิธีการชำระเงิน
+            </p>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="w-12 sm:w-24 h-0.5 mx-2" [class.bg-primary-600]="currentStep >= 3" [class.bg-gray-300]="currentStep < 3"></div>
+
+        <!-- Step 3 -->
+        <div class="flex items-center">
+          <div
+            class="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all"
+            [class.bg-primary-600]="currentStep >= 3"
+            [class.border-primary-600]="currentStep >= 3"
+            [class.text-white]="currentStep >= 3"
+            [class.border-gray-300]="currentStep < 3"
+            [class.text-gray-400]="currentStep < 3"
+          >
+            <span class="font-semibold">3</span>
+          </div>
+          <div class="ml-2 hidden sm:block">
+            <p class="text-sm font-medium" [class.text-primary-600]="currentStep >= 3" [class.text-gray-500]="currentStep < 3">
+              ตรวจสอบคำสั่งซื้อ
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Form Section -->
+      <div class="lg:col-span-2">
+        <form [formGroup]="checkoutForm" class="space-y-6">
+
+          <!-- Step 1: Shipping Information -->
+          <div *ngIf="currentStep === 1" class="bg-white rounded-lg shadow-md p-6 animate-fade-in">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">ข้อมูลการจัดส่ง</h2>
+
+            <div formGroupName="shippingInfo" class="space-y-4">
+              <!-- Name Fields -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    ชื่อ <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="firstName"
+                    placeholder="กรุณากรอกชื่อ"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    [class.border-red-500]="isFieldInvalid(shippingInfoForm, 'firstName')"
+                  />
+                  <p *ngIf="isFieldInvalid(shippingInfoForm, 'firstName')" class="mt-1 text-sm text-red-500">
+                    {{ getFieldError(shippingInfoForm, 'firstName') }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    นามสกุล <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="lastName"
+                    placeholder="กรุณากรอกนามสกุล"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    [class.border-red-500]="isFieldInvalid(shippingInfoForm, 'lastName')"
+                  />
+                  <p *ngIf="isFieldInvalid(shippingInfoForm, 'lastName')" class="mt-1 text-sm text-red-500">
+                    {{ getFieldError(shippingInfoForm, 'lastName') }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Contact Fields -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    เบอร์โทรศัพท์ <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    formControlName="phone"
+                    placeholder="0812345678"
+                    maxlength="10"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    [class.border-red-500]="isFieldInvalid(shippingInfoForm, 'phone')"
+                  />
+                  <p *ngIf="isFieldInvalid(shippingInfoForm, 'phone')" class="mt-1 text-sm text-red-500">
+                    {{ getFieldError(shippingInfoForm, 'phone') }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    อีเมล <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    formControlName="email"
+                    placeholder="example@email.com"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    [class.border-red-500]="isFieldInvalid(shippingInfoForm, 'email')"
+                  />
+                  <p *ngIf="isFieldInvalid(shippingInfoForm, 'email')" class="mt-1 text-sm text-red-500">
+                    {{ getFieldError(shippingInfoForm, 'email') }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Address -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  ที่อยู่ <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                  formControlName="address"
+                  rows="3"
+                  placeholder="บ้านเลขที่ หมู่บ้าน ซอย ถนน"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  [class.border-red-500]="isFieldInvalid(shippingInfoForm, 'address')"
+                ></textarea>
+                <p *ngIf="isFieldInvalid(shippingInfoForm, 'address')" class="mt-1 text-sm text-red-500">
+                  {{ getFieldError(shippingInfoForm, 'address') }}
+                </p>
+              </div>
+
+              <!-- Location Fields -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    แขวง/ตำบล <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="subDistrict"
+                    placeholder="แขวง/ตำบล"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    [class.border-red-500]="isFieldInvalid(shippingInfoForm, 'subDistrict')"
+                  />
+                  <p *ngIf="isFieldInvalid(shippingInfoForm, 'subDistrict')" class="mt-1 text-sm text-red-500">
+                    {{ getFieldError(shippingInfoForm, 'subDistrict') }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    เขต/อำเภอ <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="district"
+                    placeholder="เขต/อำเภอ"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    [class.border-red-500]="isFieldInvalid(shippingInfoForm, 'district')"
+                  />
+                  <p *ngIf="isFieldInvalid(shippingInfoForm, 'district')" class="mt-1 text-sm text-red-500">
+                    {{ getFieldError(shippingInfoForm, 'district') }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    จังหวัด <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="province"
+                    placeholder="จังหวัด"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    [class.border-red-500]="isFieldInvalid(shippingInfoForm, 'province')"
+                  />
+                  <p *ngIf="isFieldInvalid(shippingInfoForm, 'province')" class="mt-1 text-sm text-red-500">
+                    {{ getFieldError(shippingInfoForm, 'province') }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    รหัสไปรษณีย์ <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="postalCode"
+                    placeholder="10110"
+                    maxlength="5"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    [class.border-red-500]="isFieldInvalid(shippingInfoForm, 'postalCode')"
+                  />
+                  <p *ngIf="isFieldInvalid(shippingInfoForm, 'postalCode')" class="mt-1 text-sm text-red-500">
+                    {{ getFieldError(shippingInfoForm, 'postalCode') }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Save as Default -->
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  formControlName="saveAsDefault"
+                  id="saveAsDefault"
+                  class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                />
+                <label for="saveAsDefault" class="ml-2 text-sm text-gray-700">
+                  บันทึกเป็นที่อยู่เริ่มต้น
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Payment Method -->
+          <div *ngIf="currentStep === 2" class="bg-white rounded-lg shadow-md p-6 animate-fade-in">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">วิธีการชำระเงิน</h2>
+
+            <div formGroupName="paymentInfo" class="space-y-6">
+              <!-- Payment Methods -->
+              <div class="space-y-3">
+                <div *ngFor="let method of paymentMethods" class="relative">
+                  <label
+                    class="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50"
+                    [class.border-primary-600]="selectedPaymentMethod === method.value"
+                    [class.bg-primary-50]="selectedPaymentMethod === method.value"
+                    [class.border-gray-300]="selectedPaymentMethod !== method.value"
+                  >
+                    <input
+                      type="radio"
+                      formControlName="paymentMethod"
+                      [value]="method.value"
+                      class="w-5 h-5 text-primary-600 border-gray-300 focus:ring-primary-500"
+                    />
+                    <span class="ml-3 text-2xl">{{ method.icon }}</span>
+                    <span class="ml-3 text-base font-medium text-gray-900">{{ method.label }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Bank Transfer Details -->
+              <div *ngIf="selectedPaymentMethod === 'BankTransfer'"
+                   class="bg-primary-50 border border-primary-200 rounded-lg p-4 animate-fade-in">
+                <h3 class="font-semibold text-primary-900 mb-3">ข้อมูลบัญชีสำหรับโอนเงิน</h3>
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-700">ธนาคาร:</span>
+                    <span class="font-medium text-gray-900">{{ bankDetails.bankName }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-700">ชื่อบัญชี:</span>
+                    <span class="font-medium text-gray-900">{{ bankDetails.accountName }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-700">เลขที่บัญชี:</span>
+                    <span class="font-medium text-gray-900">{{ bankDetails.accountNumber }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-700">พร้อมเพย์:</span>
+                    <span class="font-medium text-gray-900">{{ bankDetails.promptPayId }}</span>
+                  </div>
+                </div>
+                <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                  <p class="text-xs text-yellow-800">
+                    <strong>หมายเหตุ:</strong> กรุณาโอนเงินภายใน 24 ชั่วโมง หลังจากสั่งซื้อ และแนบหลักฐานการโอนในหน้ารายการคำสั่งซื้อ
+                  </p>
+                </div>
+              </div>
+
+              <!-- Customer Notes -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  หมายเหตุสำหรับร้านค้า (ถ้ามี)
+                </label>
+                <textarea
+                  formControlName="customerNotes"
+                  rows="3"
+                  placeholder="ระบุข้อความหรือคำขอพิเศษ..."
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Order Review -->
+          <div *ngIf="currentStep === 3" class="bg-white rounded-lg shadow-md p-6 animate-fade-in">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">ตรวจสอบคำสั่งซื้อ</h2>
+
+            <!-- Order Items -->
+            <div class="mb-6">
+              <h3 class="font-semibold text-gray-900 mb-4">รายการสินค้า</h3>
+              <div class="space-y-3">
+                <div *ngFor="let item of cart?.items" class="flex items-center space-x-4 pb-3 border-b">
+                  <img
+                    [src]="getCartItemImage(item)"
+                    [alt]="getCartItemName(item)"
+                    class="w-16 h-16 object-cover rounded"
+                  />
+                  <div class="flex-1">
+                    <h4 class="font-medium text-gray-900">{{ getCartItemName(item) }}</h4>
+                    <p class="text-sm text-gray-600">{{ getCartItemVariantName(item) }}</p>
+                    <p class="text-sm text-gray-600">จำนวน: {{ item.quantity }}</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-semibold text-gray-900">฿{{ formatCurrency(item.subtotal) }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="mb-6">
+              <h3 class="font-semibold text-gray-900 mb-4">ข้อมูลการจัดส่ง</h3>
+              <div class="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                <p><span class="font-medium">ชื่อ-นามสกุล:</span> {{ shippingInfoForm.value.firstName }} {{ shippingInfoForm.value.lastName }}</p>
+                <p><span class="font-medium">โทรศัพท์:</span> {{ shippingInfoForm.value.phone }}</p>
+                <p><span class="font-medium">อีเมล:</span> {{ shippingInfoForm.value.email }}</p>
+                <p><span class="font-medium">ที่อยู่:</span> {{ shippingInfoForm.value.address }}</p>
+                <p>
+                  {{ shippingInfoForm.value.subDistrict }}
+                  {{ shippingInfoForm.value.district }}
+                  {{ shippingInfoForm.value.province }}
+                  {{ shippingInfoForm.value.postalCode }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="mb-6">
+              <h3 class="font-semibold text-gray-900 mb-4">วิธีการชำระเงิน</h3>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <p class="text-sm">
+                  {{ paymentMethods.find(m => m.value === selectedPaymentMethod)?.label }}
+                </p>
+                <p *ngIf="paymentInfoForm.value.customerNotes" class="text-sm text-gray-600 mt-2">
+                  <span class="font-medium">หมายเหตุ:</span> {{ paymentInfoForm.value.customerNotes }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Coupon Code -->
+            <div class="mb-6">
+              <h3 class="font-semibold text-gray-900 mb-4">รหัสส่วนลด</h3>
+              <div class="flex space-x-2">
+                <input
+                  type="text"
+                  [(ngModel)]="couponCode"
+                  [ngModelOptions]="{standalone: true}"
+                  placeholder="กรอกรหัสคูปอง"
+                  [disabled]="!!appliedCoupon"
+                  class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
+                />
+                <button
+                  type="button"
+                  *ngIf="!appliedCoupon"
+                  (click)="validateCoupon()"
+                  [disabled]="isValidatingCoupon || !couponCode"
+                  class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  <span *ngIf="!isValidatingCoupon">ใช้คูปอง</span>
+                  <span *ngIf="isValidatingCoupon">กำลังตรวจสอบ...</span>
+                </button>
+                <button
+                  type="button"
+                  *ngIf="appliedCoupon"
+                  (click)="removeCoupon()"
+                  class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  ยกเลิก
+                </button>
+              </div>
+              <div *ngIf="appliedCoupon" class="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p class="text-sm text-green-800">
+                  <strong>ใช้คูปองสำเร็จ!</strong> ส่วนลด ฿{{ formatCurrency(appliedCoupon.discountAmount) }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation Buttons -->
+          <div class="flex justify-between items-center pt-6">
+            <button
+              type="button"
+              *ngIf="currentStep > 1"
+              (click)="previousStep()"
+              class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              ย้อนกลับ
+            </button>
+            <div class="flex-1"></div>
+            <button
+              type="button"
+              *ngIf="currentStep < totalSteps"
+              (click)="nextStep()"
+              class="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            >
+              ถัดไป
+            </button>
+            <button
+              type="button"
+              *ngIf="currentStep === totalSteps"
+              (click)="submitOrder()"
+              [disabled]="isSubmitting"
+              class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+            >
+              <span *ngIf="!isSubmitting">ยืนยันคำสั่งซื้อ</span>
+              <span *ngIf="isSubmitting">กำลังดำเนินการ...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Order Summary Sidebar -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow-md p-6 sticky top-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">สรุปคำสั่งซื้อ</h2>
+
+          <!-- Loading State -->
+          <div *ngIf="isLoading" class="text-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+            <p class="text-sm text-gray-600 mt-2">กำลังโหลด...</p>
+          </div>
+
+          <!-- Order Summary -->
+          <div *ngIf="!isLoading && cart" class="space-y-3">
+            <!-- Items -->
+            <div class="pb-3 border-b">
+              <p class="text-sm text-gray-600">
+                สินค้า {{ cart.totalItems }} รายการ
+              </p>
+            </div>
+
+            <!-- Subtotal -->
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">ราคาสินค้า</span>
+              <span class="font-medium text-gray-900">฿{{ formatCurrency(getSubtotal()) }}</span>
+            </div>
+
+            <!-- Discount -->
+            <div *ngIf="appliedCoupon" class="flex justify-between text-sm text-green-600">
+              <span>ส่วนลด</span>
+              <span class="font-medium">-฿{{ formatCurrency(getDiscountAmount()) }}</span>
+            </div>
+
+            <!-- Shipping -->
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">ค่าจัดส่ง</span>
+              <span class="font-medium text-gray-900">฿{{ formatCurrency(getShippingFee()) }}</span>
+            </div>
+
+            <!-- Total -->
+            <div class="pt-3 border-t">
+              <div class="flex justify-between items-center">
+                <span class="text-base font-semibold text-gray-900">ยอดรวมทั้งหมด</span>
+                <span class="text-2xl font-bold text-primary-600">฿{{ formatCurrency(getTotal()) }}</span>
+              </div>
+            </div>
+
+            <!-- VAT Note -->
+            <p class="text-xs text-gray-500 text-center pt-2">
+              (รวมภาษีมูลค่าเพิ่ม 7%)
+            </p>
+          </div>
+
+          <!-- Empty Cart -->
+          <div *ngIf="!isLoading && (!cart || cart.items.length === 0)" class="text-center py-8">
+            <p class="text-gray-600">ไม่มีสินค้าในตะกร้า</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

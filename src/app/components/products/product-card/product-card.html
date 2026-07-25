@@ -1,0 +1,94 @@
+<a [routerLink]="['/products', product.slug]" class="group block bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden animate-fade-in">
+  <!-- Image Container with Padding -->
+  <div class="p-4 pb-0">
+    <div class="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 aspect-square rounded-xl">
+      <img
+        [src]="getPrimaryImage()"
+        [alt]="product.name"
+        appImageFallback="https://placehold.co/400x400/e5e7eb/6b7280/png?text=No+Image"
+        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+      />
+
+      <!-- Badges -->
+      <div class="absolute top-3 left-3 flex flex-col gap-2">
+        @if (isOutOfStock()) {
+          <span class="bg-gray-800/90 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
+            หมด
+          </span>
+        } @else if (product.isBestseller) {
+          <span class="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
+            🔥 ขายดี
+          </span>
+        }
+      </div>
+
+      <!-- Wishlist Button -->
+      <button
+        (click)="toggleWishlist($event)"
+        [disabled]="isWishlistLoading"
+        class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+        [attr.aria-label]="isInWishlist() ? 'ลบออกจากรายการโปรด' : 'เพิ่มในรายการโปรด'"
+      >
+      @if (isWishlistLoading) {
+        <!-- Loading spinner -->
+        <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      } @else if (isInWishlist()) {
+        <!-- Filled heart (in wishlist) -->
+        <svg class="w-5 h-5 text-red-500 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      } @else {
+        <!-- Outline heart (not in wishlist) -->
+        <svg class="w-5 h-5 text-gray-400 stroke-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+      }
+    </button>
+    </div>
+  </div>
+
+  <!-- Info with Proper Padding -->
+  <div class="p-5">
+    <!-- Brand -->
+    @if (product.brand) {
+      <p class="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">{{ product.brand.name }}</p>
+    }
+
+    <!-- Name -->
+    <h3 class="font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors min-h-[3rem]">
+      {{ product.name }}
+    </h3>
+
+    <!-- Price -->
+    <div class="flex items-baseline gap-2 mb-3">
+      <span class="text-xl font-bold bg-gradient-to-r from-brand-600 to-primary-600 bg-clip-text text-transparent">
+        ฿{{ getLowestPrice().toLocaleString() }}
+      </span>
+      @if (product.compareAtPrice && product.compareAtPrice > product.basePrice) {
+        <span class="text-sm text-gray-400 line-through">
+          ฿{{ product.compareAtPrice.toLocaleString() }}
+        </span>
+      }
+    </div>
+
+    <!-- Stock Status - Only show if we have variant data -->
+    @if (hasVariantData()) {
+      @if (isOutOfStock()) {
+        <div class="text-xs text-red-600 font-medium mb-2">
+          ⚠️ สินค้าหมด
+        </div>
+      } @else if (getTotalStock() <= 5 && getTotalStock() > 0) {
+        <div class="text-xs text-yellow-600 font-medium mb-2">
+          ⚡ เหลือเพียง {{ getTotalStock() }} ชิ้น
+        </div>
+      } @else {
+        <div class="text-xs text-green-600 font-medium mb-2">
+          ✓ พร้อมจัดส่ง
+        </div>
+      }
+    }
+  </div>
+</a>

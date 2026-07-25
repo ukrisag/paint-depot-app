@@ -1,0 +1,135 @@
+<!-- Modal Overlay -->
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <!-- Modal Content -->
+  <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b border-gray-200">
+      <h2 class="text-2xl font-bold text-gray-900">เขียนรีวิวสินค้า</h2>
+      <button
+        type="button"
+        (click)="onCancel()"
+        class="text-gray-400 hover:text-gray-600 transition-colors"
+        [disabled]="loading"
+      >
+        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="reviewForm" (ngSubmit)="onSubmit()" class="p-6 space-y-6">
+      <!-- Star Rating -->
+      <div>
+        <label class="block text-sm font-medium text-gray-900 mb-3">
+          คะแนน <span class="text-red-500">*</span>
+        </label>
+        <div class="flex items-center gap-2">
+          @for (star of getStarArray(); track star) {
+            <button
+              type="button"
+              (click)="setRating(star)"
+              (mouseenter)="setHoveredStar(star)"
+              (mouseleave)="clearHoveredStar()"
+              class="transition-transform hover:scale-110 focus:outline-none"
+            >
+              @if (isStarFilled(star)) {
+                <svg class="w-10 h-10 text-yellow-400 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                </svg>
+              } @else {
+                <svg class="w-10 h-10 text-gray-300 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                </svg>
+              }
+            </button>
+          }
+          @if (rating?.value > 0) {
+            <span class="ml-2 text-gray-600">{{ rating?.value }} ดาว</span>
+          }
+        </div>
+        @if (rating?.invalid && rating?.touched) {
+          <p class="mt-2 text-sm text-red-600">กรุณาเลือกคะแนน</p>
+        }
+      </div>
+
+      <!-- Title -->
+      <div>
+        <label for="title" class="block text-sm font-medium text-gray-900 mb-2">
+          หัวข้อรีวิว (ไม่บังคับ)
+        </label>
+        <input
+          type="text"
+          id="title"
+          formControlName="title"
+          placeholder="เช่น สีสวย ทาง่าย คุ้มค่า"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+          [disabled]="loading"
+        />
+      </div>
+
+      <!-- Comment -->
+      <div>
+        <label for="comment" class="block text-sm font-medium text-gray-900 mb-2">
+          รีวิว <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          id="comment"
+          formControlName="comment"
+          rows="5"
+          placeholder="บอกเล่าประสบการณ์การใช้งานสินค้า (อย่างน้อย 10 ตัวอักษร)"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
+          [disabled]="loading"
+        ></textarea>
+        @if (comment?.invalid && comment?.touched) {
+          <p class="mt-2 text-sm text-red-600">
+            @if (comment?.errors?.['required']) {
+              กรุณาเขียนรีวิว
+            } @else if (comment?.errors?.['minlength']) {
+              รีวิวต้องมีอย่างน้อย 10 ตัวอักษร (ปัจจุบัน {{ comment?.value?.length || 0 }} ตัวอักษร)
+            }
+          </p>
+        } @else if (comment?.value) {
+          <p class="mt-2 text-sm text-gray-500">{{ comment?.value?.length || 0 }} ตัวอักษร</p>
+        }
+      </div>
+
+      <!-- Info Note -->
+      <div class="bg-primary-50 border border-primary-200 rounded-lg p-4">
+        <div class="flex gap-3">
+          <svg class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+          <div class="text-sm text-primary-800">
+            <p class="font-medium mb-1">หมายเหตุ</p>
+            <p>รีวิวของคุณจะถูกส่งไปตรวจสอบก่อนแสดงบนเว็บไซต์ เพื่อความเหมาะสมของเนื้อหา</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3 pt-4">
+        <button
+          type="button"
+          (click)="onCancel()"
+          class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          [disabled]="loading"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="submit"
+          class="flex-1 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          [disabled]="loading || reviewForm.invalid"
+        >
+          @if (loading) {
+            <div class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+            <span>กำลังส่ง...</span>
+          } @else {
+            <span>ส่งรีวิว</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,155 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        สมัครสมาชิก
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        หรือ
+        <a routerLink="/login" class="font-medium text-orange-600 hover:text-orange-500">
+          เข้าสู่ระบบ
+        </a>
+      </p>
+    </div>
+
+    <form class="mt-8 space-y-6" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="rounded-md shadow-sm space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="firstName" class="block text-sm font-medium text-gray-700">ชื่อ</label>
+            <input
+              id="firstName"
+              type="text"
+              formControlName="firstName"
+              class="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+              [class.border-red-500]="firstName?.invalid && firstName?.touched"
+              placeholder="ชื่อ"
+            />
+            @if (firstName?.invalid && firstName?.touched) {
+              <p class="mt-1 text-sm text-red-600">กรุณากรอกชื่อ</p>
+            }
+          </div>
+
+          <div>
+            <label for="lastName" class="block text-sm font-medium text-gray-700">นามสกุล</label>
+            <input
+              id="lastName"
+              type="text"
+              formControlName="lastName"
+              class="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+              [class.border-red-500]="lastName?.invalid && lastName?.touched"
+              placeholder="นามสกุล"
+            />
+            @if (lastName?.invalid && lastName?.touched) {
+              <p class="mt-1 text-sm text-red-600">กรุณากรอกนามสกุล</p>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">อีเมล</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+            [class.border-red-500]="email?.invalid && email?.touched"
+            placeholder="กรอกอีเมล"
+          />
+          @if (email?.invalid && email?.touched) {
+            <p class="mt-1 text-sm text-red-600">
+              @if (email?.errors?.['required']) {
+                กรุณากรอกอีเมล
+              }
+              @if (email?.errors?.['email']) {
+                รูปแบบอีเมลไม่ถูกต้อง
+              }
+            </p>
+          }
+        </div>
+
+        <div>
+          <label for="phone" class="block text-sm font-medium text-gray-700">เบอร์โทรศัพท์</label>
+          <input
+            id="phone"
+            type="tel"
+            formControlName="phone"
+            class="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+            [class.border-red-500]="phone?.invalid && phone?.touched"
+            placeholder="0812345678"
+          />
+          @if (phone?.invalid && phone?.touched) {
+            <p class="mt-1 text-sm text-red-600">
+              @if (phone?.errors?.['required']) {
+                กรุณากรอกเบอร์โทรศัพท์
+              }
+              @if (phone?.errors?.['pattern']) {
+                เบอร์โทรศัพท์ต้องเป็นตัวเลข 10 หลัก
+              }
+            </p>
+          }
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">รหัสผ่าน</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            class="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+            [class.border-red-500]="password?.invalid && password?.touched"
+            placeholder="กรอกรหัสผ่าน"
+          />
+          @if (password?.invalid && password?.touched) {
+            <p class="mt-1 text-sm text-red-600">
+              @if (password?.errors?.['required']) {
+                กรุณากรอกรหัสผ่าน
+              }
+              @if (password?.errors?.['minlength']) {
+                รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร
+              }
+            </p>
+          }
+        </div>
+
+        <div>
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-700">ยืนยันรหัสผ่าน</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            formControlName="confirmPassword"
+            class="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+            [class.border-red-500]="(confirmPassword?.invalid && confirmPassword?.touched) || (registerForm.errors?.['passwordMismatch'] && confirmPassword?.touched)"
+            placeholder="ยืนยันรหัสผ่าน"
+          />
+          @if (confirmPassword?.invalid && confirmPassword?.touched) {
+            <p class="mt-1 text-sm text-red-600">กรุณายืนยันรหัสผ่าน</p>
+          }
+          @if (registerForm.errors?.['passwordMismatch'] && confirmPassword?.touched) {
+            <p class="mt-1 text-sm text-red-600">รหัสผ่านไม่ตรงกัน</p>
+          }
+        </div>
+      </div>
+
+      <div>
+        <button
+          type="submit"
+          [disabled]="registerForm.invalid || loading"
+          class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          @if (loading) {
+            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+            กำลังสมัครสมาชิก...
+          } @else {
+            สมัครสมาชิก
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

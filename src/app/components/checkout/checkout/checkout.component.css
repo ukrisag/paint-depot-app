@@ -1,0 +1,277 @@
+/* Animation for step transitions */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form Input Focus States */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+/* Custom Radio Button Styles */
+input[type="radio"]:checked {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+/* Custom Checkbox Styles */
+input[type="checkbox"]:checked {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+/* Loading Spinner */
+.spinner {
+  border: 2px solid #f3f4f6;
+  border-top: 2px solid #2563eb;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Progress Bar Animation */
+.progress-line {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Button Hover Effects */
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Sticky Sidebar */
+.sticky {
+  position: sticky;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+  .sticky {
+    position: relative;
+    top: 0;
+  }
+}
+
+/* Payment Method Card Hover */
+label:has(input[type="radio"]) {
+  transition: all 0.2s ease-in-out;
+}
+
+label:has(input[type="radio"]):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Error Input Shake Animation */
+.border-red-500 {
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Order Summary Card Shadow */
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Success/Error Messages */
+.bg-green-50 {
+  background-color: #f0fdf4;
+}
+
+.bg-yellow-50 {
+  background-color: #fefce8;
+}
+
+.bg-blue-50 {
+  background-color: #eff6ff;
+}
+
+/* Disabled State */
+input:disabled,
+textarea:disabled,
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Progress Step Transitions */
+.flex.items-center.justify-center.w-10.h-10 {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Image Placeholder */
+img {
+  background-color: #f3f4f6;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Print Styles (for order confirmation) */
+@media print {
+  .no-print {
+    display: none;
+  }
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Card Transitions */
+.bg-white.rounded-lg {
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.bg-white.rounded-lg:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Input Number Arrows Hide */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Responsive Text */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.875rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  .text-3xl {
+    font-size: 1.875rem;
+  }
+
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+}
+
+/* Focus Visible for Accessibility */
+*:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Grid Gap Responsive */
+@media (max-width: 768px) {
+  .grid.gap-4 {
+    gap: 1rem;
+  }
+
+  .grid.gap-8 {
+    gap: 1.5rem;
+  }
+}
+
+/* Button Loading State */
+button.loading {
+  position: relative;
+  color: transparent;
+}
+
+button.loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid #ffffff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* Smooth Scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Card Border Hover */
+.border-2:hover {
+  transition: border-color 0.2s ease-in-out;
+}
+
+/* Success Checkmark Animation */
+@keyframes checkmark {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.success-checkmark {
+  animation: checkmark 0.3s ease-in-out;
+}

@@ -1,0 +1,32 @@
+<div class="bg-white min-h-screen">
+  <div class="container mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">แบรนด์</h1>
+
+    @if (loading) {
+      <div class="text-center py-16 text-gray-500">กำลังโหลด...</div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        @for (brand of brands; track brand.id) {
+          <div
+            (click)="goToBrand(brand.id)"
+            class="p-6 border rounded-lg hover:shadow-lg transition-shadow cursor-pointer text-center"
+          >
+            @if (brand.logoUrl) {
+              <div class="h-32 flex items-center justify-center mb-4">
+                <img
+                  [src]="brand.logoUrl"
+                  [alt]="brand.name"
+                  class="max-h-full max-w-full object-contain"
+                />
+              </div>
+            }
+            <h3 class="text-lg font-medium text-gray-900 mb-1">{{ brand.name }}</h3>
+            @if (brand.description) {
+              <p class="text-gray-600 text-sm">{{ brand.description }}</p>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
