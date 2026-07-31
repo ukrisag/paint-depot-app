@@ -283,6 +283,11 @@
       }
     </div>
   </div>
+
+  <!-- Mobile Menu Backdrop -->
+  @if (isMobileMenuOpen) {
+    <div class="mobile-menu-backdrop" (click)="toggleMobileMenu()"></div>
+  }
 </header>
 
 <!-- Mobile Search Modal -->

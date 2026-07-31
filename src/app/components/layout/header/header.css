@@ -681,6 +681,31 @@
   transform: translateX(0);
 }
 
+/* Mobile Menu Backdrop */
+.mobile-menu-backdrop {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+@media (min-width: 640px) {
+  .mobile-menu-backdrop {
+    top: 70px;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-menu-backdrop {
+    display: none;
+  }
+}
+
 /* Mobile Menu Content */
 .mobile-menu-content {
   display: flex;
