@@ -82,7 +82,7 @@
 /* User Dropdown */
 .user-dropdown {
   animation: slideDown 0.3s ease-out;
-  z-index: 1000;
+  z-index: 9999;
 }
 
 @keyframes slideDown {

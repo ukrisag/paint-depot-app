@@ -75,16 +75,4 @@ export class LoginComponent {
   get password() {
     return this.loginForm.get('password');
   }
-
-  loginWithGoogle() {
-    this.notificationService.info('การเข้าสู่ระบบด้วย Google จะเปิดใช้งานในอนาคต');
-    // TODO: Implement Google OAuth integration
-    // window.location.href = `${environment.apiUrl}/auth/google`;
-  }
-
-  loginWithFacebook() {
-    this.notificationService.info('การเข้าสู่ระบบด้วย Facebook จะเปิดใช้งานในอนาคต');
-    // TODO: Implement Facebook OAuth integration
-    // window.location.href = `${environment.apiUrl}/auth/facebook`;
-  }
 }
