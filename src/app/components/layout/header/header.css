@@ -513,7 +513,7 @@
   color: white;
   font-size: 0.9375rem;
   font-weight: 600;
-  background: linear-gradient(135deg, #002B7F 0%, #F7A627 100%);
+  background: #C31D23;
   border: none;
   border-radius: 0.75rem;
   text-decoration: none;
@@ -524,7 +524,8 @@
 
 .register-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 43, 127, 0.2);
+  background: #A01519;
+  box-shadow: 0 4px 12px rgba(195, 29, 35, 0.3);
 }
 
 /* Mobile Menu Toggle */
@@ -724,7 +725,7 @@
   color: white;
   font-size: 1rem;
   font-weight: 600;
-  background: linear-gradient(135deg, #002B7F 0%, #F7A627 100%);
+  background: #C31D23;
   border: none;
   border-radius: 0.75rem;
   text-decoration: none;
@@ -734,7 +735,8 @@
 
 .mobile-register-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 43, 127, 0.2);
+  background: #A01519;
+  box-shadow: 0 4px 12px rgba(195, 29, 35, 0.3);
 }
 
 /* Scrollbar Styling */
@@ -773,13 +775,13 @@
   gap: 0.75rem;
 }
 
-/* Register Button with Gradient */
+/* Register Button */
 .register-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
   padding: 0.625rem 1.25rem;
-  background: linear-gradient(135deg, #2196F3 0%, #FFA726 100%);
+  background: #C31D23;
   border: none;
   border-radius: 0.75rem;
   color: white;
@@ -793,17 +795,17 @@
 
 .register-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  background: #A01519;
+  box-shadow: 0 4px 12px rgba(195, 29, 35, 0.3);
 }
 
-.register-btn-gradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #2196F3 0%, #FFA726 100%);
-  z-index: 0;
+.register-btn-gradient,
+.mobile-register-gradient {
+  display: none;
 }
 
-.register-btn-text {
+.register-btn-text,
+.mobile-register-text {
   position: relative;
   z-index: 1;
 }

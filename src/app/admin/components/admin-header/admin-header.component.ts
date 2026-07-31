@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Output, inject, OnDestroy, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +18,7 @@ export class AdminHeaderComponent implements OnDestroy {
   authService = inject(AuthService);
   private router = inject(Router);
 
-  isUserMenuOpen = false;
+  isUserMenuOpen = signal(false);
   searchQuery = '';
   notificationCount = 3; // Mock notification count
   private clickListener?: (event: Event) => void;
@@ -37,8 +37,8 @@ export class AdminHeaderComponent implements OnDestroy {
     this.clickListener = (event: Event) => {
       const target = event.target as HTMLElement;
       const userMenu = document.querySelector('.user-menu');
-      if (this.isUserMenuOpen && userMenu && !userMenu.contains(target)) {
-        this.isUserMenuOpen = false;
+      if (this.isUserMenuOpen() && userMenu && !userMenu.contains(target)) {
+        this.isUserMenuOpen.set(false);
       }
     };
     document.addEventListener('click', this.clickListener);
@@ -53,7 +53,7 @@ export class AdminHeaderComponent implements OnDestroy {
   }
 
   toggleUserMenu(): void {
-    this.isUserMenuOpen = !this.isUserMenuOpen;
+    this.isUserMenuOpen.update(value => !value);
   }
 
   onSearchFocus(): void {

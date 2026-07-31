@@ -123,8 +123,8 @@
 </div>
 
 <!-- Create/Edit Modal -->
-<div class="modal-backdrop" *ngIf="showModal()" (click)="closeModal()">
-  <div class="modal-container" (click)="$event.stopPropagation()">
+<div class="modal-backdrop" *ngIf="showModal()" (click)="$event.target === $event.currentTarget && closeModal()">
+  <div class="modal-container">
     <div class="modal-header">
       <h2 class="modal-title">{{ isEditMode() ? 'แก้ไขรูปภาพ' : 'เพิ่มรูปภาพใหม่' }}</h2>
       <button class="modal-close" (click)="closeModal()">
@@ -134,7 +134,7 @@
       </button>
     </div>
 
-    <form [formGroup]="imageForm" class="modal-body">
+    <form [formGroup]="imageForm" class="modal-body" (ngSubmit)="$event.preventDefault()">
       <!-- Image Upload -->
       <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700 mb-2">รูปภาพ *</label>
@@ -254,8 +254,8 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal-backdrop" *ngIf="showDeleteModal()" (click)="closeDeleteModal()">
-  <div class="modal-container modal-small" (click)="$event.stopPropagation()">
+<div class="modal-backdrop" *ngIf="showDeleteModal()" (click)="$event.target === $event.currentTarget && closeDeleteModal()">
+  <div class="modal-container modal-small">
     <div class="modal-header">
       <h2 class="modal-title">ยืนยันการลบ</h2>
       <button class="modal-close" (click)="closeDeleteModal()">
