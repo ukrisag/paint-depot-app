@@ -652,7 +652,7 @@
 /* Mobile Menu */
 .mobile-menu {
   position: fixed;
-  top: 70px;
+  top: 60px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -664,6 +664,12 @@
   transition: transform 0.3s ease;
 }
 
+@media (min-width: 640px) {
+  .mobile-menu {
+    top: 70px;
+  }
+}
+
 .mobile-menu.open {
   transform: translateX(0);
 }
@@ -671,7 +677,7 @@
 /* Mobile Search */
 .mobile-search {
   position: fixed;
-  top: 70px;
+  top: 60px;
   left: 0;
   right: 0;
   background: white;
@@ -680,6 +686,12 @@
   z-index: 998;
   transform: translateY(-100%);
   transition: transform 0.3s ease;
+}
+
+@media (min-width: 640px) {
+  .mobile-search {
+    top: 70px;
+  }
 }
 
 .mobile-search.open {

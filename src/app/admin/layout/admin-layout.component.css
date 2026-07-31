@@ -115,18 +115,10 @@
 
 /* No footer needed for admin */
 
-/* Mobile: Hide sidebar */
+/* Mobile: Adjust layout */
 @media (max-width: 768px) {
-  .admin-sidebar {
-    transform: translateX(-100%);
-  }
-
   .main-wrapper {
     margin-left: 0;
-  }
-
-  .mobile-overlay {
-    display: block;
   }
 
   .footer-content {
@@ -177,6 +169,13 @@
 /* Desktop - Hide mobile overlay */
 @media (min-width: 769px) {
   .mobile-overlay {
-    display: none !important;
+    display: none;
+  }
+}
+
+/* Mobile - Show overlay when sidebar is open */
+@media (max-width: 768px) {
+  .mobile-overlay {
+    display: block;
   }
 }
