@@ -9,15 +9,15 @@
     </div>
 
     @if (cart() && cart()!.items.length > 0) {
-      <div class="grid lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
         <!-- Cart Items -->
-        <div class="lg:col-span-2 space-y-4">
+        <div class="md:col-span-2 space-y-4">
           @for (item of cart()!.items; track item.id) {
             <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-colors overflow-hidden border border-gray-100 hover:border-primary-200">
               <div class="flex gap-6 p-6">
                 <!-- Image with modern styling -->
                 <div class="relative flex-shrink-0">
-                  <div class="w-32 h-32 bg-white rounded-xl overflow-hidden">
+                  <div class="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-white rounded-xl overflow-hidden">
                     <img
                       [src]="item.product?.images?.[0]?.imageUrl || 'https://via.placeholder.com/128'"
                       [alt]="item.product?.name"
@@ -55,7 +55,8 @@
                         <button
                           (click)="updateQuantity(item, item.quantity - 1)"
                           [disabled]="item.quantity <= 1"
-                          class="w-10 h-10 rounded-lg bg-white hover:bg-primary-50 disabled:opacity-30 disabled:hover:bg-white transition-colors flex items-center justify-center group/btn"
+                          class="w-11 h-11 sm:w-10 sm:h-10 rounded-lg bg-white hover:bg-primary-50 disabled:opacity-30 disabled:hover:bg-white transition-colors flex items-center justify-center group/btn"
+                          aria-label="ลดจำนวน"
                         >
                           <svg class="w-5 h-5 text-gray-700 group-hover/btn:text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
@@ -64,7 +65,8 @@
                         <span class="w-12 text-center font-bold text-gray-900">{{ item.quantity }}</span>
                         <button
                           (click)="updateQuantity(item, item.quantity + 1)"
-                          class="w-10 h-10 rounded-lg bg-white hover:bg-primary-50 transition-colors flex items-center justify-center group/btn"
+                          class="w-11 h-11 sm:w-10 sm:h-10 rounded-lg bg-white hover:bg-primary-50 transition-colors flex items-center justify-center group/btn"
+                          aria-label="เพิ่มจำนวน"
                         >
                           <svg class="w-5 h-5 text-gray-700 group-hover/btn:text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -96,7 +98,7 @@
         </div>
 
         <!-- Summary - Modern Card -->
-        <div class="lg:col-span-1">
+        <div class="md:col-span-1">
           <div class="sticky top-6 bg-white rounded-2xl shadow-xl p-8 border-2 border-primary-100">
             <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
               <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

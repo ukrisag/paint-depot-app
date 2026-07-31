@@ -168,24 +168,37 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-/* Mobile Responsive Adjustments */
-@media (max-width: 1024px) {
+/* Mobile Responsive Adjustments - Mobile First Typography */
+
+/* Base: Mobile (<640px) */
+.hero-content h1 {
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+/* Mobile landscape (640px+) */
+@media (min-width: 640px) {
   .hero-content h1 {
-    font-size: 3rem;
+    font-size: 2.25rem;
   }
 
-  .filter-sidebar {
-    position: static;
+  .hero-content p {
+    font-size: 1.125rem;
   }
 
-  .products-grid-container {
-    margin-top: 2rem;
+  .filter-chips {
+    font-size: 0.875rem;
   }
 }
 
-@media (max-width: 768px) {
+/* Tablet (768px+) */
+@media (min-width: 768px) {
   .hero-content h1 {
-    font-size: 2.5rem;
+    font-size: 2.75rem;
+  }
+
+  .hero-content p {
+    font-size: 1.25rem;
   }
 
   .filter-sidebar {
@@ -202,12 +215,27 @@ select:focus {
   }
 }
 
-@media (max-width: 640px) {
+/* Desktop (1024px+) */
+@media (min-width: 1024px) {
   .hero-content h1 {
-    font-size: 2rem;
-    line-height: 1.2;
+    font-size: 3rem;
   }
 
+  .hero-content p {
+    font-size: 1.5rem;
+  }
+
+  .filter-sidebar {
+    position: static;
+  }
+
+  .products-grid-container {
+    margin-top: 2rem;
+  }
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 640px) {
   .hero-content p {
     font-size: 1rem;
   }

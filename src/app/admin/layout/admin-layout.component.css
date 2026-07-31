@@ -20,27 +20,46 @@
   left: 0;
   right: 0;
   z-index: 9998;
-  height: 4rem;
+  height: 3.5rem;
+}
+
+@media (min-width: 640px) {
+  .admin-header {
+    height: 4rem;
+  }
 }
 
 /* Body - Contains sidebar and main content */
 .admin-body {
   display: flex;
   flex: 1;
-  margin-top: 4rem;
-  height: calc(100vh - 4rem);
+  margin-top: 3.5rem;
+  height: calc(100vh - 3.5rem);
   overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .admin-body {
+    margin-top: 4rem;
+    height: calc(100vh - 4rem);
+  }
 }
 
 /* Sidebar - Fixed on left */
 .admin-sidebar {
   position: fixed;
   left: 0;
-  top: 4rem;
+  top: 3.5rem;
   bottom: 0;
   width: 18rem;
   z-index: 20;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, width 0.3s ease;
+}
+
+@media (min-width: 640px) {
+  .admin-sidebar {
+    top: 4rem;
+  }
 }
 
 /* Mobile overlay */
@@ -96,8 +115,8 @@
 
 /* No footer needed for admin */
 
-/* Mobile Responsive */
-@media (max-width: 1024px) {
+/* Mobile: Hide sidebar */
+@media (max-width: 768px) {
   .admin-sidebar {
     transform: translateX(-100%);
   }
@@ -126,6 +145,17 @@
   }
 }
 
+/* Tablet: Narrow sidebar */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .admin-sidebar {
+    width: 14rem;
+  }
+
+  .main-wrapper {
+    margin-left: 14rem;
+  }
+}
+
 @media (max-width: 640px) {
   .main-content {
     padding: 1rem;
@@ -145,7 +175,7 @@
 }
 
 /* Desktop - Hide mobile overlay */
-@media (min-width: 1024px) {
+@media (min-width: 769px) {
   .mobile-overlay {
     display: none !important;
   }
