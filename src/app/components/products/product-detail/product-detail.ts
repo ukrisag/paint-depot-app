@@ -39,7 +39,7 @@ export class ProductDetailComponent implements OnInit {
     private cartService: CartService,
     private notificationService: NotificationService,
     private reviewService: ReviewService,
-    private authService: AuthService,
+    public authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 

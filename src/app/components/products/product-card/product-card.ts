@@ -24,7 +24,7 @@ export class ProductCardComponent {
     private cartService: CartService,
     private notificationService: NotificationService,
     private wishlistService: WishlistService,
-    private authService: AuthService
+    public authService: AuthService
   ) {}
 
   addToCart(event: Event) {
