@@ -657,7 +657,7 @@
   right: 0;
   bottom: 0;
   background: white;
-  z-index: 999;
+  z-index: 1001;
   overflow-y: auto;
   padding: 1rem;
   transform: translateX(-100%);
@@ -683,7 +683,7 @@
   background: white;
   border-bottom: 1px solid #e5e7eb;
   padding: 1rem;
-  z-index: 998;
+  z-index: 1001;
   transform: translateY(-100%);
   transition: transform 0.3s ease;
 }
