@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -17,7 +17,8 @@ import { CartService } from '../../../services/cart.service';
 })
 export class LoginComponent {
   loginForm: FormGroup;
-  loading = false;
+  loading = signal(false);
+  errorMessage = signal<string>('');
   returnUrl: string = '/';
   showPassword = false;
   rememberMe = false;
@@ -48,7 +49,8 @@ export class LoginComponent {
       return;
     }
 
-    this.loading = true;
+    this.loading.set(true);
+    this.errorMessage.set('');
     const credentials = this.loginForm.value;
 
     this.authService.login(credentials).subscribe({
@@ -61,9 +63,10 @@ export class LoginComponent {
         this.router.navigate([this.returnUrl]);
       },
       error: (error) => {
-        this.loading = false;
-        const errorMessage = error?.error?.message || error?.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
-        this.notificationService.error(errorMessage);
+        this.loading.set(false);
+        const errorMsg = error?.error?.message || error?.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง';
+        this.errorMessage.set(errorMsg);
+        this.notificationService.error(errorMsg);
       }
     });
   }
