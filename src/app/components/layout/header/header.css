@@ -662,6 +662,7 @@
   padding: 1rem;
   transform: translateX(-100%);
   transition: transform 0.3s ease;
+  box-shadow: -4px 0 8px rgba(0, 0, 0, 0.1);
 }
 
 @media (min-width: 640px) {
@@ -670,8 +671,27 @@
   }
 }
 
+@media (min-width: 768px) {
+  .mobile-menu {
+    display: none;
+  }
+}
+
 .mobile-menu.open {
   transform: translateX(0);
+}
+
+/* Mobile Menu Content */
+.mobile-menu-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Mobile Search Wrapper */
+.mobile-search-wrapper {
+  padding: 0;
+  margin-bottom: 1rem;
 }
 
 /* Mobile Search */
@@ -797,6 +817,13 @@
   margin-top: 0.125rem;
 }
 
+/* Mobile Auth Section */
+.mobile-auth-section {
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 1.5rem;
+}
+
 /* Mobile Login/Register */
 .mobile-login-btn {
   display: flex;
@@ -844,6 +871,15 @@
   transform: translateY(-2px);
   background: #A01519;
   box-shadow: 0 4px 12px rgba(195, 29, 35, 0.3);
+}
+
+/* Mobile Logout Button */
+.mobile-logout-btn {
+  color: #dc2626 !important;
+}
+
+.mobile-logout-btn:hover {
+  background: rgba(220, 38, 38, 0.05) !important;
 }
 
 /* Scrollbar Styling */
