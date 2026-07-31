@@ -1,0 +1,32 @@
+<div class="admin-layout">
+  <!-- Admin Header - Fixed at top -->
+  <app-admin-header
+    (toggleSidebar)="toggleSidebar()"
+    class="admin-header">
+  </app-admin-header>
+
+  <div class="admin-body">
+    <!-- Sidebar - Fixed on left -->
+    <app-admin-sidebar
+      [isOpen]="isSidebarOpen()"
+      (close)="closeSidebar()"
+      class="admin-sidebar">
+    </app-admin-sidebar>
+
+    <!-- Overlay for mobile -->
+    @if (isSidebarOpen()) {
+      <div
+        class="mobile-overlay"
+        (click)="closeSidebar()">
+      </div>
+    }
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper" [class.sidebar-closed]="!isSidebarOpen()">
+      <!-- Scrollable Content -->
+      <main class="main-content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </div>
+</div>

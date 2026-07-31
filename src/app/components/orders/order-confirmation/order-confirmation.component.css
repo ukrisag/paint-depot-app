@@ -1,0 +1,487 @@
+/* Order Confirmation Component - Premium Design */
+
+/* Success Icon Animation */
+@keyframes checkmark-bounce {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(-10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.success-icon {
+  animation: checkmark-bounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Particle Animations */
+.particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #3b82f6);
+  opacity: 0;
+}
+
+.particle-1 {
+  top: 20%;
+  left: 20%;
+  animation: float-particle 3s infinite ease-in-out;
+}
+
+.particle-2 {
+  top: 30%;
+  right: 20%;
+  animation: float-particle 3s infinite ease-in-out 0.5s;
+}
+
+.particle-3 {
+  bottom: 30%;
+  left: 25%;
+  animation: float-particle 3s infinite ease-in-out 1s;
+}
+
+.particle-4 {
+  bottom: 20%;
+  right: 25%;
+  animation: float-particle 3s infinite ease-in-out 1.5s;
+}
+
+@keyframes float-particle {
+  0%, 100% {
+    transform: translateY(0) scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(-80px) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Glassmorphism Effects */
+.bg-white\/80 {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Button Hover Effects */
+button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Gradient Text */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Loading Spinner */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-ping {
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Card Entrance Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-header,
+.payment-section,
+.order-summary,
+.shipping-section {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.payment-section {
+  animation-delay: 0.1s;
+}
+
+.order-summary {
+  animation-delay: 0.2s;
+}
+
+.shipping-section {
+  animation-delay: 0.3s;
+}
+
+.action-buttons {
+  animation: fadeInUp 0.6s ease-out 0.4s;
+  animation-fill-mode: backwards;
+}
+
+/* Hover Effects */
+.hover\:shadow-2xl:hover {
+  box-shadow: 0 25px 50px -12px rgba(147, 51, 234, 0.35),
+              0 15px 30px -8px rgba(79, 70, 229, 0.25);
+}
+
+/* Item Cards */
+.bg-gradient-to-r {
+  transition: all 0.3s ease;
+}
+
+.bg-gradient-to-r:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #10b981, #3b82f6);
+  border-radius: 10px;
+  border: 2px solid #f3f4f6;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #059669, #2563eb);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .text-3xl {
+    font-size: 1.875rem;
+  }
+
+  .text-4xl {
+    font-size: 2rem;
+  }
+
+  .text-5xl {
+    font-size: 2.5rem;
+  }
+
+  .success-header {
+    padding: 2rem;
+  }
+
+  .w-24 {
+    width: 5rem;
+  }
+
+  .h-24 {
+    height: 5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .p-12 {
+    padding: 2rem;
+  }
+
+  .p-8 {
+    padding: 1.5rem;
+  }
+
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+
+  .text-xl {
+    font-size: 1.125rem;
+  }
+
+  .text-lg {
+    font-size: 1rem;
+  }
+}
+
+/* Accessibility: Focus styles */
+button:focus,
+a:focus {
+  outline: 3px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .bg-gradient-to-br,
+  .bg-gradient-to-r {
+    background: white !important;
+    color: black !important;
+  }
+
+  button {
+    display: none;
+  }
+
+  .shadow-2xl,
+  .shadow-xl,
+  .shadow-lg {
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb;
+  }
+
+  .backdrop-blur-lg {
+    backdrop-filter: none;
+  }
+
+  .particle {
+    display: none;
+  }
+}
+
+/* SVG Animations */
+svg {
+  transition: all 0.3s ease;
+}
+
+.group:hover svg {
+  transform: scale(1.1);
+}
+
+button:hover svg {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Premium shadow effects */
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1),
+              0 4px 6px -2px rgba(16, 185, 129, 0.05);
+}
+
+.shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.1),
+              0 10px 10px -5px rgba(16, 185, 129, 0.04);
+}
+
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.25),
+              0 10px 20px -5px rgba(59, 130, 246, 0.15);
+}
+
+/* Success icon glow effect */
+.success-icon {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5),
+              0 0 40px rgba(16, 185, 129, 0.3);
+}
+
+/* Pulse animation for important elements */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(16, 185, 129, 0.8);
+  }
+}
+
+.success-header {
+  animation: fadeInUp 0.8s ease-out, pulse-glow 3s ease-in-out infinite 1s;
+}
+
+/* Gradient background animations */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.bg-gradient-to-r,
+.bg-gradient-to-br {
+  background-size: 200% 200%;
+  animation: gradient-shift 5s ease infinite;
+}
+
+/* Border animations */
+@keyframes border-dance {
+  0%, 100% {
+    border-color: #10b981;
+  }
+  50% {
+    border-color: #3b82f6;
+  }
+}
+
+.border-2.border-green-200 {
+  animation: border-dance 3s ease infinite;
+}
+
+/* Confetti effect */
+@keyframes confetti {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Success checkmark animation */
+@keyframes draw-check {
+  0% {
+    stroke-dasharray: 0, 100;
+  }
+  100% {
+    stroke-dasharray: 100, 0;
+  }
+}
+
+.success-icon svg path {
+  stroke-dasharray: 100;
+  animation: draw-check 0.6s ease-out 0.3s forwards;
+}
+
+/* Hover state for action buttons */
+.action-buttons button:hover {
+  transform: translateY(-2px);
+}
+
+/* Gap animations */
+.hover\:gap-3:hover {
+  gap: 0.75rem;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .space-y-3 > * + * {
+    margin-top: 0.75rem;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+
+  .gap-4 {
+    gap: 1rem;
+  }
+}
+
+/* Error state animation */
+.error-state {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+/* Success message fade in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.success-header h1 {
+  animation: fadeIn 1s ease-out 0.5s backwards;
+}
+
+.success-header p {
+  animation: fadeIn 1s ease-out 0.7s backwards;
+}

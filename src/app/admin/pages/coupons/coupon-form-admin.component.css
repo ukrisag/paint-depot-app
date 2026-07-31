@@ -1,0 +1,6 @@
+/* Additional custom styles if needed - Tailwind CSS handles most styling */
+
+/* Force uppercase for coupon code input */
+input[formControlName="code"] {
+  text-transform: uppercase;
+}

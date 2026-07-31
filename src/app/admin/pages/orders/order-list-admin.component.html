@@ -1,0 +1,253 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">จัดการคำสั่งซื้อ</h1>
+    <p class="text-gray-600 mt-1">รายการคำสั่งซื้อทั้งหมดในระบบ</p>
+  </div>
+
+  <!-- Filters Bar -->
+  <div class="mb-6 bg-white rounded-lg shadow p-4">
+    <!-- Search and Export Buttons -->
+    <div class="mb-4 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+      <div class="w-full sm:flex-1">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+          placeholder="ค้นหาเลขที่คำสั่งซื้อ..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <!-- Export Buttons -->
+      <div class="flex gap-2">
+        <button
+          (click)="downloadExcel()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+        >
+          <span>📊</span>
+          <span>Excel</span>
+        </button>
+        <button
+          (click)="downloadPdf()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+        >
+          <span>📄</span>
+          <span>PDF</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Status Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">สถานะ</label>
+        <select
+          [(ngModel)]="selectedStatus"
+          (change)="onFilterChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option [ngValue]="undefined">ทั้งหมด</option>
+          <option *ngFor="let status of orderStatuses" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Start Date Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">วันที่เริ่มต้น</label>
+        <input
+          type="date"
+          [(ngModel)]="startDate"
+          (change)="onFilterChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <!-- End Date Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">วันที่สิ้นสุด</label>
+        <input
+          type="date"
+          [(ngModel)]="endDate"
+          (change)="onFilterChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+    </div>
+
+    <!-- Clear Filters -->
+    <div class="mt-4">
+      <button
+        (click)="clearFilters()"
+        class="text-sm text-blue-600 hover:text-blue-800"
+      >
+        ล้างตัวกรอง
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+    {{ error() }}
+  </div>
+
+  <!-- Orders Table (Desktop) -->
+  <div *ngIf="!loading() && !error()" class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">เลขที่คำสั่งซื้อ</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ลูกค้า</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่สั่ง</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ยอดรวม</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let order of orders()" class="hover:bg-gray-50">
+          <!-- Order Number -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium text-gray-900 font-mono">{{ order.orderNumber }}</div>
+          </td>
+
+          <!-- Customer -->
+          <td class="px-6 py-4">
+            <div class="text-sm font-medium text-gray-900">{{ order.shippingFullName || '-' }}</div>
+            <div class="text-sm text-gray-500">{{ order.shippingPhone || '-' }}</div>
+          </td>
+
+          <!-- Date -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ formatDate(order.createdAt) }}</div>
+          </td>
+
+          <!-- Total -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-semibold text-gray-900">{{ formatPrice(order.totalAmount) }}</div>
+          </td>
+
+          <!-- Status -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span [class]="getStatusClass(order.status)">
+              {{ getStatusLabel(order.status) }}
+            </span>
+          </td>
+
+          <!-- Actions -->
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button
+              (click)="onViewDetail(order.id)"
+              class="text-blue-600 hover:text-blue-900"
+            >
+              ดูรายละเอียด
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="orders().length === 0" class="text-center py-12">
+      <p class="text-gray-500">ไม่พบคำสั่งซื้อ</p>
+    </div>
+  </div>
+
+  <!-- Orders Cards (Mobile/Tablet) -->
+  <div *ngIf="!loading() && !error()" class="lg:hidden space-y-4">
+    <div *ngFor="let order of orders()" class="bg-white rounded-lg shadow p-4">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <div class="text-sm font-medium text-gray-900 font-mono">{{ order.orderNumber }}</div>
+          <div class="text-xs text-gray-500 mt-1">{{ formatDate(order.createdAt) }}</div>
+        </div>
+        <span [class]="getStatusClass(order.status)">
+          {{ getStatusLabel(order.status) }}
+        </span>
+      </div>
+
+      <div class="space-y-2 mb-3">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">ลูกค้า:</span>
+          <span class="text-gray-900 font-medium">{{ order.shippingFullName || '-' }}</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">เบอร์โทร:</span>
+          <span class="text-gray-900">{{ order.shippingPhone || '-' }}</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">ยอดรวม:</span>
+          <span class="text-gray-900 font-semibold">{{ formatPrice(order.totalAmount) }}</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <button
+        (click)="onViewDetail(order.id)"
+        class="w-full px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700"
+      >
+        ดูรายละเอียด
+      </button>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="orders().length === 0" class="text-center py-12 bg-white rounded-lg">
+      <p class="text-gray-500">ไม่พบคำสั่งซื้อ</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading() && !error() && totalPages() > 1" class="mt-6">
+    <div class="bg-white rounded-lg shadow px-4 py-3">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <!-- Page Info -->
+        <div class="text-sm text-gray-600">
+          แสดง {{ orders().length }} จาก {{ totalItems() }} รายการ
+        </div>
+
+        <!-- Page Numbers -->
+        <div class="flex items-center gap-2">
+          <!-- Previous Button -->
+          <button
+            (click)="onPageChange(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+            [class]="currentPage() === 1
+              ? 'px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed'
+              : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
+          >
+            ก่อนหน้า
+          </button>
+
+          <!-- Page Numbers -->
+          <button
+            *ngFor="let page of getPageNumbers()"
+            (click)="onPageChange(page)"
+            [class]="page === currentPage()
+              ? 'px-3 py-1 rounded bg-primary-600 text-white'
+              : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
+          >
+            {{ page }}
+          </button>
+
+          <!-- Next Button -->
+          <button
+            (click)="onPageChange(currentPage() + 1)"
+            [disabled]="currentPage() === totalPages()"
+            [class]="currentPage() === totalPages()
+              ? 'px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed'
+              : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
+          >
+            ถัดไป
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

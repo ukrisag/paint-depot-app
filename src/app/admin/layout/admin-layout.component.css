@@ -1,0 +1,152 @@
+/* Admin Layout Styles */
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Main Layout Container */
+.admin-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f3f4f6;
+}
+
+/* Header - Fixed at top */
+.admin-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  height: 4rem;
+}
+
+/* Body - Contains sidebar and main content */
+.admin-body {
+  display: flex;
+  flex: 1;
+  margin-top: 4rem;
+  height: calc(100vh - 4rem);
+  overflow: hidden;
+}
+
+/* Sidebar - Fixed on left */
+.admin-sidebar {
+  position: fixed;
+  left: 0;
+  top: 4rem;
+  bottom: 0;
+  width: 18rem;
+  z-index: 20;
+  transition: transform 0.3s ease;
+}
+
+/* Mobile overlay */
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+/* Main wrapper - Contains content and footer */
+.main-wrapper {
+  flex: 1;
+  margin-left: 18rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: margin-left 0.3s ease;
+  overflow: hidden;
+}
+
+/* When sidebar is closed, expand main wrapper */
+.main-wrapper.sidebar-closed {
+  margin-left: 0;
+}
+
+/* Main Content - Scrollable area */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem 2rem;
+  background: #f3f4f6;
+}
+
+/* Custom scrollbar for main content */
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: #e5e7eb;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 4px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* No footer needed for admin */
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+  }
+
+  .main-wrapper {
+    margin-left: 0;
+  }
+
+  .mobile-overlay {
+    display: block;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .footer-links {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-bottom-content {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-content {
+    padding: 1rem;
+  }
+
+  .footer-content {
+    padding: 1.5rem 1rem 1rem;
+  }
+
+  .footer-links {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-bottom-content {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* Desktop - Hide mobile overlay */
+@media (min-width: 1024px) {
+  .mobile-overlay {
+    display: none !important;
+  }
+}

@@ -1,0 +1,350 @@
+/* Modern Product List Styles */
+
+/* Blob Animation for Background */
+@keyframes blob {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(20px, -50px) scale(1.1);
+  }
+  50% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  75% {
+    transform: translate(50px, 50px) scale(1.05);
+  }
+}
+
+.animate-blob {
+  animation: blob 20s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Filter Option Active State */
+.filter-option.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.filter-option.active span {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+/* Filter Chips Animation */
+.filter-chip {
+  animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Breadcrumb Hover Effect */
+.breadcrumb-container a {
+  position: relative;
+}
+
+.breadcrumb-container a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: white;
+  transition: width 0.3s ease;
+}
+
+.breadcrumb-container a:hover::after {
+  width: 100%;
+}
+
+/* Loading Shimmer Effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.loading-container .animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom Scrollbar for Filters */
+.filter-sidebar ::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filter-sidebar ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.filter-sidebar ::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  border-radius: 10px;
+}
+
+.filter-sidebar ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #4f46e5, #9333ea);
+}
+
+/* Product Grid Fade In */
+.products-grid-container {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Empty State Animation */
+.empty-state {
+  animation: zoomIn 0.5s ease-out;
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Pagination Hover Effects */
+.pagination-container button:not(:disabled):hover {
+  transform: translateY(-2px);
+}
+
+.pagination-container button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+/* Gradient Text Effect for Headers */
+.hero-content h1 {
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Sort Dropdown Custom Styling */
+select {
+  background-image: none;
+}
+
+select:hover {
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+select:focus {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 1024px) {
+  .hero-content h1 {
+    font-size: 3rem;
+  }
+
+  .filter-sidebar {
+    position: static;
+  }
+
+  .products-grid-container {
+    margin-top: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .filter-sidebar {
+    margin-bottom: 1.5rem;
+  }
+
+  .pagination-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pagination-container > div {
+    min-width: max-content;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-content h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  .hero-content p {
+    font-size: 1rem;
+  }
+
+  .filter-chips {
+    font-size: 0.875rem;
+  }
+
+  .empty-state {
+    padding: 3rem 1.5rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.5rem;
+  }
+
+  .empty-state p {
+    font-size: 0.875rem;
+  }
+}
+
+/* Enhance Focus States for Accessibility */
+input[type="radio"]:focus {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+button:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+/* Smooth Transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Disable transitions for loading states */
+.loading-container * {
+  transition: none !important;
+}
+
+/* Product Card Wrapper Styles */
+.product-card-wrapper {
+  height: 100%;
+}
+
+/* Glass Morphism Effect for Hero Elements */
+.hero-content .inline-block span {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.filter-chip {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Enhance Shadow on Scroll */
+.filter-sidebar > div {
+  transition: box-shadow 0.3s ease;
+}
+
+.filter-sidebar > div:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Loading Spinner Enhanced Animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-container .animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Pagination Current Page Glow */
+.pagination-container button.bg-gradient-to-r {
+  box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.4);
+}
+
+/* Radio Button Custom Styling */
+input[type="radio"] {
+  cursor: pointer;
+  appearance: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+input[type="radio"]:checked {
+  border-color: #4f46e5;
+  background: #4f46e5;
+}
+
+input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+}
+
+input[type="radio"]:hover {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Gradient Overlay Animation */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.bg-gradient-to-br {
+  background-size: 200% 200%;
+  animation: gradientShift 15s ease infinite;
+}
+
+/* Tooltip for Filter Count */
+.filter-option span:last-child {
+  font-variant-numeric: tabular-nums;
+}

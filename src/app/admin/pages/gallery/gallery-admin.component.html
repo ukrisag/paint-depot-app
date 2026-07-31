@@ -1,0 +1,276 @@
+<!-- Header -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">จัดการคลังภาพ</h1>
+    <p class="page-description">จัดการรูปภาพและผลงานที่แสดงในหน้าแกลเลอรี</p>
+  </div>
+  <button class="btn-primary" (click)="openCreateModal()">
+    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+    </svg>
+    <span>เพิ่มรูปภาพ</span>
+  </button>
+</div>
+
+<!-- Filters -->
+<div class="filters-section">
+  <div class="search-box">
+    <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
+    <input
+      type="text"
+      class="search-input"
+      placeholder="ค้นหา..."
+      [value]="searchTerm()"
+      (input)="onSearch($event)">
+  </div>
+
+  <select class="filter-select" [(ngModel)]="selectedCategory" (change)="onCategoryChange()">
+    <option value="">หมวดหมู่ทั้งหมด</option>
+    <option value="Interior">Interior</option>
+    <option value="Exterior">Exterior</option>
+    <option value="Commercial">Commercial</option>
+    <option value="Residential">Residential</option>
+  </select>
+
+  <select class="filter-select" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+    <option value="">สถานะทั้งหมด</option>
+    <option value="active">ใช้งาน</option>
+    <option value="inactive">ไม่ใช้งาน</option>
+  </select>
+
+  <select class="filter-select" [(ngModel)]="sortBy" (change)="onSortChange()">
+    <option value="created_desc">วันที่สร้าง (ใหม่-เก่า)</option>
+    <option value="created_asc">วันที่สร้าง (เก่า-ใหม่)</option>
+    <option value="title_asc">ชื่อ (A-Z)</option>
+    <option value="title_desc">ชื่อ (Z-A)</option>
+    <option value="views_desc">ยอดดู (มาก-น้อย)</option>
+  </select>
+</div>
+
+<!-- Grid View -->
+<div class="gallery-grid" *ngIf="!initialLoading() && images().length > 0" [class.gallery-loading]="loading()">
+  <!-- Loading Overlay -->
+  <div *ngIf="loading()" class="loading-overlay-inline">
+    <div class="spinner-small"></div>
+    <span>กำลังโหลด...</span>
+  </div>
+  <div class="gallery-item" *ngFor="let image of images()">
+    <div class="image-container">
+      <img [src]="image.thumbnailUrl || image.imageUrl" [alt]="image.title" class="gallery-image">
+      <div class="image-actions">
+        <button class="action-btn" (click)="openEditModal(image)" title="แก้ไข">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+        </button>
+        <button class="action-btn delete" (click)="openDeleteModal(image)" title="ลบ">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="image-info">
+      <h3 class="image-title">{{ image.title }}</h3>
+      <p class="image-category" *ngIf="image.category">{{ image.category }}</p>
+      <div class="image-meta">
+        <span class="meta-item">
+          <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+          {{ image.viewCount }}
+        </span>
+        <span class="badge" [class.badge-success]="image.isActive" [class.badge-inactive]="!image.isActive">
+          {{ image.isActive ? 'ใช้งาน' : 'ไม่ใช้งาน' }}
+        </span>
+        <span class="badge badge-featured" *ngIf="image.isFeatured">แนะนำ</span>
+      </div>
+      <div class="image-actions-bottom">
+        <button class="toggle-btn" (click)="toggleActiveStatus(image)" [class.active]="image.isActive">
+          {{ image.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน' }}
+        </button>
+        <button class="toggle-btn" (click)="toggleFeaturedStatus(image)" [class.featured]="image.isFeatured">
+          {{ image.isFeatured ? 'ยกเลิกแนะนำ' : 'ตั้งเป็นแนะนำ' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="initialLoading()">
+  <div class="spinner"></div>
+  <p>กำลังโหลด...</p>
+</div>
+
+<!-- Empty State -->
+<div class="empty-state" *ngIf="!initialLoading() && images().length === 0">
+  <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+  </svg>
+  <h3>ไม่พบรูปภาพ</h3>
+  <p>เริ่มต้นสร้างคลังภาพของคุณโดยคลิกปุ่ม "เพิ่มรูปภาพ" ด้านบน</p>
+</div>
+
+<!-- Pagination -->
+<div class="pagination" *ngIf="totalPages() > 1">
+  <button class="pagination-btn" [disabled]="currentPage() === 1" (click)="previousPage()">ก่อนหน้า</button>
+  <span class="pagination-info">หน้า {{ currentPage() }} จาก {{ totalPages() }}</span>
+  <button class="pagination-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()">ถัดไป</button>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal-backdrop" *ngIf="showModal()" (click)="closeModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ isEditMode() ? 'แก้ไขรูปภาพ' : 'เพิ่มรูปภาพใหม่' }}</h2>
+      <button class="modal-close" (click)="closeModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="imageForm" class="modal-body">
+      <!-- Image Upload -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">รูปภาพ *</label>
+        <div class="upload-container">
+          <div class="image-preview" *ngIf="imagePreview()">
+            <img [src]="imagePreview()" alt="Preview">
+          </div>
+          <div class="upload-area" *ngIf="!imagePreview()">
+            <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            <p>คลิกเพื่ออัปโหลดรูปภาพ</p>
+            <p class="upload-hint">รองรับไฟล์ JPG, PNG, GIF, WebP (สูงสุด 5MB)</p>
+          </div>
+          <input
+            type="file"
+            accept="image/*"
+            class="file-input"
+            (change)="onFileSelected($event)">
+        </div>
+        <button
+          type="button"
+          class="btn-upload"
+          *ngIf="selectedFile && !uploadingImage()"
+          (click)="uploadImage()">
+          อัปโหลด
+        </button>
+        <div class="uploading" *ngIf="uploadingImage()">
+          <div class="spinner-small"></div>
+          <span>กำลังอัปโหลด...</span>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2" for="title">ชื่อรูปภาพ *</label>
+        <input
+          type="text"
+          id="title"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          formControlName="title"
+          placeholder="ห้องนั่งเล่นสไตล์โมเดิร์น">
+        <span class="text-red-500 text-sm mt-1" *ngIf="imageForm.get('title')?.invalid && imageForm.get('title')?.touched">
+          กรุณากรอกชื่อรูปภาพ
+        </span>
+      </div>
+
+      <!-- Description -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2" for="description">คำอธิบาย</label>
+        <textarea
+          id="description"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          formControlName="description"
+          rows="3"
+          placeholder="รายละเอียดเกี่ยวกับผลงานนี้..."></textarea>
+      </div>
+
+      <!-- Category -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2" for="category">หมวดหมู่</label>
+        <input
+          type="text"
+          id="category"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          formControlName="category"
+          placeholder="Interior">
+      </div>
+
+      <!-- Alt Text -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2" for="altText">ข้อความ Alt</label>
+        <input
+          type="text"
+          id="altText"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          formControlName="altText"
+          placeholder="ห้องนั่งเล่นสีขาวโทนอบอุ่น">
+      </div>
+
+      <!-- Display Order -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2" for="displayOrder">ลำดับการแสดง</label>
+        <input
+          type="number"
+          id="displayOrder"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          formControlName="displayOrder"
+          min="0">
+      </div>
+
+      <!-- Checkboxes -->
+      <div class="flex gap-6 mb-4">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" formControlName="isFeatured" class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
+          <span class="text-sm text-gray-700">รูปภาพแนะนำ</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" formControlName="isActive" class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
+          <span class="text-sm text-gray-700">เปิดใช้งาน</span>
+        </label>
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" (click)="closeModal()">ยกเลิก</button>
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="saveImage()"
+        [disabled]="uploadingImage() || (imageForm.get('title')?.invalid)">
+        <span *ngIf="uploadingImage()">กำลังบันทึก...</span>
+        <span *ngIf="!uploadingImage()">{{ isEditMode() ? 'บันทึกการแก้ไข' : 'สร้างรูปภาพ' }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-backdrop" *ngIf="showDeleteModal()" (click)="closeDeleteModal()">
+  <div class="modal-container modal-small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">ยืนยันการลบ</h2>
+      <button class="modal-close" (click)="closeDeleteModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>คุณแน่ใจหรือไม่ว่าต้องการลบรูปภาพ "{{ currentImage()?.title }}"?</p>
+      <p class="text-danger">การดำเนินการนี้ไม่สามารถย้อนกลับได้</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" (click)="closeDeleteModal()">ยกเลิก</button>
+      <button type="button" class="btn-danger" (click)="confirmDelete()">ลบ</button>
+    </div>
+  </div>
+</div>

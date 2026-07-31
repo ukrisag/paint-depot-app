@@ -1,0 +1,252 @@
+<!-- Simple, Clean Design - No gradients -->
+<div>
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900 mb-2">
+      รายการโปรดของฉัน
+    </h2>
+    <p class="text-gray-600">สินค้าที่คุณบันทึกไว้และชื่นชอบ</p>
+  </div>
+
+  <!-- Loading State - Simple Spinner -->
+  <div *ngIf="isLoading()" class="flex justify-center items-center py-24">
+    <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-500"></div>
+  </div>
+
+  <!-- Error State - Simple Design -->
+  <div *ngIf="error() && !isLoading()" class="bg-white rounded-lg shadow-md p-8 text-center">
+    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+    </div>
+    <h3 class="text-xl font-bold text-gray-900 mb-2">เกิดข้อผิดพลาด</h3>
+    <p class="text-gray-600 mb-6">{{ error() }}</p>
+    <button
+      (click)="loadWishlist()"
+      class="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      <span>ลองอีกครั้ง</span>
+    </button>
+  </div>
+
+  <!-- Simple Empty State -->
+  <div *ngIf="!isLoading() && !error() && wishlistItems().length === 0">
+    <div class="bg-white rounded-lg shadow-md p-12 text-center">
+        <!-- SVG Illustration -->
+        <div class="mb-8">
+          <svg class="w-64 h-64 mx-auto" viewBox="0 0 400 400" fill="none">
+            <!-- Big Heart -->
+            <g class="animate-pulse-soft">
+              <path d="M200 320 L100 220 Q80 200 80 170 Q80 140 105 115 Q130 90 160 90 Q180 90 200 105 Q220 90 240 90 Q270 90 295 115 Q320 140 320 170 Q320 200 300 220 Z"
+                    fill="#FBCFE8" stroke="#DB2777" stroke-width="4" stroke-linejoin="round"/>
+              <path d="M200 140 L200 240 M160 180 L200 220 L240 180"
+                    stroke="#DB2777" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.3" stroke-dasharray="8,4"/>
+            </g>
+
+            <!-- Floating hearts -->
+            <g class="animate-float" style="animation-delay: 0.2s;">
+              <path d="M80 100 L60 80 Q55 75 55 68 Q55 61 60 56 Q65 51 72 51 Q76 51 80 55 Q84 51 88 51 Q95 51 100 56 Q105 61 105 68 Q105 75 100 80 Z"
+                    fill="#FED7AA" opacity="0.8"/>
+            </g>
+            <g class="animate-float" style="animation-delay: 0.5s;">
+              <path d="M340 140 L320 120 Q315 115 315 108 Q315 101 320 96 Q325 91 332 91 Q336 91 340 95 Q344 91 348 91 Q355 91 360 96 Q365 101 365 108 Q365 115 360 120 Z"
+                    fill="#FDE68A" opacity="0.8"/>
+            </g>
+            <g class="animate-float" style="animation-delay: 0.8s;">
+              <path d="M320 260 L305 245 Q302 242 302 237 Q302 232 305 229 Q308 226 313 226 Q316 226 320 230 Q324 226 327 226 Q332 226 335 229 Q338 232 338 237 Q338 242 335 245 Z"
+                    fill="#DDD6FE" opacity="0.8"/>
+            </g>
+
+            <!-- Sparkles -->
+            <g class="animate-bounce-in">
+              <circle cx="140" cy="100" r="3" fill="#F472B6"/>
+              <circle cx="260" cy="120" r="4" fill="#A78BFA"/>
+              <circle cx="300" cy="200" r="3" fill="#FB923C"/>
+              <circle cx="100" cy="180" r="4" fill="#FCD34D"/>
+            </g>
+          </svg>
+        </div>
+
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">
+        รายการโปรดของคุณว่างเปล่า
+      </h2>
+      <p class="text-gray-600 mb-8">
+        เริ่มสะสมสินค้าที่คุณชื่นชอบ กดปุ่ม ❤️ ที่สินค้าเพื่อบันทึกไว้ดูภายหลัง
+      </p>
+
+      <!-- CTA Buttons - 60-30-10 Rule -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+        <a
+          routerLink="/products"
+          class="inline-flex items-center justify-center gap-2 bg-blue-500 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+          </svg>
+          <span>ค้นหาสินค้าที่ใช่</span>
+        </a>
+        <a
+          routerLink="/categories"
+          class="inline-flex items-center justify-center gap-2 bg-white text-blue-600 border-2 border-blue-200 px-8 py-3 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+          </svg>
+          <span>เลือกจากหมวดหมู่</span>
+        </a>
+      </div>
+
+      <!-- Tips - Simple Design -->
+      <div class="bg-blue-50 rounded-lg p-6 border border-blue-100">
+        <div class="flex items-start gap-4 text-left">
+          <div class="flex-shrink-0 w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-gray-900 mb-2">เคล็ดลับ</h4>
+            <p class="text-sm text-gray-600">
+              บันทึกสินค้าที่สนใจไว้ในรายการโปรด เพื่อติดตามราคาและโปรโมชั่นพิเศษได้ง่ายขึ้น!
+            </p>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+  <!-- Wishlist Grid -->
+  <div *ngIf="!isLoading() && !error() && wishlistItems().length > 0">
+    <!-- Item Count Badge - Solid Colors -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">รายการโปรดทั้งหมด</p>
+          <p class="text-2xl font-bold text-blue-600">
+            {{ wishlistItems().length }} รายการ
+          </p>
+        </div>
+      </div>
+
+      <!-- Clear All Button -->
+      <button class="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-2 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+        <span>ลบทั้งหมด</span>
+      </button>
+    </div>
+
+    <!-- Grid with Clean Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div *ngFor="let item of wishlistItems()" class="group bg-white rounded-lg shadow-md hover:shadow-lg transition-colors overflow-hidden border border-gray-100 hover:border-blue-200">
+        <!-- Product Image -->
+        <div class="relative aspect-square bg-gray-100 cursor-pointer" (click)="navigateToProduct(item.product?.slug)">
+          <img
+            [src]="getImageUrl(item.product?.primaryImage)"
+            [alt]="item.product?.name || 'Product image'"
+            appImageFallback="https://placehold.co/400x400/e5e7eb/6b7280/png?text=No+Image"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+          />
+
+          <!-- Simple Overlay on Hover -->
+          <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+          <!-- Remove Button (Filled Heart) -->
+          <button
+            (click)="removeFromWishlist(item.productId, item.product?.name); $event.stopPropagation()"
+            class="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all"
+            type="button"
+            aria-label="ลบออกจากรายการโปรด"
+          >
+            <svg class="w-5 h-5 text-red-500 fill-current" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+
+          <!-- Solid Color Badges -->
+          <div class="absolute top-3 left-3 flex flex-col gap-2">
+            <span *ngIf="item.product?.isNewArrival" class="px-3 py-1 bg-green-500 text-white text-xs font-medium rounded-full">
+              ✨ ใหม่
+            </span>
+            <span *ngIf="item.product?.isFeatured" class="px-3 py-1 bg-orange-500 text-white text-xs font-medium rounded-full">
+              ⭐ แนะนำ
+            </span>
+            <span *ngIf="item.product?.isBestseller" class="px-3 py-1 bg-red-500 text-white text-xs font-medium rounded-full">
+              🔥 ขายดี
+            </span>
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="p-5">
+          <!-- Category & Brand -->
+          <div class="flex items-center gap-2 text-xs text-gray-500 mb-2 uppercase tracking-wide font-medium">
+            <span *ngIf="item.product?.categoryName">{{ item.product.categoryName }}</span>
+            <span *ngIf="item.product?.categoryName && item.product?.brandName" class="text-gray-300">•</span>
+            <span *ngIf="item.product?.brandName">{{ item.product.brandName }}</span>
+          </div>
+
+          <!-- Product Name -->
+          <h3
+            class="text-base font-bold text-gray-900 mb-3 line-clamp-2 cursor-pointer group-hover:text-blue-600 transition-colors min-h-[3rem]"
+            (click)="navigateToProduct(item.product?.slug)"
+          >
+            {{ item.product?.name }}
+          </h3>
+
+          <!-- Price - Solid Colors -->
+          <div class="mb-4">
+            <div class="flex items-baseline gap-2">
+              <span class="text-2xl font-bold text-blue-600">
+                ฿{{ formatPrice(item.product?.basePrice) }}
+              </span>
+              <span *ngIf="item.product?.compareAtPrice && item.product?.compareAtPrice > (item.product?.basePrice || 0)"
+                    class="text-sm text-gray-400 line-through">
+                ฿{{ formatPrice(item.product.compareAtPrice) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Rating Stars -->
+          <div *ngIf="item.product?.averageRating" class="flex items-center gap-2 mb-4">
+            <div class="flex items-center">
+              <svg *ngFor="let star of [1,2,3,4,5]"
+                   class="w-5 h-5"
+                   [class.text-yellow-400]="star <= (item.product?.averageRating || 0)"
+                   [class.text-gray-300]="star > (item.product?.averageRating || 0)"
+                   fill="currentColor"
+                   viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+              </svg>
+            </div>
+            <span class="text-sm text-gray-600 font-medium">
+              {{ item.product.averageRating?.toFixed(1) }} ({{ item.product.reviewCount || 0 }})
+            </span>
+          </div>
+
+          <!-- Add to Cart Button - Solid Color (10% Accent) -->
+          <button
+            (click)="navigateToProduct(item.product?.slug)"
+            class="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium flex items-center justify-center gap-2"
+            type="button"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+            <span>เพิ่มลงตะกร้า</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,617 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Review Management</h1>
+    <p class="text-gray-600 mt-1">Manage product reviews and customer feedback</p>
+  </div>
+
+  <!-- Actions & Filters Bar -->
+  <div class="mb-6 bg-white rounded-lg shadow p-4">
+    <!-- Search and Export Buttons -->
+    <div class="mb-4 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+      <div class="w-full sm:flex-1 sm:max-w-md">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+          placeholder="Search by reviewer or content..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <!-- Export Buttons -->
+      <div class="flex gap-2">
+        <button
+          (click)="downloadExcel()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+        >
+          <span>📊</span>
+          <span>Excel</span>
+        </button>
+        <button
+          (click)="downloadPdf()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+        >
+          <span>📄</span>
+          <span>PDF</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Status Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <select
+          [(ngModel)]="selectedStatus"
+          (change)="onFilterChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option [ngValue]="undefined">All Statuses</option>
+          <option *ngFor="let status of statuses" [ngValue]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Rating Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+        <select
+          [(ngModel)]="selectedRating"
+          (change)="onFilterChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option [ngValue]="undefined">All Ratings</option>
+          <option *ngFor="let rating of ratings" [ngValue]="rating">
+            {{ rating }} Star{{ rating > 1 ? 's' : '' }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Clear Filters & Bulk Actions -->
+    <div class="mt-4 flex flex-wrap gap-4 items-center justify-between">
+      <button
+        (click)="clearFilters()"
+        class="text-sm text-blue-600 hover:text-blue-800"
+      >
+        Clear Filters
+      </button>
+
+      <!-- Bulk Actions -->
+      <div *ngIf="selectedReviewIds().size > 0" class="flex gap-2">
+        <span class="text-sm text-gray-600 self-center">
+          {{ selectedReviewIds().size }} selected
+        </span>
+        <button
+          (click)="onBulkApproveClick()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+        >
+          Approve Selected
+        </button>
+        <button
+          (click)="onBulkRejectClick()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+        >
+          Reject Selected
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+    {{ error() }}
+  </div>
+
+  <!-- Reviews Table (Desktop) -->
+  <div *ngIf="!loading() && !error()" class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left">
+            <input
+              type="checkbox"
+              [(ngModel)]="selectAll"
+              (change)="toggleSelectAll()"
+              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reviewer</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let review of getPaginatedReviews()" class="hover:bg-gray-50">
+          <!-- Checkbox -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <input
+              type="checkbox"
+              [checked]="isReviewSelected(review.id)"
+              (change)="toggleReviewSelection(review.id)"
+              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+          </td>
+
+          <!-- ID -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-mono text-gray-900">#{{ review.id }}</div>
+          </td>
+
+          <!-- Product -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">Product #{{ review.productId }}</div>
+          </td>
+
+          <!-- Reviewer -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium text-gray-900">{{ review.userName || 'Anonymous' }}</div>
+            <div *ngIf="review.isVerifiedPurchase" class="text-xs text-green-600">Verified Purchase</div>
+          </td>
+
+          <!-- Rating -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center gap-1">
+              <svg *ngFor="let filled of getStarArray(review.rating)"
+                   [class]="filled ? 'w-4 h-4 text-yellow-400 fill-current' : 'w-4 h-4 text-gray-300 fill-current'"
+                   viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+              <span class="text-sm text-gray-600 ml-1">{{ review.rating }}/5</span>
+            </div>
+          </td>
+
+          <!-- Title -->
+          <td class="px-6 py-4">
+            <div class="text-sm text-gray-900 max-w-xs">{{ truncateText(review.title, 50) }}</div>
+          </td>
+
+          <!-- Comment -->
+          <td class="px-6 py-4">
+            <div class="text-sm text-gray-600 max-w-xs">{{ truncateText(review.comment, 60) }}</div>
+          </td>
+
+          <!-- Status -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span [class]="getStatusClass(review.status)">
+              {{ review.status || 'Unknown' }}
+            </span>
+          </td>
+
+          <!-- Date -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ formatDate(review.createdAt) }}</div>
+          </td>
+
+          <!-- Actions -->
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <div class="flex flex-col gap-1">
+              <button
+                (click)="onViewDetail(review)"
+                class="text-blue-600 hover:text-blue-900 text-left"
+              >
+                View
+              </button>
+              <button
+                *ngIf="review.status !== 'approved'"
+                (click)="onApproveClick(review)"
+                class="text-green-600 hover:text-green-900 text-left"
+              >
+                Approve
+              </button>
+              <button
+                *ngIf="review.status !== 'rejected'"
+                (click)="onRejectClick(review)"
+                class="text-orange-600 hover:text-orange-900 text-left"
+              >
+                Reject
+              </button>
+              <button
+                (click)="onDeleteClick(review)"
+                class="text-red-600 hover:text-red-900 text-left"
+              >
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredReviews().length === 0" class="text-center py-12">
+      <p class="text-gray-500">No reviews found</p>
+    </div>
+  </div>
+
+  <!-- Reviews Cards (Mobile/Tablet) -->
+  <div *ngIf="!loading() && !error()" class="lg:hidden space-y-4">
+    <div *ngFor="let review of getPaginatedReviews()" class="bg-white rounded-lg shadow p-4">
+      <div class="space-y-3">
+        <!-- Header with checkbox -->
+        <div class="flex items-start gap-3">
+          <input
+            type="checkbox"
+            [checked]="isReviewSelected(review.id)"
+            (change)="toggleReviewSelection(review.id)"
+            class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-semibold text-gray-900">{{ review.userName || 'Anonymous' }}</h3>
+                <p class="text-sm text-gray-600">Product #{{ review.productId }}</p>
+              </div>
+              <span [class]="getStatusClass(review.status)">
+                {{ review.status || 'Unknown' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating -->
+        <div class="flex items-center gap-1">
+          <svg *ngFor="let filled of getStarArray(review.rating)"
+               [class]="filled ? 'w-5 h-5 text-yellow-400 fill-current' : 'w-5 h-5 text-gray-300 fill-current'"
+               viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          </svg>
+          <span class="text-sm text-gray-600 ml-1">{{ review.rating }}/5</span>
+        </div>
+
+        <!-- Content -->
+        <div>
+          <p class="font-medium text-gray-900">{{ review.title || 'No title' }}</p>
+          <p class="text-sm text-gray-600 mt-1">{{ truncateText(review.comment, 100) }}</p>
+        </div>
+
+        <!-- Info -->
+        <div class="text-sm text-gray-500">
+          <span>{{ formatDate(review.createdAt) }}</span>
+          <span *ngIf="review.isVerifiedPurchase" class="ml-2 text-green-600">• Verified Purchase</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap gap-2 pt-2">
+          <button
+            (click)="onViewDetail(review)"
+            class="flex-1 px-3 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700"
+          >
+            View
+          </button>
+          <button
+            *ngIf="review.status !== 'approved'"
+            (click)="onApproveClick(review)"
+            class="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+          >
+            Approve
+          </button>
+          <button
+            *ngIf="review.status !== 'rejected'"
+            (click)="onRejectClick(review)"
+            class="flex-1 px-3 py-2 bg-orange-600 text-white rounded-lg text-sm hover:bg-orange-700"
+          >
+            Reject
+          </button>
+          <button
+            (click)="onDeleteClick(review)"
+            class="px-3 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredReviews().length === 0" class="text-center py-12 bg-white rounded-lg">
+      <p class="text-gray-500">No reviews found</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading() && !error() && totalPages() > 1" class="mt-6">
+    <div class="bg-white rounded-lg shadow px-4 py-3">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <!-- Page Info -->
+        <div class="text-sm text-gray-600">
+          Showing {{ getPaginatedReviews().length }} of {{ totalItems() }} reviews
+        </div>
+
+        <!-- Page Numbers -->
+        <div class="flex items-center gap-2">
+          <!-- Previous Button -->
+          <button
+            (click)="onPageChange(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+            [class]="currentPage() === 1
+              ? 'px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed'
+              : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
+          >
+            Previous
+          </button>
+
+          <!-- Page Numbers -->
+          <button
+            *ngFor="let page of getPageNumbers()"
+            (click)="onPageChange(page)"
+            [class]="page === currentPage()
+              ? 'px-3 py-1 rounded bg-primary-600 text-white'
+              : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
+          >
+            {{ page }}
+          </button>
+
+          <!-- Next Button -->
+          <button
+            (click)="onPageChange(currentPage() + 1)"
+            [disabled]="currentPage() === totalPages()"
+            [class]="currentPage() === totalPages()
+              ? 'px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed'
+              : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div *ngIf="showDetailModal() && currentReview()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-6">
+      <!-- Header -->
+      <div class="flex justify-between items-start mb-4">
+        <h3 class="text-xl font-semibold text-gray-900">Review Details</h3>
+        <button (click)="closeDetailModal()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="space-y-4">
+        <!-- Product Info -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Product</label>
+          <p class="text-gray-900">Product #{{ currentReview()!.productId }}</p>
+        </div>
+
+        <!-- Reviewer Info -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Reviewer</label>
+            <p class="text-gray-900">{{ currentReview()!.userName || 'Anonymous' }}</p>
+            <p *ngIf="currentReview()!.isVerifiedPurchase" class="text-sm text-green-600">Verified Purchase</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+            <p class="text-gray-900">{{ formatDate(currentReview()!.createdAt) }}</p>
+          </div>
+        </div>
+
+        <!-- Rating -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+          <div class="flex items-center gap-1">
+            <svg *ngFor="let filled of getStarArray(currentReview()!.rating)"
+                 [class]="filled ? 'w-6 h-6 text-yellow-400 fill-current' : 'w-6 h-6 text-gray-300 fill-current'"
+                 viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            </svg>
+            <span class="text-gray-600 ml-2">{{ currentReview()!.rating }}/5</span>
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+          <p class="text-gray-900">{{ currentReview()!.title || '-' }}</p>
+        </div>
+
+        <!-- Comment -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Comment</label>
+          <p class="text-gray-900 whitespace-pre-wrap">{{ currentReview()!.comment || '-' }}</p>
+        </div>
+
+        <!-- Status -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <span [class]="getStatusClass(currentReview()!.status)">
+            {{ currentReview()!.status || 'Unknown' }}
+          </span>
+        </div>
+
+        <!-- Admin Response -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Admin Response</label>
+          <textarea
+            [(ngModel)]="adminResponseText"
+            rows="3"
+            placeholder="Add admin response (optional)..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          ></textarea>
+          <p *ngIf="currentReview()!.adminResponse" class="text-sm text-gray-600 mt-1">
+            Current: {{ currentReview()!.adminResponse }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-3 justify-end mt-6 pt-4 border-t">
+        <button
+          (click)="closeDetailModal()"
+          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+        >
+          Close
+        </button>
+        <button
+          *ngIf="currentReview()!.status !== 'approved'"
+          (click)="onApproveClick(currentReview()!); closeDetailModal()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+        >
+          Approve
+        </button>
+        <button
+          *ngIf="currentReview()!.status !== 'rejected'"
+          (click)="onRejectClick(currentReview()!); closeDetailModal()"
+          class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+        >
+          Reject
+        </button>
+        <button
+          (click)="onDeleteClick(currentReview()!); closeDetailModal()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Approve Confirmation Modal -->
+<div *ngIf="showApproveConfirm()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirm Approve Review</h3>
+    <p class="text-gray-600 mb-4">
+      Are you sure you want to approve this review?
+    </p>
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Admin Response (Optional)</label>
+      <textarea
+        [(ngModel)]="adminResponseText"
+        rows="3"
+        placeholder="Add response..."
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      ></textarea>
+    </div>
+    <div class="flex gap-3 justify-end">
+      <button
+        (click)="onCancelApprove()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="onConfirmApprove()"
+        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+      >
+        Approve Review
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Confirmation Modal -->
+<div *ngIf="showRejectConfirm()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirm Reject Review</h3>
+    <p class="text-gray-600 mb-4">
+      Are you sure you want to reject this review from "{{ currentReview()?.userName || 'Anonymous' }}"?
+    </p>
+    <div class="flex gap-3 justify-end">
+      <button
+        (click)="onCancelReject()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="onConfirmReject()"
+        class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+      >
+        Reject Review
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteConfirm()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirm Delete Review</h3>
+    <p class="text-gray-600 mb-4">
+      Are you sure you want to delete this review? This action cannot be undone.
+    </p>
+    <div class="flex gap-3 justify-end">
+      <button
+        (click)="onCancelDelete()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="onConfirmDelete()"
+        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+      >
+        Delete Review
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Approve Confirmation Modal -->
+<div *ngIf="showBulkApproveConfirm()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirm Bulk Approve</h3>
+    <p class="text-gray-600 mb-4">
+      Are you sure you want to approve {{ selectedReviewIds().size }} review(s)?
+    </p>
+    <div class="flex gap-3 justify-end">
+      <button
+        (click)="onCancelBulkApprove()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="onConfirmBulkApprove()"
+        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+      >
+        Approve {{ selectedReviewIds().size }} Review(s)
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Reject Confirmation Modal -->
+<div *ngIf="showBulkRejectConfirm()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirm Bulk Reject</h3>
+    <p class="text-gray-600 mb-4">
+      Are you sure you want to reject {{ selectedReviewIds().size }} review(s)?
+    </p>
+    <div class="flex gap-3 justify-end">
+      <button
+        (click)="onCancelBulkReject()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="onConfirmBulkReject()"
+        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+      >
+        Reject {{ selectedReviewIds().size }} Review(s)
+      </button>
+    </div>
+  </div>
+</div>

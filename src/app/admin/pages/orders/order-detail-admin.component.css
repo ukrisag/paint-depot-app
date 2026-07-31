@@ -1,0 +1,50 @@
+/* Order Detail Admin Component Styles */
+
+/* Animation for spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Smooth transitions */
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Focus styles */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* Timeline styles */
+.timeline-step {
+  position: relative;
+}
+
+/* Status badge hover effects */
+.status-badge {
+  transition: transform 0.2s ease-in-out;
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+}
+
+/* Card shadows */
+.shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Responsive table */
+@media (max-width: 640px) {
+  .overflow-x-auto {
+    overflow-x: auto;
+  }
+}

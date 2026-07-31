@@ -1,0 +1,227 @@
+/* Login component styles */
+
+/* ============================================
+   Gradient Background with Animated Blobs
+   ============================================ */
+.auth-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  background: linear-gradient(135deg, #f5f3ff 0%, #fdf4ff 50%, #fff7ed 100%);
+}
+
+.gradient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.blob-1 {
+  width: 500px;
+  height: 500px;
+  top: -10%;
+  left: -10%;
+  background: linear-gradient(135deg, #002B7F 0%, #0047AB 100%);
+}
+
+.blob-2 {
+  width: 400px;
+  height: 400px;
+  bottom: -10%;
+  right: -10%;
+  background: linear-gradient(135deg, #F7A627 0%, #FFB84D 100%);
+}
+
+.blob-3 {
+  width: 350px;
+  height: 350px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #0047AB 0%, #F7A627 100%);
+}
+
+.gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(255, 255, 255, 0.3) 100%);
+}
+
+/* ============================================
+   SVG Decorative Elements
+   ============================================ */
+.auth-decoration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.decoration-svg {
+  position: absolute;
+  opacity: 0.4;
+}
+
+.decoration-top-left {
+  width: 300px;
+  height: 300px;
+  top: -50px;
+  left: -50px;
+}
+
+.decoration-bottom-right {
+  width: 350px;
+  height: 350px;
+  bottom: -80px;
+  right: -80px;
+}
+
+/* ============================================
+   Glassmorphism Card
+   ============================================ */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 8px 32px 0 rgba(0, 43, 127, 0.1),
+    0 4px 16px 0 rgba(247, 166, 39, 0.05),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.8);
+  border-radius: 24px;
+  padding: 2.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  box-shadow:
+    0 12px 48px 0 rgba(0, 43, 127, 0.15),
+    0 6px 24px 0 rgba(247, 166, 39, 0.08),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   Gradient Text
+   ============================================ */
+.gradient-text {
+  background: linear-gradient(135deg, #002B7F 0%, #0047AB 50%, #F7A627 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+@media (max-width: 640px) {
+  .glass-card {
+    padding: 1.5rem;
+    border-radius: 20px;
+  }
+
+  .blob-1,
+  .blob-2,
+  .blob-3 {
+    width: 300px;
+    height: 300px;
+    filter: blur(60px);
+  }
+
+  .decoration-top-left,
+  .decoration-bottom-right {
+    width: 200px;
+    height: 200px;
+  }
+
+  .decoration-top-left {
+    top: -30px;
+    left: -30px;
+  }
+
+  .decoration-bottom-right {
+    bottom: -50px;
+    right: -50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .glass-card {
+    padding: 1.25rem;
+  }
+
+  .blob-1,
+  .blob-2,
+  .blob-3 {
+    width: 250px;
+    height: 250px;
+    filter: blur(50px);
+  }
+}
+
+/* ============================================
+   Enhanced Form Elements
+   ============================================ */
+.form-section {
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure buttons have proper z-index for glassmorphism */
+.btn {
+  position: relative;
+  z-index: 1;
+}
+
+/* Enhanced social login buttons */
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(147, 51, 234, 0.1);
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(147, 51, 234, 0.2);
+  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Divider enhancement */
+.border-gray-200 {
+  border-color: rgba(147, 51, 234, 0.1) !important;
+}
+
+/* Link enhancement */
+a {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  filter: brightness(1.1);
+}

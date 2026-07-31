@@ -1,0 +1,39 @@
+/* Orders List Admin Component Styles */
+
+/* Animation for spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive table */
+@media (max-width: 1024px) {
+  .hidden.lg\:block {
+    display: none;
+  }
+}
+
+/* Smooth transitions */
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Focus styles */
+input:focus,
+select:focus {
+  outline: none;
+}
+
+/* Status badge hover effects */
+.status-badge {
+  transition: transform 0.2s ease-in-out;
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+}

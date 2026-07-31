@@ -1,0 +1,102 @@
+/* Custom styles for category list component */
+
+/* Smooth transitions for status badges */
+button[class*="rounded-full"] {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Modal overlay animation */
+.fixed.inset-0 {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal content animation */
+.fixed.inset-0 > div {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Hierarchy indentation styling */
+.text-gray-400 {
+  user-select: none;
+}
+
+/* Hover effects for table rows */
+tr.hover\:bg-gray-50:hover {
+  background-color: rgb(249 250 251);
+  transition: background-color 0.15s ease-in-out;
+}
+
+/* Disabled button styling */
+button:disabled,
+button.cursor-not-allowed {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Form input focus states */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: rgb(59 130 246);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Responsive table overflow */
+@media (max-width: 1024px) {
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Card shadow on hover (mobile) */
+.lg\:hidden .bg-white.rounded-lg.shadow {
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.lg\:hidden .bg-white.rounded-lg.shadow:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Truncate long text */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Font mono for technical text */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}

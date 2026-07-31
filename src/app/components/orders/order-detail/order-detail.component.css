@@ -1,0 +1,386 @@
+/* Order Detail Component - Premium Design */
+
+/* Custom Animations */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Glassmorphism Effects */
+.bg-white\/80 {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Premium Card Styles */
+.bg-white\/80.backdrop-blur-lg {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Timeline Styles */
+.timeline-line {
+  transition: height 0.5s ease;
+}
+
+.timeline-step {
+  transition: all 0.3s ease;
+}
+
+.timeline-container {
+  position: relative;
+}
+
+/* Button Hover Effects - REMOVED to prevent flickering */
+
+/* Gradient Text */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Table Hover Effects */
+tbody tr {
+  transition: all 0.3s ease;
+}
+
+tbody tr:hover {
+  transform: translateX(4px);
+}
+
+/* Loading Spinner */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-ping {
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #4f46e5, #9333ea);
+  border-radius: 10px;
+  border: 2px solid #f3f4f6;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #4338ca, #7c3aed);
+}
+
+/* File Input Styling */
+input[type="file"] {
+  transition: all 0.3s ease;
+}
+
+input[type="file"]:focus {
+  outline: none;
+  border-color: #4f46e5;
+}
+
+/* Image Preview Animation */
+img {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+img:hover {
+  transform: scale(1.02);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .text-4xl {
+    font-size: 2rem;
+  }
+
+  .text-5xl {
+    font-size: 2.5rem;
+  }
+
+  .timeline-step {
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .text-3xl {
+    font-size: 1.75rem;
+  }
+
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+
+  .text-xl {
+    font-size: 1.125rem;
+  }
+
+  table {
+    font-size: 0.875rem;
+  }
+
+  .timeline-step .w-16 {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .timeline-line {
+    left: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .p-8 {
+    padding: 1.5rem;
+  }
+
+  .px-8 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .text-lg {
+    font-size: 1rem;
+  }
+}
+
+/* Accessibility: Focus styles */
+button:focus,
+a:focus,
+input:focus {
+  outline: 3px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .bg-gradient-to-br,
+  .bg-gradient-to-r {
+    background: white !important;
+    color: black !important;
+  }
+
+  button {
+    display: none;
+  }
+
+  .shadow-xl,
+  .shadow-lg {
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb;
+  }
+
+  .backdrop-blur-lg {
+    backdrop-filter: none;
+  }
+
+  .no-print {
+    display: none;
+  }
+}
+
+/* SVG Animations */
+svg {
+  transition: all 0.3s ease;
+}
+
+.group:hover svg,
+button:hover svg {
+  transform: scale(1.1);
+}
+
+/* Removed universal selector - was causing icon display issues */
+
+/* Premium shadow effects */
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1),
+              0 4px 6px -2px rgba(79, 70, 229, 0.05);
+}
+
+.shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.1),
+              0 10px 10px -5px rgba(79, 70, 229, 0.04);
+}
+
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.25),
+              0 10px 20px -5px rgba(147, 51, 234, 0.15);
+}
+
+.hover\:shadow-lg:hover {
+  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.2),
+              0 4px 6px -2px rgba(79, 70, 229, 0.1);
+}
+
+.hover\:shadow-2xl:hover {
+  box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.35),
+              0 15px 30px -8px rgba(147, 51, 234, 0.25);
+}
+
+/* Breadcrumb hover effects */
+.breadcrumbs a {
+  position: relative;
+}
+
+.breadcrumbs a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(to right, #4f46e5, #9333ea);
+  transition: width 0.3s ease;
+}
+
+.breadcrumbs a:hover::after {
+  width: 100%;
+}
+
+/* Card entrance animations - removed automatic animation to prevent icon issues */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Status badge pulse effect - REMOVED */
+
+/* Disabled state */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Hover transitions */
+.hover\:gap-3:hover {
+  gap: 0.75rem;
+}
+
+.hover\:gap-2:hover {
+  gap: 0.5rem;
+}
+
+/* Grid responsive improvements */
+.grid {
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .grid {
+    gap: 1rem;
+  }
+}
+
+/* Payment instructions animation */
+.payment-instructions {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Upload section styling */
+.upload-section {
+  transition: all 0.3s ease;
+}
+
+.upload-section:hover {
+  transform: translateY(-2px);
+}
+
+/* Smooth color transitions */
+.bg-gradient-to-r,
+.bg-gradient-to-br {
+  background-size: 200% 200%;
+  transition: background-position 0.5s ease;
+}
+
+.bg-gradient-to-r:hover,
+.bg-gradient-to-br:hover {
+  background-position: right center;
+}
+
+/* Image container styles */
+.border-2.border-gray-200.rounded-2xl {
+  transition: all 0.3s ease;
+}
+
+.border-2.border-gray-200.rounded-2xl:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Better spacing for mobile */
+@media (max-width: 640px) {
+  .space-y-6 > * + * {
+    margin-top: 1rem;
+  }
+
+  .space-y-8 > * + * {
+    margin-top: 1.5rem;
+  }
+}

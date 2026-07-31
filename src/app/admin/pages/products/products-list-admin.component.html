@@ -1,0 +1,358 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">จัดการสินค้า</h1>
+    <p class="text-gray-600 mt-1">รายการสินค้าทั้งหมดในระบบ</p>
+  </div>
+
+  <!-- Actions & Filters Bar -->
+  <div class="mb-6 bg-white rounded-lg shadow p-4">
+    <!-- Search and Add Button -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-4">
+      <!-- Search -->
+      <div class="w-full sm:w-96">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+          placeholder="ค้นหาสินค้า (ชื่อ, SKU)..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-2">
+        <button
+          (click)="downloadExcel()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>📊</span>
+          <span>Excel</span>
+        </button>
+        <button
+          (click)="downloadPdf()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>📄</span>
+          <span>PDF</span>
+        </button>
+        <button
+          (click)="onAddNew()"
+          class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>+</span>
+          <span>เพิ่มสินค้าใหม่</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Category Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">หมวดหมู่</label>
+        <select
+          [(ngModel)]="selectedCategoryId"
+          (change)="onFilterChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option [ngValue]="undefined">ทั้งหมด</option>
+          <option *ngFor="let category of categories()" [ngValue]="category.id">
+            {{ category.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Brand Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">แบรนด์</label>
+        <select
+          [(ngModel)]="selectedBrandId"
+          (change)="onFilterChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option [ngValue]="undefined">ทั้งหมด</option>
+          <option *ngFor="let brand of brands()" [ngValue]="brand.id">
+            {{ brand.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">สถานะ</label>
+        <select
+          [(ngModel)]="selectedStatus"
+          (change)="onFilterChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option [ngValue]="undefined">ทั้งหมด</option>
+          <option [ngValue]="true">เปิดใช้งาน</option>
+          <option [ngValue]="false">ปิดใช้งาน</option>
+        </select>
+      </div>
+
+      <!-- Sort By -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">เรียงตาม</label>
+        <select
+          [(ngModel)]="sortBy"
+          (change)="onSortChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="name-asc">ชื่อ (ก-ฮ)</option>
+          <option value="name-desc">ชื่อ (ฮ-ก)</option>
+          <option value="price-asc">ราคา (ต่ำ-สูง)</option>
+          <option value="price-desc">ราคา (สูง-ต่ำ)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Clear Filters -->
+    <div class="mt-4">
+      <button
+        (click)="clearFilters()"
+        class="text-sm text-blue-600 hover:text-blue-800"
+      >
+        ล้างตัวกรอง
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+    {{ error() }}
+  </div>
+
+  <!-- Products Table (Desktop) -->
+  <div *ngIf="!loading() && !error()" class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รูปภาพ</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อสินค้า</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">หมวดหมู่</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">แบรนด์</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ราคา</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สต็อก</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let product of products()" class="hover:bg-gray-50">
+          <!-- Image -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <img
+              [src]="getImageUrl(product)"
+              [alt]="product.name"
+              class="h-12 w-12 rounded object-cover"
+            />
+          </td>
+
+          <!-- Name -->
+          <td class="px-6 py-4">
+            <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
+            <div class="text-sm text-gray-500 truncate max-w-xs">{{ product.shortDescription }}</div>
+          </td>
+
+          <!-- SKU -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900 font-mono">{{ product.sku }}</div>
+          </td>
+
+          <!-- Category -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ getCategoryName(product.categoryId) }}</div>
+          </td>
+
+          <!-- Brand -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ getBrandName(product.brandId) }}</div>
+          </td>
+
+          <!-- Price -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-semibold text-gray-900">{{ formatPrice(product.basePrice) }}</div>
+            <div *ngIf="product.compareAtPrice" class="text-xs text-gray-500 line-through">
+              {{ formatPrice(product.compareAtPrice) }}
+            </div>
+          </td>
+
+          <!-- Stock -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-600">
+              -
+            </div>
+          </td>
+
+          <!-- Status -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <button
+              (click)="onToggleStatus(product)"
+              [class]="product.isActive
+                ? 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer'
+                : 'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 hover:bg-red-200 cursor-pointer'"
+            >
+              {{ product.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
+            </button>
+          </td>
+
+          <!-- Actions -->
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button
+              (click)="onEdit(product.id)"
+              class="text-blue-600 hover:text-blue-900 mr-3"
+            >
+              แก้ไข
+            </button>
+            <button
+              (click)="onDeleteClick(product)"
+              class="text-red-600 hover:text-red-900"
+            >
+              ลบ
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="products().length === 0" class="text-center py-12">
+      <p class="text-gray-500">ไม่พบสินค้า</p>
+    </div>
+  </div>
+
+  <!-- Products Cards (Mobile/Tablet) -->
+  <div *ngIf="!loading() && !error()" class="lg:hidden space-y-4">
+    <div *ngFor="let product of products()" class="bg-white rounded-lg shadow p-4">
+      <div class="flex gap-4">
+        <!-- Image -->
+        <img
+          [src]="getImageUrl(product)"
+          [alt]="product.name"
+          class="h-24 w-24 rounded object-cover flex-shrink-0"
+        />
+
+        <!-- Info -->
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-gray-900 truncate">{{ product.name }}</h3>
+          <p class="text-sm text-gray-600 font-mono">SKU: {{ product.sku }}</p>
+          <p class="text-xs text-gray-600 mt-1">{{ getCategoryName(product.categoryId) }} | {{ getBrandName(product.brandId) }}</p>
+          <p class="text-sm font-semibold text-gray-900 mt-1">{{ formatPrice(product.basePrice) }}</p>
+
+          <div class="flex gap-2 mt-2 flex-wrap">
+            <button
+              (click)="onToggleStatus(product)"
+              [class]="product.isActive
+                ? 'px-2 py-1 text-xs rounded-full bg-green-100 text-green-800'
+                : 'px-2 py-1 text-xs rounded-full bg-red-100 text-red-800'"
+            >
+              {{ product.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-2 mt-4">
+        <button
+          (click)="onEdit(product.id)"
+          class="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700"
+        >
+          แก้ไข
+        </button>
+        <button
+          (click)="onDeleteClick(product)"
+          class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+        >
+          ลบ
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="products().length === 0" class="text-center py-12 bg-white rounded-lg">
+      <p class="text-gray-500">ไม่พบสินค้า</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading() && !error() && totalPages() > 1" class="mt-6">
+    <div class="bg-white rounded-lg shadow px-4 py-3">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <!-- Page Info -->
+        <div class="text-sm text-gray-600">
+          แสดง {{ products().length }} จาก {{ totalItems() }} รายการ
+        </div>
+
+        <!-- Page Numbers -->
+        <div class="flex items-center gap-2">
+          <!-- Previous Button -->
+          <button
+            (click)="onPageChange(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+            [class]="currentPage() === 1
+              ? 'px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed'
+              : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
+          >
+            ก่อนหน้า
+          </button>
+
+          <!-- Page Numbers -->
+          <button
+            *ngFor="let page of getPageNumbers()"
+            (click)="onPageChange(page)"
+            [class]="page === currentPage()
+              ? 'px-3 py-1 rounded bg-primary-600 text-white'
+              : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
+          >
+            {{ page }}
+          </button>
+
+          <!-- Next Button -->
+          <button
+            (click)="onPageChange(currentPage() + 1)"
+            [disabled]="currentPage() === totalPages()"
+            [class]="currentPage() === totalPages()
+              ? 'px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed'
+              : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
+          >
+            ถัดไป
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteConfirm()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-2">ยืนยันการลบสินค้า</h3>
+    <p class="text-gray-600 mb-4">
+      คุณแน่ใจหรือไม่ว่าต้องการลบสินค้า "{{ productToDelete()?.name }}"?
+      การดำเนินการนี้ไม่สามารถย้อนกลับได้
+    </p>
+    <div class="flex gap-3 justify-end">
+      <button
+        (click)="onCancelDelete()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+      >
+        ยกเลิก
+      </button>
+      <button
+        (click)="onConfirmDelete()"
+        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+      >
+        ลบสินค้า
+      </button>
+    </div>
+  </div>
+</div>

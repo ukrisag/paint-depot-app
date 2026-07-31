@@ -1,0 +1,91 @@
+@if (notificationService.confirmDialog$ | async; as dialog) {
+  <!-- Backdrop with Blur -->
+  <div
+    #backdrop
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/40"
+    (click)="cancel(dialog)"
+  >
+    <!-- Premium Dialog -->
+    <div
+      #dialogBox
+      class="relative w-full max-w-md overflow-hidden rounded-3xl shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Gradient Header -->
+      <div class="relative px-6 py-8 text-white overflow-hidden"
+           [ngClass]="{
+             'bg-red-600': dialog.type === 'danger',
+             'bg-orange-500': dialog.type === 'warning',
+             'bg-blue-600': dialog.type === 'info' || !dialog.type
+           }">
+        <!-- Decorative Circles -->
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+
+        <!-- Icon -->
+        <div class="relative flex justify-center mb-4">
+          <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+            @if (dialog.type === 'danger') {
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            } @else if (dialog.type === 'warning') {
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            } @else {
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            }
+          </div>
+        </div>
+
+        <!-- Title -->
+        <h3 class="relative text-xl font-bold text-center">
+          @if (dialog.type === 'danger') {
+            ยืนยันการลบ
+          } @else if (dialog.type === 'warning') {
+            คำเตือน
+          } @else {
+            ยืนยัน
+          }
+        </h3>
+      </div>
+
+      <!-- Content with Glassmorphism -->
+      <div class="bg-white/95 backdrop-blur-xl px-6 py-8">
+        <!-- Message -->
+        <p class="text-gray-700 text-center text-base leading-relaxed mb-8">
+          {{ dialog.message }}
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3">
+          <!-- Cancel Button -->
+          <button
+            type="button"
+            (click)="cancel(dialog)"
+            class="flex-1 px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-2xl transition-colors hover:scale-105 active:scale-95"
+          >
+            {{ dialog.cancelText || 'ยกเลิก' }}
+          </button>
+
+          <!-- Confirm Button -->
+          <button
+            type="button"
+            (click)="confirm(dialog)"
+            class="flex-1 px-6 py-3.5 font-semibold text-white rounded-2xl transition-colors hover:scale-105 active:scale-95 shadow-lg"
+            [ngClass]="{
+              'bg-red-600 ': dialog.type === 'danger',
+              'bg-orange-600 ': dialog.type === 'warning',
+              'bg-blue-500 ': dialog.type === 'info' || !dialog.type
+            }"
+          >
+            {{ dialog.confirmText || 'ยืนยัน' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

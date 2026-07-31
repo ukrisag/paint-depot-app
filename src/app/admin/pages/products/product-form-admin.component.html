@@ -1,0 +1,479 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">
+      {{ isEditMode() ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่' }}
+    </h1>
+    <p class="text-gray-600 mt-1">
+      {{ isEditMode() ? 'แก้ไขข้อมูลสินค้าในระบบ' : 'เพิ่มสินค้าใหม่เข้าสู่ระบบ' }}
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+    {{ error() }}
+  </div>
+
+  <!-- Form -->
+  <form *ngIf="!loading()" [formGroup]="productForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Basic Information Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">ข้อมูลพื้นฐาน</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Product Name -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            ชื่อสินค้า <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="name"
+            [class]="isFieldInvalid('name')
+              ? 'w-full px-4 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500'
+              : 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'"
+            placeholder="ระบุชื่อสินค้า"
+          />
+          <p *ngIf="isFieldInvalid('name')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('name') }}
+          </p>
+        </div>
+
+        <!-- SKU -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            SKU <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="sku"
+            [class]="isFieldInvalid('sku')
+              ? 'w-full px-4 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 font-mono'
+              : 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono'"
+            placeholder="เช่น PAINT-001"
+          />
+          <p *ngIf="isFieldInvalid('sku')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('sku') }}
+          </p>
+        </div>
+
+        <!-- Category -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            หมวดหมู่ <span class="text-red-500">*</span>
+          </label>
+          <select
+            formControlName="categoryId"
+            [class]="isFieldInvalid('categoryId')
+              ? 'w-full px-4 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500'
+              : 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'"
+          >
+            <option [ngValue]="null">เลือกหมวดหมู่</option>
+            <option *ngFor="let category of categories()" [ngValue]="category.id">
+              {{ category.name }}
+            </option>
+          </select>
+          <p *ngIf="isFieldInvalid('categoryId')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('categoryId') }}
+          </p>
+        </div>
+
+        <!-- Brand -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            แบรนด์ <span class="text-red-500">*</span>
+          </label>
+          <select
+            formControlName="brandId"
+            [class]="isFieldInvalid('brandId')
+              ? 'w-full px-4 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500'
+              : 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'"
+          >
+            <option [ngValue]="null">เลือกแบรนด์</option>
+            <option *ngFor="let brand of brands()" [ngValue]="brand.id">
+              {{ brand.name }}
+            </option>
+          </select>
+          <p *ngIf="isFieldInvalid('brandId')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('brandId') }}
+          </p>
+        </div>
+
+        <!-- Base Price -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            ราคาขาย <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-2.5 text-gray-500">฿</span>
+            <input
+              type="number"
+              formControlName="basePrice"
+              [class]="isFieldInvalid('basePrice')
+                ? 'w-full pl-8 pr-4 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500'
+                : 'w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+            />
+          </div>
+          <p *ngIf="isFieldInvalid('basePrice')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('basePrice') }}
+          </p>
+        </div>
+
+        <!-- Compare At Price -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            ราคาเปรียบเทียบ (ถ้ามี)
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-2.5 text-gray-500">฿</span>
+            <input
+              type="number"
+              formControlName="compareAtPrice"
+              class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+            />
+          </div>
+          <p class="mt-1 text-xs text-gray-500">ราคาก่อนลด (จะแสดงขีดฆ่า)</p>
+        </div>
+
+        <!-- Short Description -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            คำอธิบายสั้น <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            formControlName="shortDescription"
+            rows="3"
+            [class]="isFieldInvalid('shortDescription')
+              ? 'w-full px-4 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500'
+              : 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'"
+            placeholder="คำอธิบายสั้นๆ เกี่ยวกับสินค้า"
+          ></textarea>
+          <p *ngIf="isFieldInvalid('shortDescription')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('shortDescription') }}
+          </p>
+        </div>
+
+        <!-- Full Description -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            คำอธิบายเต็ม
+          </label>
+          <textarea
+            formControlName="fullDescription"
+            rows="6"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="คำอธิบายโดยละเอียดเกี่ยวกับสินค้า"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Flags Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">คุณสมบัติพิเศษ</h2>
+
+      <div class="space-y-4">
+        <!-- Is Featured -->
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            formControlName="isFeatured"
+            id="isFeatured"
+            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          <label for="isFeatured" class="ml-3 block text-sm text-gray-700">
+            สินค้าแนะนำ (Featured)
+          </label>
+        </div>
+
+        <!-- Is Bestseller -->
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            formControlName="isBestseller"
+            id="isBestseller"
+            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          <label for="isBestseller" class="ml-3 block text-sm text-gray-700">
+            สินค้าขายดี (Bestseller)
+          </label>
+        </div>
+
+        <!-- Is New Arrival -->
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            formControlName="isNewArrival"
+            id="isNewArrival"
+            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          <label for="isNewArrival" class="ml-3 block text-sm text-gray-700">
+            สินค้าใหม่ (New Arrival)
+          </label>
+        </div>
+
+        <!-- Is Active -->
+        <div class="flex items-center pt-2 border-t border-gray-200">
+          <input
+            type="checkbox"
+            formControlName="isActive"
+            id="isActive"
+            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          <label for="isActive" class="ml-3 block text-sm font-medium text-gray-700">
+            เปิดใช้งานสินค้า
+          </label>
+        </div>
+        <p class="ml-7 text-xs text-gray-500">สินค้าที่เปิดใช้งานจะแสดงในหน้าร้าน</p>
+      </div>
+    </div>
+
+    <!-- Product Variants Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">รูปแบบสินค้า (Variants)</h2>
+          <p class="text-sm text-gray-600 mt-1">เพิ่มขนาด/สี/ราคาที่แตกต่างกันของสินค้า เช่น 1L, 5L, 10L</p>
+        </div>
+        <button
+          type="button"
+          (click)="addVariant()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+        >
+          <span class="text-lg">+</span>
+          <span>เพิ่ม Variant</span>
+        </button>
+      </div>
+
+      <div formArrayName="variants" class="space-y-4">
+        @if (variants.length === 0) {
+          <div class="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+            <div class="text-4xl mb-2">📦</div>
+            <p>ยังไม่มี Variants</p>
+            <p class="text-sm mt-1">คลิกปุ่ม "เพิ่ม Variant" เพื่อเพิ่มขนาดหรือรูปแบบสินค้า</p>
+          </div>
+        }
+
+        @for (variantControl of variants.controls; track $index; let i = $index) {
+          <div [formGroupName]="i" class="border border-gray-200 rounded-lg p-4 relative">
+            <!-- Remove Button -->
+            <button
+              type="button"
+              (click)="removeVariant(i)"
+              class="absolute top-2 right-2 text-red-600 hover:text-red-700 p-1"
+              title="ลบ Variant"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+
+            <h3 class="text-sm font-medium text-gray-700 mb-3">Variant #{{ i + 1 }}</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <!-- Variant Name -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  ชื่อ Variant <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  formControlName="name"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="เช่น 1 ลิตร, ขนาดเล็ก"
+                />
+              </div>
+
+              <!-- SKU -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  SKU <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  formControlName="sku"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  placeholder="PAINT-001-1L"
+                />
+              </div>
+
+              <!-- Size -->
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    ขนาด
+                  </label>
+                  <input
+                    type="number"
+                    formControlName="sizeValue"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="1"
+                    step="0.1"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    หน่วย
+                  </label>
+                  <select
+                    formControlName="sizeUnit"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="L">ลิตร (L)</option>
+                    <option value="gal">แกลลอน (gal)</option>
+                    <option value="ml">มิลลิลิตร (ml)</option>
+                    <option value="kg">กิโลกรัม (kg)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Price -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  ราคา <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2.5 text-gray-500">฿</span>
+                  <input
+                    type="number"
+                    formControlName="price"
+                    class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="0.00"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <!-- Stock Quantity -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  จำนวนสต็อก <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  formControlName="stockQuantity"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0"
+                  min="0"
+                />
+              </div>
+
+              <!-- Compare At Price -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  ราคาเปรียบเทียบ
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2.5 text-gray-500">฿</span>
+                  <input
+                    type="number"
+                    formControlName="compareAtPrice"
+                    class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="0.00"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <!-- Color Name (Optional) -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  ชื่อสี (ถ้ามี)
+                </label>
+                <input
+                  type="text"
+                  formControlName="colorName"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="เช่น แดง, ฟ้า"
+                />
+              </div>
+
+              <!-- Color Code (Optional) -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  รหัสสี (Hex)
+                </label>
+                <input
+                  type="text"
+                  formControlName="colorCode"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="#FF0000"
+                />
+              </div>
+
+              <!-- Weight (Optional) -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  น้ำหนัก (kg)
+                </label>
+                <input
+                  type="number"
+                  formControlName="weight"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0.0"
+                  step="0.1"
+                />
+              </div>
+
+              <!-- Is Active -->
+              <div class="flex items-end pb-2">
+                <label class="flex items-center">
+                  <input
+                    type="checkbox"
+                    formControlName="isActive"
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">เปิดใช้งาน</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Product Images Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">รูปภาพสินค้า</h2>
+      <app-image-upload
+        [(images)]="productImages"
+        [maxImages]="10"
+        (imagesChange)="onImagesChange($event)"
+      ></app-image-upload>
+      <p class="mt-2 text-sm text-gray-500">
+        <strong>หมายเหตุ:</strong> รูปแรกจะเป็นรูปหลักของสินค้า คุณสามารถเปลี่ยนได้โดยคลิกที่ดาวบนรูปที่ต้องการ
+      </p>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-end">
+      <button
+        type="button"
+        (click)="onCancel()"
+        [disabled]="submitting()"
+        class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        ยกเลิก
+      </button>
+      <button
+        type="submit"
+        [disabled]="submitting() || productForm.invalid"
+        class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      >
+        <span *ngIf="submitting()" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+        <span>{{ isEditMode() ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า' }}</span>
+      </button>
+    </div>
+  </form>
+</div>

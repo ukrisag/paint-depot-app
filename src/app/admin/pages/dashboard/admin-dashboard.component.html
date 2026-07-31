@@ -1,0 +1,237 @@
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <h1 class="text-2xl font-bold text-gray-800">แดชบอร์ด</h1>
+    <p class="text-gray-600 mt-1">ภาพรวมของระบบจัดการ Paint Depot</p>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="bg-white rounded-lg shadow-sm p-12">
+      <div class="flex justify-center items-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        <span class="ml-3 text-gray-600">กำลังโหลดข้อมูล...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Stats Grid -->
+  @if (!loading()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      @for (stat of stats(); track stat.title) {
+        <div class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow duration-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 mb-1">{{ stat.title }}</p>
+              <p class="text-2xl font-bold text-gray-800">{{ stat.value }}</p>
+            </div>
+            <div [class]="stat.color + ' w-12 h-12 rounded-full flex items-center justify-center'">
+              <span class="text-2xl">{{ stat.icon }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Charts Grid -->
+  @if (!loading()) {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Sales Chart -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+      <h2 class="text-lg font-semibold text-gray-800 mb-6">ยอดขาย 7 วันล่าสุด</h2>
+
+      @if (salesChartData().length > 0) {
+        <div class="relative">
+          <!-- Chart Container -->
+          <div class="flex items-end justify-center gap-4" style="height: 256px;">
+            @for (data of salesChartData(); track data.date) {
+              <div class="flex flex-col justify-end items-center group h-full" style="width: 60px;">
+                <!-- Bar Container -->
+                <div class="w-full flex flex-col justify-end items-center relative" style="height: 240px;">
+                  <!-- Bar -->
+                  <div
+                    class="w-full max-w-[48px] bg-gradient-to-t from-blue-500 to-blue-400 rounded-t transition-all duration-300 hover:from-blue-600 hover:to-blue-500 cursor-pointer relative shadow-md hover:shadow-lg"
+                    [style.height.px]="(getBarHeight(data.amount) / 100) * 240"
+                    [title]="'฿' + data.amount.toLocaleString('th-TH')"
+                  >
+                    <!-- Tooltip on hover -->
+                    <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs px-3 py-1.5 rounded shadow-lg whitespace-nowrap z-10">
+                      ฿{{ data.amount.toLocaleString('th-TH') }}
+                      <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                    </div>
+                    <!-- Amount inside bar -->
+                    @if (data.amount > 0 && getBarHeight(data.amount) > 20) {
+                      <div class="text-xs text-white text-center pt-2 font-semibold">
+                        ฿{{ data.amount.toLocaleString('th-TH', { maximumFractionDigits: 0 }) }}
+                      </div>
+                    }
+                  </div>
+                </div>
+                <!-- Date Label -->
+                <div class="text-xs text-gray-600 mt-2 text-center font-medium">{{ data.date }}</div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Chart Legend -->
+        <div class="mt-6 flex items-center justify-center gap-4 text-sm text-gray-600">
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 bg-gradient-to-t from-blue-500 to-blue-400 rounded"></div>
+            <span>ยอดขาย</span>
+          </div>
+          <div class="border-l border-gray-300 h-4"></div>
+          <span>ยอดขายสูงสุด: ฿{{ getMaxChartValue().toLocaleString('th-TH') }}</span>
+        </div>
+      } @else {
+        <div class="h-64 flex items-center justify-center text-gray-400">
+          <div class="text-center">
+            <div class="text-5xl mb-3">📊</div>
+            <p class="text-gray-500">ยังไม่มีข้อมูลยอดขาย</p>
+            <p class="text-sm text-gray-400 mt-1">เมื่อมีคำสั่งซื้อ กราฟจะแสดงที่นี่</p>
+          </div>
+        </div>
+      }
+      </div>
+
+      <!-- Order Status Chart -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-6">สถานะคำสั่งซื้อ</h2>
+
+        @if (orderStatusData().length > 0) {
+          <div class="space-y-3">
+            @for (status of orderStatusData(); track status.status) {
+              <div class="group">
+                <!-- Status Row -->
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center gap-3">
+                    <div class="w-3 h-3 rounded-full" [class]="status.color"></div>
+                    <span class="text-sm font-medium text-gray-700">{{ status.label }}</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm text-gray-500">{{ status.count }} รายการ</span>
+                    <span class="text-sm font-semibold text-gray-700 w-12 text-right">{{ status.percentage.toFixed(1) }}%</span>
+                  </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-all duration-500 ease-out"
+                    [class]="status.color"
+                    [style.width.%]="status.percentage"
+                  ></div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Total Summary -->
+          <div class="mt-6 pt-6 border-t border-gray-200">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-gray-700">ทั้งหมด</span>
+              <span class="text-sm font-semibold text-gray-900">
+                {{ orderStatusData().reduce((sum, s) => sum + s.count, 0) }} รายการ
+              </span>
+            </div>
+          </div>
+        } @else {
+          <div class="h-64 flex items-center justify-center text-gray-400">
+            <div class="text-center">
+              <div class="text-5xl mb-3">📋</div>
+              <p class="text-gray-500">ยังไม่มีคำสั่งซื้อ</p>
+              <p class="text-sm text-gray-400 mt-1">เมื่อมีคำสั่งซื้อ สถานะจะแสดงที่นี่</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-semibold text-gray-800">คำสั่งซื้อล่าสุด</h2>
+        <a routerLink="/admin/orders" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+          ดูทั้งหมด →
+        </a>
+      </div>
+
+      @if (recentOrders().length > 0) {
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr class="bg-gray-50">
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  เลขที่คำสั่งซื้อ
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  ลูกค้า
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  วันที่
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  ยอดเงิน
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  สถานะ
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              @for (order of recentOrders(); track order.id) {
+                <tr class="hover:bg-gray-50 cursor-pointer" [routerLink]="['/admin/orders', order.id]">
+                  <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                    #{{ order.orderNumber }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-600">
+                    {{ order.userId }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-600">
+                    {{ formatDate(order.createdAt || undefined) }}
+                  </td>
+                  <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                    ฿{{ order.totalAmount?.toLocaleString('th-TH') }}
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full" [ngClass]="getOrderStatusClass(order.status || undefined)">
+                      {{ getOrderStatusText(order.status || undefined) }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="text-center py-8 text-gray-500">
+          <div class="text-4xl mb-2">📦</div>
+          <p>ยังไม่มีคำสั่งซื้อ</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Quick Actions -->
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">การดำเนินการด่วน</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 stagger-children">
+      <a routerLink="/admin/products/create" class="block p-4 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-all duration-300 text-left cursor-pointer hover:scale-105 hover:shadow-lg">
+        <div class="text-3xl mb-2 animate-float">📦</div>
+        <h3 class="font-semibold text-gray-800">เพิ่มสินค้าใหม่</h3>
+        <p class="text-sm text-gray-600 mt-1">เพิ่มสินค้าเข้าสู่ระบบ</p>
+      </a>
+      <a routerLink="/admin/orders" class="block p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all duration-300 text-left cursor-pointer hover:scale-105 hover:shadow-lg">
+        <div class="text-3xl mb-2 animate-float" style="animation-delay: 0.5s;">🛒</div>
+        <h3 class="font-semibold text-gray-800">ดูคำสั่งซื้อ</h3>
+        <p class="text-sm text-gray-600 mt-1">จัดการคำสั่งซื้อทั้งหมด</p>
+      </a>
+      <a routerLink="/admin/users" class="block p-4 border-2 border-gray-200 rounded-lg hover:border-secondary-500 hover:bg-secondary-50 transition-all duration-300 text-left cursor-pointer hover:scale-105 hover:shadow-lg">
+        <div class="text-3xl mb-2 animate-float" style="animation-delay: 1s;">👥</div>
+        <h3 class="font-semibold text-gray-800">จัดการผู้ใช้</h3>
+        <p class="text-sm text-gray-600 mt-1">ดูและจัดการผู้ใช้งาน</p>
+      </a>
+    </div>
+  </div>
+</div>

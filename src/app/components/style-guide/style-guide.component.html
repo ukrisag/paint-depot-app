@@ -1,0 +1,367 @@
+<div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="text-center mb-12 animate-slide-up">
+      <h1 class="text-5xl font-bold gradient-text mb-4">Design System Style Guide</h1>
+      <p class="text-xl text-gray-600">Modern forms and buttons for Paint Depot</p>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="form-section mb-8 animate-slide-up" style="animation-delay: 0.1s;">
+      <h2 class="form-section-title">Table of Contents</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <a href="#inputs" class="text-primary-600 hover:text-primary-700 font-medium">Form Inputs</a>
+        <a href="#checkboxes" class="text-primary-600 hover:text-primary-700 font-medium">Checkboxes & Radios</a>
+        <a href="#buttons" class="text-primary-600 hover:text-primary-700 font-medium">Buttons</a>
+        <a href="#file-upload" class="text-primary-600 hover:text-primary-700 font-medium">File Upload</a>
+      </div>
+    </div>
+
+    <!-- Form Inputs Section -->
+    <div id="inputs" class="form-section mb-8 animate-slide-up" style="animation-delay: 0.2s;">
+      <h2 class="form-section-title">Form Inputs with Floating Labels</h2>
+
+      <form [formGroup]="demoForm" class="form-grid">
+
+        <!-- Email Input -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Email Input with Validation</h3>
+          <div class="form-group">
+            <input
+              id="demo-email"
+              type="email"
+              formControlName="email"
+              class="form-input"
+              [class.error]="email?.invalid && email?.touched"
+              [class.success]="email?.valid && email?.touched"
+              placeholder=" "
+            />
+            <label for="demo-email" class="form-label">Email Address</label>
+
+            <svg class="form-icon error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <svg class="form-icon success-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+
+            @if (email?.invalid && email?.touched) {
+              <div class="form-error">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                <span>Please enter a valid email address</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Password Input with Toggle -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Password Input with Toggle</h3>
+          <div class="form-group">
+            <input
+              id="demo-password"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              class="form-input"
+              [class.error]="password?.invalid && password?.touched"
+              [class.success]="password?.valid && password?.touched"
+              placeholder=" "
+            />
+            <label for="demo-password" class="form-label">Password</label>
+
+            <button
+              type="button"
+              class="form-icon"
+              style="opacity: 1; cursor: pointer; z-index: 10;"
+              (click)="togglePasswordVisibility()"
+            >
+              @if (showPassword) {
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              } @else {
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                </svg>
+              }
+            </button>
+
+            @if (password?.invalid && password?.touched) {
+              <div class="form-error">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                <span>Password must be at least 6 characters</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Text Input with Helper -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Text Input with Helper</h3>
+          <div class="form-group">
+            <input
+              id="demo-name"
+              type="text"
+              formControlName="name"
+              class="form-input"
+              [class.error]="name?.invalid && name?.touched"
+              [class.success]="name?.valid && name?.touched"
+              placeholder=" "
+            />
+            <label for="demo-name" class="form-label">Full Name</label>
+
+            <svg class="form-icon error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <svg class="form-icon success-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+
+            <div class="form-helper">Enter your first and last name</div>
+          </div>
+        </div>
+
+        <!-- Phone Input -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Phone Input with Pattern</h3>
+          <div class="form-group">
+            <input
+              id="demo-phone"
+              type="tel"
+              formControlName="phone"
+              class="form-input"
+              [class.error]="phone?.invalid && phone?.touched"
+              [class.success]="phone?.valid && phone?.touched"
+              placeholder=" "
+            />
+            <label for="demo-phone" class="form-label">Phone Number</label>
+
+            <svg class="form-icon error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <svg class="form-icon success-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+
+            @if (phone?.invalid && phone?.touched) {
+              <div class="form-error">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                <span>Phone must be 10 digits (e.g., 0812345678)</span>
+              </div>
+            }
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Checkboxes & Radios Section -->
+    <div id="checkboxes" class="form-section mb-8 animate-slide-up" style="animation-delay: 0.3s;">
+      <h2 class="form-section-title">Checkboxes & Radio Buttons</h2>
+
+      <div class="form-grid form-grid-2">
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Checkboxes</h3>
+          <div class="space-y-3">
+            <div class="form-checkbox-container">
+              <input id="check1" type="checkbox" class="form-checkbox" [(ngModel)]="rememberMe" />
+              <label for="check1" class="text-sm text-gray-700 cursor-pointer">Remember me</label>
+            </div>
+            <div class="form-checkbox-container">
+              <input id="check2" type="checkbox" class="form-checkbox" [(ngModel)]="acceptTerms" />
+              <label for="check2" class="text-sm text-gray-700 cursor-pointer">Accept terms and conditions</label>
+            </div>
+            <div class="form-checkbox-container">
+              <input id="check3" type="checkbox" class="form-checkbox" disabled />
+              <label for="check3" class="text-sm text-gray-400 cursor-not-allowed">Disabled checkbox</label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Radio Buttons</h3>
+          <div class="space-y-3">
+            <div class="form-checkbox-container">
+              <input id="radio1" type="radio" name="demo-radio" class="form-radio" value="option1" [(ngModel)]="selectedOption" />
+              <label for="radio1" class="text-sm text-gray-700 cursor-pointer">Option 1</label>
+            </div>
+            <div class="form-checkbox-container">
+              <input id="radio2" type="radio" name="demo-radio" class="form-radio" value="option2" [(ngModel)]="selectedOption" />
+              <label for="radio2" class="text-sm text-gray-700 cursor-pointer">Option 2</label>
+            </div>
+            <div class="form-checkbox-container">
+              <input id="radio3" type="radio" name="demo-radio" class="form-radio" value="option3" [(ngModel)]="selectedOption" />
+              <label for="radio3" class="text-sm text-gray-700 cursor-pointer">Option 3</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buttons Section -->
+    <div id="buttons" class="form-section mb-8 animate-slide-up" style="animation-delay: 0.4s;">
+      <h2 class="form-section-title">Buttons</h2>
+
+      <div class="space-y-8">
+        <!-- Button Variants -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Button Variants</h3>
+          <div class="flex flex-wrap gap-4">
+            <button class="btn btn-primary">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Primary
+            </button>
+            <button class="btn btn-secondary">Secondary</button>
+            <button class="btn btn-tertiary">Tertiary</button>
+            <button class="btn btn-danger">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Danger
+            </button>
+            <button class="btn btn-success">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Success
+            </button>
+          </div>
+        </div>
+
+        <!-- Button Sizes -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Button Sizes</h3>
+          <div class="flex flex-wrap items-center gap-4">
+            <button class="btn btn-primary btn-sm">Small</button>
+            <button class="btn btn-primary">Default</button>
+            <button class="btn btn-primary btn-lg">Large</button>
+          </div>
+        </div>
+
+        <!-- Icon Buttons -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Icon Buttons</h3>
+          <div class="flex flex-wrap gap-4">
+            <button class="btn btn-icon">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+            </button>
+            <button class="btn btn-icon">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+            <button class="btn btn-icon btn-sm">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Loading State</h3>
+          <div class="flex flex-wrap gap-4">
+            <button class="btn btn-primary" [class.btn-loading]="loading" (click)="simulateLoading()">
+              @if (!loading) {
+                Click to Load
+              } @else {
+                Loading...
+              }
+            </button>
+            <button class="btn btn-secondary" [class.btn-loading]="loading" disabled>
+              Loading...
+            </button>
+          </div>
+        </div>
+
+        <!-- Disabled State -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Disabled State</h3>
+          <div class="flex flex-wrap gap-4">
+            <button class="btn btn-primary" disabled>Primary Disabled</button>
+            <button class="btn btn-secondary" disabled>Secondary Disabled</button>
+            <button class="btn btn-danger" disabled>Danger Disabled</button>
+          </div>
+        </div>
+
+        <!-- Full Width -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Full Width Button</h3>
+          <button class="btn btn-primary btn-block btn-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+            </svg>
+            Full Width Button
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Upload Section -->
+    <div id="file-upload" class="form-section mb-8 animate-slide-up" style="animation-delay: 0.5s;">
+      <h2 class="form-section-title">File Upload</h2>
+
+      <div class="file-upload-container">
+        <div class="file-upload-area">
+          <input type="file" class="file-upload-input" id="fileUpload" />
+          <label for="fileUpload" class="file-upload-content cursor-pointer">
+            <svg class="file-upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <div class="file-upload-text">Click to upload or drag and drop</div>
+            <div class="file-upload-subtext">PNG, JPG, GIF up to 10MB</div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color Palette -->
+    <div class="form-section mb-8 animate-slide-up" style="animation-delay: 0.6s;">
+      <h2 class="form-section-title">Color Palette</h2>
+
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Primary Gradient</h3>
+          <div class="h-24 rounded-lg" style="background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);"></div>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Success Gradient</h3>
+          <div class="h-24 rounded-lg" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"></div>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Danger Gradient</h3>
+          <div class="h-24 rounded-lg" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typography -->
+    <div class="form-section mb-8 animate-slide-up" style="animation-delay: 0.7s;">
+      <h2 class="form-section-title">Typography</h2>
+
+      <div class="space-y-4">
+        <h1 class="text-4xl font-bold gradient-text">Heading 1 - Gradient Text</h1>
+        <h2 class="text-3xl font-bold text-gray-800">Heading 2</h2>
+        <h3 class="text-2xl font-semibold text-gray-700">Heading 3</h3>
+        <p class="text-gray-600">Regular paragraph text with normal font weight and gray color.</p>
+        <p class="text-sm text-gray-500">Small helper text for form fields and descriptions.</p>
+      </div>
+    </div>
+
+  </div>
+</div>

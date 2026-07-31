@@ -1,0 +1,273 @@
+<div class="min-h-screen bg-gray-50">
+  <div class="container mx-auto px-4 py-12">
+    <!-- Modern Loading State -->
+    <div *ngIf="isLoading()" class="flex justify-center items-center py-24">
+      <div class="relative">
+        <div class="animate-spin rounded-full h-20 w-20 border-4 border-blue-200 border-t-transparent"></div>
+        <div class="absolute top-0 left-0 animate-ping rounded-full h-20 w-20 "></div>
+      </div>
+    </div>
+
+    <!-- Premium Error State -->
+    <div *ngIf="error() && !isLoading()" class="max-w-2xl mx-auto error-state">
+      <div class="bg-white border-2 border-red-200 rounded-3xl p-12 text-center ">
+        <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-red-900 mb-3">เกิดข้อผิดพลาด</h3>
+        <p class="text-red-700 mb-8">{{ error() }}</p>
+        <button
+          (click)="goHome()"
+          class="inline-flex items-center gap-2 px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+          <span>กลับหน้าหลัก</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Success State -->
+    <div *ngIf="order() && !isLoading()" class="max-w-4xl mx-auto">
+      <!-- Premium Success Header -->
+      <div class="bg-white/80  rounded-lg shadow-md p-12 text-center mb-8 border border-gray-100 success-header">
+        <!-- Animated Success Icon -->
+        <div class="flex justify-center mb-6">
+          <div class="relative">
+            <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center  success-icon">
+              <svg class="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <!-- Particles animation -->
+            <div class="absolute top-0 left-0 w-full h-full">
+              <div class="particle particle-1"></div>
+              <div class="particle particle-2"></div>
+              <div class="particle particle-3"></div>
+              <div class="particle particle-4"></div>
+            </div>
+          </div>
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          ขอบคุณสำหรับคำสั่งซื้อ!
+        </h1>
+        <p class="text-gray-600 text-lg mb-8 leading-relaxed">
+          เราได้รับคำสั่งซื้อของคุณเรียบร้อยแล้ว<br class="hidden sm:block"/>
+          และกำลังดำเนินการเตรียมจัดส่งสินค้าให้คุณ
+        </p>
+
+        <div class="inline-block bg-green-50 rounded-2xl p-6 border-2 border-green-200 shadow-lg">
+          <p class="text-sm text-gray-600 mb-2 font-semibold uppercase tracking-wide">หมายเลขคำสั่งซื้อ</p>
+          <p class="text-3xl font-bold text-green-600">
+            {{ order()?.orderNumber }}
+          </p>
+        </div>
+
+        <div class="mt-6 flex items-center justify-center gap-2 text-sm text-gray-600">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <span class="font-medium">วันที่สั่งซื้อ: {{ formatDate(order()?.createdAt) }}</span>
+        </div>
+      </div>
+
+      <!-- Payment Instructions (Bank Transfer) -->
+      <div *ngIf="isBankTransfer()" class="bg-yellow-50 border-2 border-yellow-300 rounded-2xl p-8 mb-8 shadow-lg payment-section">
+        <h2 class="text-2xl font-bold text-yellow-900 mb-6 flex items-center gap-3">
+          <div class="w-10 h-10 bg-yellow-500 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <span>วิธีการชำระเงิน</span>
+        </h2>
+
+        <div class="space-y-4">
+          <div class="bg-yellow-100 border border-yellow-300 rounded-xl p-4">
+            <p class="text-yellow-900 font-bold text-lg flex items-center gap-2">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+              </svg>
+              โอนเงินผ่านธนาคาร
+            </p>
+          </div>
+
+          <div class="bg-white rounded-xl p-6 space-y-4 shadow-md">
+            <div class="flex justify-between items-center py-3 border-b border-gray-200">
+              <span class="text-gray-600 font-medium flex items-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
+                  <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+                </svg>
+                ธนาคาร:
+              </span>
+              <span class="font-bold text-gray-900 text-lg">{{ bankDetails.bankName }}</span>
+            </div>
+            <div class="flex justify-between items-center py-3 border-b border-gray-200">
+              <span class="text-gray-600 font-medium">ชื่อบัญชี:</span>
+              <span class="font-bold text-gray-900">{{ bankDetails.accountName }}</span>
+            </div>
+            <div class="flex justify-between items-center py-3 border-b border-gray-200">
+              <span class="text-gray-600 font-medium">เลขที่บัญชี:</span>
+              <span class="font-bold text-green-600 text-xl">{{ bankDetails.accountNumber }}</span>
+            </div>
+            <div class="flex justify-between items-center py-3">
+              <span class="text-gray-600 font-medium">พร้อมเพย์:</span>
+              <span class="font-bold text-green-600 text-xl">{{ bankDetails.promptPayId }}</span>
+            </div>
+          </div>
+
+          <div class="bg-green-50 rounded-xl p-6 border-2 border-green-300 shadow-md">
+            <p class="text-green-900 font-bold text-xl text-center">
+              จำนวนเงินที่ต้องชำระ: <span class="text-3xl text-green-600">{{ formatCurrency(order()?.totalAmount || 0) }}</span>
+            </p>
+          </div>
+
+          <div class="bg-yellow-100 rounded-xl p-4 border border-yellow-300">
+            <p class="text-sm text-yellow-800 flex items-start gap-2">
+              <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>กรุณาโอนเงินภายใน 24 ชั่วโมง และแนบหลักฐานการโอนเงินในหน้ารายละเอียดคำสั่งซื้อ</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium Order Summary -->
+      <div class="bg-white/80  rounded-2xl shadow-xl p-8 mb-8 border border-gray-100 order-summary">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+            </svg>
+          </div>
+          <span>สรุปคำสั่งซื้อ</span>
+        </h2>
+
+        <!-- Order Items -->
+        <div class="space-y-3 mb-6">
+          <div *ngFor="let item of order()?.items" class="bg-white rounded-xl p-5 border border-gray-200 hover:shadow-md transition-all">
+            <div class="flex justify-between items-start gap-4">
+              <div class="flex-1">
+                <p class="font-bold text-gray-900 text-lg mb-1">{{ item.productName }}</p>
+                <p class="text-sm text-gray-600 font-medium mb-2">{{ item.variantName }}</p>
+                <p class="text-sm text-blue-600 font-semibold inline-block bg-blue-100 px-3 py-1 rounded-lg">
+                  จำนวน: {{ item.quantity }}
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-gray-900 text-xl">{{ formatCurrency(item.totalPrice) }}</p>
+                <p class="text-sm text-gray-500 mt-1">{{ formatCurrency(item.unitPrice) }} x {{ item.quantity }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Breakdown -->
+        <div class="space-y-3 pt-6 border-t-2 border-gray-200">
+          <div class="flex justify-between text-gray-600 py-2">
+            <span class="font-medium">ยอดรวมสินค้า</span>
+            <span class="font-bold text-gray-900">{{ formatCurrency(subtotalBeforeDiscount()) }}</span>
+          </div>
+          <div *ngIf="order()?.discountAmount && (order()?.discountAmount ?? 0) > 0" class="flex justify-between text-green-600 py-2">
+            <span class="font-medium">ส่วนลด <span *ngIf="order()?.couponCode" class="text-sm bg-green-100 px-2 py-1 rounded-lg ml-1">{{ order()?.couponCode }}</span></span>
+            <span class="font-bold">-{{ formatCurrency(order()?.discountAmount || 0) }}</span>
+          </div>
+          <div class="flex justify-between text-gray-600 py-2">
+            <span class="font-medium">ค่าจัดส่ง</span>
+            <span class="font-bold text-gray-900">{{ formatCurrency(order()?.shippingFee || 0) }}</span>
+          </div>
+
+          <div class="pt-4 bg-blue-50 rounded-2xl p-6 mt-4 border-2 border-blue-200 shadow-md">
+            <div class="flex justify-between items-center">
+              <span class="text-xl font-bold text-gray-900">ยอดรวมทั้งหมด</span>
+              <span class="text-4xl font-bold text-blue-600">
+                {{ formatCurrency(order()?.totalAmount || 0) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium Shipping Address -->
+      <div class="bg-white/80  rounded-2xl shadow-xl p-8 mb-8 border border-gray-100 shipping-section">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+          <div class="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </div>
+          <span>ที่อยู่จัดส่ง</span>
+        </h2>
+
+        <div class="bg-white rounded-xl p-6 space-y-3 border border-gray-200">
+          <p class="font-bold text-gray-900 text-lg flex items-center gap-2">
+            <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+            </svg>
+            {{ order()?.shippingFullName }}
+          </p>
+          <p class="flex items-center gap-2 text-gray-700 font-medium">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+            </svg>
+            {{ order()?.shippingPhone }}
+          </p>
+          <p *ngIf="order()?.shippingEmail" class="flex items-center gap-2 text-gray-700 font-medium">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            {{ order()?.shippingEmail }}
+          </p>
+          <div class="pt-4 border-t border-gray-200 mt-4 text-gray-700 space-y-1">
+            <p>{{ order()?.shippingAddressLine1 }}</p>
+            <p *ngIf="order()?.shippingAddressLine2">{{ order()?.shippingAddressLine2 }}</p>
+            <p>{{ order()?.shippingDistrict }} {{ order()?.shippingProvince }} {{ order()?.shippingPostalCode }}</p>
+            <p>{{ order()?.shippingCountry || 'ประเทศไทย' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 action-buttons">
+        <button
+          (click)="viewOrderDetail()"
+          class="flex-1 px-8 py-4 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-3 group"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+          <span>ดูรายละเอียดคำสั่งซื้อ</span>
+          <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+
+        <button
+          (click)="goHome()"
+          class="flex-1 px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-colors flex items-center justify-center gap-3"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+          <span>กลับหน้าหลัก</span>
+        </button>
+      </div>
+
+      <!-- Thank You Message -->
+      <div class="mt-8 bg-blue-50 rounded-2xl p-8 text-center border-2 border-green-200">
+        <p class="text-lg text-gray-700 leading-relaxed">
+          <span class="font-bold text-green-700">ขอบคุณที่ไว้วางใจเลือกซื้อสินค้ากับเรา!</span><br/>
+          เราจะดูแลให้สินค้าของคุณถึงมืออย่างปลอดภัย
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

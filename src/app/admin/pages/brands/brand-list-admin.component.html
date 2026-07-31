@@ -1,0 +1,450 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">จัดการแบรนด์</h1>
+    <p class="text-gray-600 mt-1">รายการแบรนด์ทั้งหมดในระบบ</p>
+  </div>
+
+  <!-- Actions & Filters Bar -->
+  <div class="mb-6 bg-white rounded-lg shadow p-4">
+    <!-- Search and Add Button -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-4">
+      <!-- Search -->
+      <div class="w-full sm:w-96">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+          placeholder="ค้นหาแบรนด์ (ชื่อ, Slug)..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-2">
+        <button
+          (click)="downloadExcel()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>📊</span>
+          <span>Excel</span>
+        </button>
+        <button
+          (click)="downloadPdf()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>📄</span>
+          <span>PDF</span>
+        </button>
+        <button
+          (click)="onAddNew()"
+          class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>+</span>
+          <span>เพิ่มแบรนด์ใหม่</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <!-- Status Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">สถานะ</label>
+        <select
+          [(ngModel)]="selectedStatus"
+          (change)="onFilterChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option [ngValue]="undefined">ทั้งหมด</option>
+          <option [ngValue]="true">เปิดใช้งาน</option>
+          <option [ngValue]="false">ปิดใช้งาน</option>
+        </select>
+      </div>
+
+      <!-- Sort By -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">เรียงตาม</label>
+        <select
+          [(ngModel)]="sortBy"
+          (change)="onSortChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="name-asc">ชื่อ (ก-ฮ)</option>
+          <option value="name-desc">ชื่อ (ฮ-ก)</option>
+          <option value="products-asc">จำนวนสินค้า (น้อย-มาก)</option>
+          <option value="products-desc">จำนวนสินค้า (มาก-น้อย)</option>
+        </select>
+      </div>
+
+      <!-- Clear Filters -->
+      <div class="flex items-end">
+        <button
+          (click)="clearFilters()"
+          class="px-4 py-2 text-sm text-blue-600 hover:text-blue-800 border border-primary-600 hover:border-blue-800 rounded-lg transition-colors"
+        >
+          ล้างตัวกรอง
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+    {{ error() }}
+  </div>
+
+  <!-- Brands Table (Desktop) -->
+  <div *ngIf="!loading() && !error()" class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">โลโก้</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อแบรนด์</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">จำนวนสินค้า</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let brand of filteredBrands()" class="hover:bg-gray-50">
+          <!-- Logo -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <img
+              [src]="getLogoUrl(brand)"
+              [alt]="brand.name"
+              appImageFallback="https://placehold.co/200x200/e5e7eb/6b7280/png?text=No+Logo"
+              class="h-12 w-12 rounded object-contain bg-gray-50"
+            />
+          </td>
+
+          <!-- Name -->
+          <td class="px-6 py-4">
+            <div class="text-sm font-medium text-gray-900">{{ brand.name }}</div>
+            <div *ngIf="brand.description" class="text-sm text-gray-500 truncate max-w-xs">
+              {{ brand.description }}
+            </div>
+          </td>
+
+          <!-- Slug -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900 font-mono">{{ brand.slug }}</div>
+          </td>
+
+          <!-- Product Count -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ brand.productCount || 0 }}</div>
+          </td>
+
+          <!-- Status -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <button
+              (click)="onToggleStatus(brand)"
+              [class]="brand.isActive
+                ? 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer'
+                : 'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 hover:bg-red-200 cursor-pointer'"
+            >
+              {{ brand.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
+            </button>
+          </td>
+
+          <!-- Actions -->
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button
+              (click)="onEdit(brand)"
+              class="text-blue-600 hover:text-blue-900 mr-3"
+            >
+              แก้ไข
+            </button>
+            <button
+              (click)="onDeleteClick(brand)"
+              class="text-red-600 hover:text-red-900"
+            >
+              ลบ
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredBrands().length === 0" class="text-center py-12">
+      <p class="text-gray-500">ไม่พบแบรนด์</p>
+    </div>
+  </div>
+
+  <!-- Brands Cards (Mobile/Tablet) -->
+  <div *ngIf="!loading() && !error()" class="lg:hidden space-y-4">
+    <div *ngFor="let brand of filteredBrands()" class="bg-white rounded-lg shadow p-4">
+      <div class="flex gap-4">
+        <!-- Logo -->
+        <img
+          [src]="getLogoUrl(brand)"
+          [alt]="brand.name"
+          appImageFallback="https://placehold.co/200x200/e5e7eb/6b7280/png?text=No+Logo"
+          class="h-20 w-20 rounded object-contain bg-gray-50 flex-shrink-0"
+        />
+
+        <!-- Info -->
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-gray-900">{{ brand.name }}</h3>
+          <p class="text-sm text-gray-600 font-mono">{{ brand.slug }}</p>
+          <p class="text-sm text-gray-600 mt-1">สินค้า: {{ brand.productCount || 0 }} รายการ</p>
+
+          <div class="flex gap-2 mt-2">
+            <button
+              (click)="onToggleStatus(brand)"
+              [class]="brand.isActive
+                ? 'px-2 py-1 text-xs rounded-full bg-green-100 text-green-800'
+                : 'px-2 py-1 text-xs rounded-full bg-red-100 text-red-800'"
+            >
+              {{ brand.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-2 mt-4">
+        <button
+          (click)="onEdit(brand)"
+          class="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700"
+        >
+          แก้ไข
+        </button>
+        <button
+          (click)="onDeleteClick(brand)"
+          class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+        >
+          ลบ
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredBrands.length === 0" class="text-center py-12 bg-white rounded-lg">
+      <p class="text-gray-500">ไม่พบแบรนด์</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading() && !error() && totalPages() > 1" class="mt-6">
+    <div class="bg-white rounded-lg shadow px-4 py-3">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <!-- Page Info -->
+        <div class="text-sm text-gray-600">
+          แสดง {{ filteredBrands().length }} จาก {{ totalItems() }} รายการ
+        </div>
+
+        <!-- Page Numbers -->
+        <div class="flex items-center gap-2">
+          <!-- Previous Button -->
+          <button
+            (click)="onPageChange(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+            [class]="currentPage() === 1
+              ? 'px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed'
+              : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
+          >
+            ก่อนหน้า
+          </button>
+
+          <!-- Page Numbers -->
+          <button
+            *ngFor="let page of getPageNumbers()"
+            (click)="onPageChange(page)"
+            [class]="page === currentPage()
+              ? 'px-3 py-1 rounded bg-primary-600 text-white'
+              : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
+          >
+            {{ page }}
+          </button>
+
+          <!-- Next Button -->
+          <button
+            (click)="onPageChange(currentPage() + 1)"
+            [disabled]="currentPage() === totalPages()"
+            [class]="currentPage() === totalPages()
+              ? 'px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed'
+              : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
+          >
+            ถัดไป
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteConfirm()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-2">ยืนยันการลบแบรนด์</h3>
+    <p class="text-gray-600 mb-4">
+      คุณแน่ใจหรือไม่ว่าต้องการลบแบรนด์ "{{ brandToDelete()?.name }}"?
+      การดำเนินการนี้ไม่สามารถย้อนกลับได้
+    </p>
+    <div class="flex gap-3 justify-end">
+      <button
+        (click)="onCancelDelete()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+      >
+        ยกเลิก
+      </button>
+      <button
+        (click)="onConfirmDelete()"
+        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+      >
+        ลบแบรนด์
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Brand Modal -->
+<div *ngIf="showModal()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+  <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 my-8">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+      {{ isEditMode() ? 'แก้ไขแบรนด์' : 'เพิ่มแบรนด์ใหม่' }}
+    </h3>
+
+    <form (ngSubmit)="onSaveForm()">
+      <!-- Name -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          ชื่อแบรนด์ <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="brandForm.name"
+          (ngModelChange)="onNameChange()"
+          name="name"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [class.border-red-500]="formErrors.name"
+        />
+        <p *ngIf="formErrors.name" class="text-red-500 text-xs mt-1">{{ formErrors.name }}</p>
+      </div>
+
+      <!-- Slug -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Slug <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="brandForm.slug"
+          name="slug"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+          [class.border-red-500]="formErrors.slug"
+        />
+        <p class="text-gray-500 text-xs mt-1">URL-friendly identifier (จะถูกสร้างอัตโนมัติจากชื่อ)</p>
+        <p *ngIf="formErrors.slug" class="text-red-500 text-xs mt-1">{{ formErrors.slug }}</p>
+      </div>
+
+      <!-- Logo URL -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Logo URL
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="brandForm.logoUrl"
+          name="logoUrl"
+          placeholder="https://example.com/logo.png"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <p class="text-gray-500 text-xs mt-1">URL ของโลโก้แบรนด์</p>
+
+        <!-- Logo Preview -->
+        <div *ngIf="brandForm.logoUrl" class="mt-2">
+          <p class="text-sm text-gray-600 mb-1">ตัวอย่างโลโก้:</p>
+          <img
+            [src]="brandForm.logoUrl"
+            appImageFallback="https://placehold.co/200x200/e5e7eb/6b7280/png?text=Invalid+URL"
+            alt="Logo preview"
+            class="h-24 w-24 object-contain border border-gray-200 rounded bg-gray-50"
+          />
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          คำอธิบาย
+        </label>
+        <textarea
+          [(ngModel)]="brandForm.description"
+          name="description"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="คำอธิบายเกี่ยวกับแบรนด์..."
+        ></textarea>
+      </div>
+
+      <!-- Website URL -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Website URL
+        </label>
+        <input
+          type="url"
+          [(ngModel)]="brandForm.websiteUrl"
+          name="websiteUrl"
+          placeholder="https://www.example.com"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <!-- Display Order -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          ลำดับการแสดงผล
+        </label>
+        <input
+          type="number"
+          [(ngModel)]="brandForm.displayOrder"
+          name="displayOrder"
+          min="0"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <p class="text-gray-500 text-xs mt-1">ตัวเลขน้อยจะแสดงก่อน</p>
+      </div>
+
+      <!-- Is Active -->
+      <div class="mb-6">
+        <label class="flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            [(ngModel)]="brandForm.isActive"
+            name="isActive"
+            class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+          />
+          <span class="ml-2 text-sm text-gray-700">เปิดใช้งาน</span>
+        </label>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex gap-3 justify-end">
+        <button
+          type="button"
+          (click)="onCancelForm()"
+          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+        >
+          {{ isEditMode() ? 'บันทึกการแก้ไข' : 'เพิ่มแบรนด์' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,385 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">จัดการหมวดหมู่สินค้า</h1>
+    <p class="text-gray-600 mt-1">จัดการหมวดหมู่และหมวดหมู่ย่อยของสินค้า</p>
+  </div>
+
+  <!-- Actions Bar -->
+  <div class="mb-6 bg-white rounded-lg shadow p-4">
+    <div class="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+      <!-- Filter Toggle -->
+      <div class="flex items-center gap-3">
+        <label class="flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            [(ngModel)]="showInactive"
+            (change)="onFilterChange()"
+            class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <span class="ml-2 text-sm text-gray-700">แสดงหมวดหมู่ที่ปิดใช้งาน</span>
+        </label>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-2">
+        <button
+          (click)="downloadExcel()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>📊</span>
+          <span>Excel</span>
+        </button>
+        <button
+          (click)="downloadPdf()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>📄</span>
+          <span>PDF</span>
+        </button>
+        <button
+          (click)="onAddNew()"
+          class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>+</span>
+          <span>เพิ่มหมวดหมู่ใหม่</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+    {{ error() }}
+  </div>
+
+  <!-- Categories Table (Desktop) -->
+  <div *ngIf="!loading() && !error()" class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อหมวดหมู่</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">หมวดหมู่แม่</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">จำนวนสินค้า</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ลำดับ</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let category of categories()" class="hover:bg-gray-50">
+          <!-- ID -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ category.id }}</div>
+          </td>
+
+          <!-- Name with hierarchy -->
+          <td class="px-6 py-4">
+            <div class="text-sm font-medium text-gray-900">
+              <span class="text-gray-400">{{ getIndentation(category.level) }}</span>
+              {{ category.name }}
+            </div>
+            <div *ngIf="category.description" class="text-sm text-gray-500 truncate max-w-xs">
+              {{ category.description }}
+            </div>
+          </td>
+
+          <!-- Slug -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-600 font-mono">{{ category.slug }}</div>
+          </td>
+
+          <!-- Parent Category -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ getParentName(category.parentId) }}</div>
+          </td>
+
+          <!-- Product Count -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900 text-center">
+              {{ category.productCount || 0 }}
+            </div>
+          </td>
+
+          <!-- Display Order -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900 text-center">
+              {{ category.displayOrder }}
+            </div>
+          </td>
+
+          <!-- Status -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <button
+              (click)="onToggleStatus(category)"
+              [class]="category.isActive
+                ? 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer'
+                : 'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 hover:bg-red-200 cursor-pointer'"
+            >
+              {{ category.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
+            </button>
+          </td>
+
+          <!-- Actions -->
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button
+              (click)="onEdit(category)"
+              class="text-blue-600 hover:text-blue-900 mr-3"
+            >
+              แก้ไข
+            </button>
+            <button
+              *ngIf="canDelete(category)"
+              (click)="onDeleteClick(category)"
+              class="text-red-600 hover:text-red-900"
+            >
+              ลบ
+            </button>
+            <span
+              *ngIf="!canDelete(category)"
+              class="text-gray-400 cursor-not-allowed"
+              title="ไม่สามารถลบได้ เนื่องจากมีสินค้าหรือหมวดหมู่ย่อย"
+            >
+              ลบ
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="categories().length === 0" class="text-center py-12">
+      <p class="text-gray-500">ไม่พบหมวดหมู่</p>
+    </div>
+  </div>
+
+  <!-- Categories Cards (Mobile/Tablet) -->
+  <div *ngIf="!loading() && !error()" class="lg:hidden space-y-4">
+    <div *ngFor="let category of categories()" class="bg-white rounded-lg shadow p-4">
+      <!-- Header -->
+      <div class="mb-3">
+        <h3 class="font-semibold text-gray-900">
+          <span class="text-gray-400">{{ getIndentation(category.level) }}</span>
+          {{ category.name }}
+        </h3>
+        <p class="text-xs text-gray-500 font-mono mt-1">{{ category.slug }}</p>
+      </div>
+
+      <!-- Info Grid -->
+      <div class="grid grid-cols-2 gap-3 text-sm mb-3">
+        <div>
+          <span class="text-gray-500">ID:</span>
+          <span class="ml-1 text-gray-900">{{ category.id }}</span>
+        </div>
+        <div>
+          <span class="text-gray-500">จำนวนสินค้า:</span>
+          <span class="ml-1 text-gray-900">{{ category.productCount || 0 }}</span>
+        </div>
+        <div>
+          <span class="text-gray-500">หมวดหมู่แม่:</span>
+          <span class="ml-1 text-gray-900">{{ getParentName(category.parentId) }}</span>
+        </div>
+        <div>
+          <span class="text-gray-500">ลำดับ:</span>
+          <span class="ml-1 text-gray-900">{{ category.displayOrder }}</span>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="mb-3">
+        <button
+          (click)="onToggleStatus(category)"
+          [class]="category.isActive
+            ? 'px-2 py-1 text-xs rounded-full bg-green-100 text-green-800'
+            : 'px-2 py-1 text-xs rounded-full bg-red-100 text-red-800'"
+        >
+          {{ category.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
+        </button>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-2">
+        <button
+          (click)="onEdit(category)"
+          class="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700"
+        >
+          แก้ไข
+        </button>
+        <button
+          *ngIf="canDelete(category)"
+          (click)="onDeleteClick(category)"
+          class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+        >
+          ลบ
+        </button>
+        <button
+          *ngIf="!canDelete(category)"
+          disabled
+          class="flex-1 px-4 py-2 bg-gray-300 text-gray-500 rounded-lg text-sm cursor-not-allowed"
+          title="ไม่สามารถลบได้ เนื่องจากมีสินค้าหรือหมวดหมู่ย่อย"
+        >
+          ลบ
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="categories().length === 0" class="text-center py-12 bg-white rounded-lg">
+      <p class="text-gray-500">ไม่พบหมวดหมู่</p>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div *ngIf="showModal()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+  <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 my-8">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+      {{ isEditMode() ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่ใหม่' }}
+    </h3>
+
+    <form (ngSubmit)="onSaveCategory()" class="space-y-4">
+      <!-- Name -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          ชื่อหมวดหมู่ <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="formData.name"
+          name="name"
+          (input)="onNameChange()"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="เช่น สีทาบ้าน"
+        />
+      </div>
+
+      <!-- Slug -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Slug <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="formData.slug"
+          name="slug"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+          placeholder="เช่น house-paint"
+        />
+        <p class="text-xs text-gray-500 mt-1">URL-friendly name (จะถูกสร้างอัตโนมัติจากชื่อ)</p>
+      </div>
+
+      <!-- Parent Category -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          หมวดหมู่แม่ (ถ้ามี)
+        </label>
+        <select
+          [(ngModel)]="formData.parentId"
+          name="parentId"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option [ngValue]="null">-- ไม่มี (หมวดหมู่หลัก) --</option>
+          <option *ngFor="let parent of getAvailableParentCategories()" [ngValue]="parent.id">
+            {{ parent.name }}
+          </option>
+        </select>
+        <p class="text-xs text-gray-500 mt-1">เลือกหมวดหมู่แม่ถ้าต้องการสร้างหมวดหมู่ย่อย</p>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          คำอธิบาย
+        </label>
+        <textarea
+          [(ngModel)]="formData.description"
+          name="description"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="คำอธิบายเกี่ยวกับหมวดหมู่นี้..."
+        ></textarea>
+      </div>
+
+      <!-- Display Order -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          ลำดับการแสดงผล
+        </label>
+        <input
+          type="number"
+          [(ngModel)]="formData.displayOrder"
+          name="displayOrder"
+          min="0"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="0"
+        />
+        <p class="text-xs text-gray-500 mt-1">ค่าน้อยจะแสดงก่อน</p>
+      </div>
+
+      <!-- Is Active -->
+      <div class="flex items-center">
+        <input
+          type="checkbox"
+          [(ngModel)]="formData.isActive"
+          name="isActive"
+          id="isActive"
+          class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+        />
+        <label for="isActive" class="ml-2 text-sm text-gray-700">
+          เปิดใช้งานหมวดหมู่นี้
+        </label>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-3 justify-end pt-4">
+        <button
+          type="button"
+          (click)="onCancelModal()"
+          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+        >
+          {{ isEditMode() ? 'บันทึกการแก้ไข' : 'เพิ่มหมวดหมู่' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteConfirm()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-2">ยืนยันการลบหมวดหมู่</h3>
+    <p class="text-gray-600 mb-4">
+      คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่ "{{ categoryToDelete()?.name }}"?
+      การดำเนินการนี้ไม่สามารถย้อนกลับได้
+    </p>
+    <div class="flex gap-3 justify-end">
+      <button
+        (click)="onCancelDelete()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+      >
+        ยกเลิก
+      </button>
+      <button
+        (click)="onConfirmDelete()"
+        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+      >
+        ลบหมวดหมู่
+      </button>
+    </div>
+  </div>
+</div>
