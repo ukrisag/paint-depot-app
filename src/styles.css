@@ -1,5 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* Import Local Fonts */
+@import './assets/fonts/prompt.css';
+
 /* Import Design System - must come before @tailwind directives */
 @import './styles/design-system.css';
 
