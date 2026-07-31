@@ -1,8 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminBrandService } from '../../services/admin-brand.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ReportService } from '../../../services/report.service';
 import { BrandDto } from '../../../services/openapi-client/model/brandDto';
 import { CreateBrandDto } from '../../../services/openapi-client/model/createBrandDto';
 import { ImageFallbackDirective } from '../../../directives/image-fallback.directive';
@@ -15,31 +16,31 @@ import { ImageFallbackDirective } from '../../../directives/image-fallback.direc
   styleUrls: ['./brand-list-admin.component.css']
 })
 export class BrandListAdminComponent implements OnInit {
-  brands: BrandDto[] = [];
-  filteredBrands: BrandDto[] = [];
+  brands = signal<BrandDto[]>([]);
+  filteredBrands = signal<BrandDto[]>([]);
 
-  loading = true;
-  error = '';
+  loading = signal(true);
+  error = signal('');
 
   // Filters
-  searchQuery = '';
-  selectedStatus?: boolean;
-  sortBy: 'name-asc' | 'name-desc' | 'products-asc' | 'products-desc' = 'name-asc';
+  searchQuery = signal('');
+  selectedStatus = signal<boolean | undefined>(undefined);
+  sortBy = signal<'name-asc' | 'name-desc' | 'products-asc' | 'products-desc'>('name-asc');
 
   // Pagination
-  currentPage = 1;
-  pageSize = 20;
-  totalItems = 0;
-  totalPages = 1;
+  currentPage = signal(1);
+  pageSize = signal(20);
+  totalItems = signal(0);
+  totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()));
 
   // Delete confirmation
-  brandToDelete?: BrandDto;
-  showDeleteConfirm = false;
+  brandToDelete = signal<BrandDto | undefined>(undefined);
+  showDeleteConfirm = signal(false);
 
   // Add/Edit modal
-  showModal = false;
-  isEditMode = false;
-  currentBrand?: BrandDto;
+  showModal = signal(false);
+  isEditMode = signal(false);
+  currentBrand = signal<BrandDto | undefined>(undefined);
   brandForm: CreateBrandDto = {
     name: '',
     slug: '',
@@ -59,7 +60,7 @@ export class BrandListAdminComponent implements OnInit {
   constructor(
     private adminBrandService: AdminBrandService,
     private notificationService: NotificationService,
-    private cdr: ChangeDetectorRef
+    private reportService: ReportService
   ) {}
 
   ngOnInit(): void {
@@ -67,32 +68,30 @@ export class BrandListAdminComponent implements OnInit {
   }
 
   loadBrands(): void {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
 
     this.adminBrandService.getBrands(true).subscribe({
       next: (brands) => {
-        this.brands = brands;
+        this.brands.set(brands);
         this.applyFilters();
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       },
       error: (err) => {
-        this.error = 'ไม่สามารถโหลดข้อมูลแบรนด์ได้';
+        this.error.set('ไม่สามารถโหลดข้อมูลแบรนด์ได้');
         this.notificationService.error('ไม่สามารถโหลดข้อมูลแบรนด์ได้');
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
         console.error('Error loading brands:', err);
       }
     });
   }
 
   applyFilters(): void {
-    let result = [...this.brands];
+    let result = [...this.brands()];
 
     // Search filter
-    if (this.searchQuery) {
-      const query = this.searchQuery.toLowerCase();
+    if (this.searchQuery()) {
+      const query = this.searchQuery().toLowerCase();
       result = result.filter(b =>
         (b.name || '').toLowerCase().includes(query) ||
         (b.slug || '').toLowerCase().includes(query)
@@ -100,26 +99,23 @@ export class BrandListAdminComponent implements OnInit {
     }
 
     // Status filter
-    if (this.selectedStatus !== undefined) {
-      result = result.filter(b => b.isActive === this.selectedStatus);
+    if (this.selectedStatus() !== undefined) {
+      result = result.filter(b => b.isActive === this.selectedStatus());
     }
 
     // Sort
     result = this.sortBrands(result);
 
     // Pagination
-    this.totalItems = result.length;
-    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.filteredBrands = result.slice(startIndex, endIndex);
-
-    this.cdr.detectChanges();
+    this.totalItems.set(result.length);
+    const startIndex = (this.currentPage() - 1) * this.pageSize();
+    const endIndex = startIndex + this.pageSize();
+    this.filteredBrands.set(result.slice(startIndex, endIndex));
   }
 
   sortBrands(brands: BrandDto[]): BrandDto[] {
     return [...brands].sort((a, b) => {
-      switch (this.sortBy) {
+      switch (this.sortBy()) {
         case 'name-asc':
           return (a.name || '').localeCompare(b.name || '');
         case 'name-desc':
@@ -135,12 +131,12 @@ export class BrandListAdminComponent implements OnInit {
   }
 
   onSearch(): void {
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.applyFilters();
   }
 
   onFilterChange(): void {
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.applyFilters();
   }
 
@@ -149,14 +145,14 @@ export class BrandListAdminComponent implements OnInit {
   }
 
   onPageChange(page: number): void {
-    if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
+    if (page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
     this.applyFilters();
   }
 
   onAddNew(): void {
-    this.isEditMode = false;
-    this.currentBrand = undefined;
+    this.isEditMode.set(false);
+    this.currentBrand.set(undefined);
     this.brandForm = {
       name: '',
       slug: '',
@@ -170,12 +166,12 @@ export class BrandListAdminComponent implements OnInit {
       name: '',
       slug: ''
     };
-    this.showModal = true;
+    this.showModal.set(true);
   }
 
   onEdit(brand: BrandDto): void {
-    this.isEditMode = true;
-    this.currentBrand = brand;
+    this.isEditMode.set(true);
+    this.currentBrand.set(brand);
     this.brandForm = {
       name: brand.name || '',
       slug: brand.slug || '',
@@ -189,36 +185,34 @@ export class BrandListAdminComponent implements OnInit {
       name: '',
       slug: ''
     };
-    this.showModal = true;
+    this.showModal.set(true);
   }
 
   onDeleteClick(brand: BrandDto): void {
-    this.brandToDelete = brand;
-    this.showDeleteConfirm = true;
+    this.brandToDelete.set(brand);
+    this.showDeleteConfirm.set(true);
   }
 
   onConfirmDelete(): void {
-    if (!this.brandToDelete?.id) return;
+    if (!this.brandToDelete()?.id) return;
 
-    this.adminBrandService.deleteBrand(this.brandToDelete.id).subscribe({
+    this.adminBrandService.deleteBrand(this.brandToDelete()!.id!).subscribe({
       next: () => {
         this.notificationService.success('ลบแบรนด์เรียบร้อยแล้ว');
-        this.showDeleteConfirm = false;
-        this.brandToDelete = undefined;
+        this.showDeleteConfirm.set(false);
+        this.brandToDelete.set(undefined);
         this.loadBrands();
-        this.cdr.detectChanges();
       },
       error: (err) => {
         this.notificationService.error('ไม่สามารถลบแบรนด์ได้');
         console.error('Error deleting brand:', err);
-        this.cdr.detectChanges();
       }
     });
   }
 
   onCancelDelete(): void {
-    this.showDeleteConfirm = false;
-    this.brandToDelete = undefined;
+    this.showDeleteConfirm.set(false);
+    this.brandToDelete.set(undefined);
   }
 
   onToggleStatus(brand: BrandDto): void {
@@ -231,39 +225,42 @@ export class BrandListAdminComponent implements OnInit {
         this.notificationService.success(
           newStatus ? 'เปิดใช้งานแบรนด์แล้ว' : 'ปิดใช้งานแบรนด์แล้ว'
         );
-        this.cdr.detectChanges();
       },
       error: (err) => {
         this.notificationService.error('ไม่สามารถเปลี่ยนสถานะแบรนด์ได้');
         console.error('Error toggling brand status:', err);
-        this.cdr.detectChanges();
       }
     });
   }
 
   onNameChange(): void {
-    if (!this.isEditMode) {
-      this.brandForm.slug = this.adminBrandService.generateSlug(this.brandForm.name);
+    if (!this.isEditMode()) {
+      this.brandForm = {
+        ...this.brandForm,
+        slug: this.adminBrandService.generateSlug(this.brandForm.name)
+      };
     }
   }
 
   validateForm(): boolean {
     let isValid = true;
-    this.formErrors = {
+    const currentForm = this.brandForm;
+    const errors = {
       name: '',
       slug: ''
     };
 
-    if (!this.brandForm.name.trim()) {
-      this.formErrors.name = 'กรุณากรอกชื่อแบรนด์';
+    if (!currentForm.name.trim()) {
+      errors.name = 'กรุณากรอกชื่อแบรนด์';
       isValid = false;
     }
 
-    if (!this.brandForm.slug.trim()) {
-      this.formErrors.slug = 'กรุณากรอก Slug';
+    if (!currentForm.slug.trim()) {
+      errors.slug = 'กรุณากรอก Slug';
       isValid = false;
     }
 
+    this.formErrors = errors;
     return isValid;
   }
 
@@ -272,19 +269,17 @@ export class BrandListAdminComponent implements OnInit {
       return;
     }
 
-    if (this.isEditMode && this.currentBrand?.id) {
+    if (this.isEditMode() && this.currentBrand()?.id) {
       // Update existing brand
-      this.adminBrandService.updateBrand(this.currentBrand.id, this.brandForm).subscribe({
+      this.adminBrandService.updateBrand(this.currentBrand()!.id!, this.brandForm).subscribe({
         next: () => {
           this.notificationService.success('อัปเดตแบรนด์เรียบร้อยแล้ว');
-          this.showModal = false;
+          this.showModal.set(false);
           this.loadBrands();
-          this.cdr.detectChanges();
         },
         error: (err) => {
           this.notificationService.error('ไม่สามารถอัปเดตแบรนด์ได้');
           console.error('Error updating brand:', err);
-          this.cdr.detectChanges();
         }
       });
     } else {
@@ -292,22 +287,20 @@ export class BrandListAdminComponent implements OnInit {
       this.adminBrandService.createBrand(this.brandForm).subscribe({
         next: () => {
           this.notificationService.success('เพิ่มแบรนด์เรียบร้อยแล้ว');
-          this.showModal = false;
+          this.showModal.set(false);
           this.loadBrands();
-          this.cdr.detectChanges();
         },
         error: (err) => {
           this.notificationService.error('ไม่สามารถเพิ่มแบรนด์ได้');
           console.error('Error creating brand:', err);
-          this.cdr.detectChanges();
         }
       });
     }
   }
 
   onCancelForm(): void {
-    this.showModal = false;
-    this.currentBrand = undefined;
+    this.showModal.set(false);
+    this.currentBrand.set(undefined);
   }
 
   getLogoUrl(brand: BrandDto): string {
@@ -317,8 +310,8 @@ export class BrandListAdminComponent implements OnInit {
   getPageNumbers(): number[] {
     const pages: number[] = [];
     const maxPages = 5;
-    let startPage = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-    let endPage = Math.min(this.totalPages, startPage + maxPages - 1);
+    let startPage = Math.max(1, this.currentPage() - Math.floor(maxPages / 2));
+    let endPage = Math.min(this.totalPages(), startPage + maxPages - 1);
 
     if (endPage - startPage < maxPages - 1) {
       startPage = Math.max(1, endPage - maxPages + 1);
@@ -332,10 +325,21 @@ export class BrandListAdminComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.searchQuery = '';
-    this.selectedStatus = undefined;
-    this.sortBy = 'name-asc';
-    this.currentPage = 1;
+    this.searchQuery.set('');
+    this.selectedStatus.set(undefined);
+    this.sortBy.set('name-asc');
+    this.currentPage.set(1);
     this.applyFilters();
+  }
+
+  // Report downloads
+  downloadExcel(): void {
+    this.reportService.downloadBrandsExcel();
+    this.notificationService.success('กำลังดาวน์โหลดรายงาน Excel...');
+  }
+
+  downloadPdf(): void {
+    this.reportService.downloadBrandsPdf();
+    this.notificationService.success('กำลังดาวน์โหลดรายงาน PDF...');
   }
 }

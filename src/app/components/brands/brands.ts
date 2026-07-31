@@ -1,23 +1,23 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { Brand } from '../../models/product.model';
 
 @Component({
   selector: 'app-brands',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './brands.html',
   styleUrl: './brands.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BrandsComponent implements OnInit {
-  brands: Brand[] = [];
-  loading = true;
+  brands = signal<Brand[]>([]);
+  loading = signal(true);
 
   constructor(
     private productService: ProductService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -27,9 +27,8 @@ export class BrandsComponent implements OnInit {
   loadBrands() {
     this.productService.getBrands().subscribe({
       next: (brands) => {
-        this.brands = brands;
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.brands.set(brands);
+        this.loading.set(false);
       }
     });
   }

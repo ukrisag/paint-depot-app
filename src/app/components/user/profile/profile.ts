@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -23,14 +23,16 @@ type TabType = 'account' | 'orders' | 'wishlist' | 'password';
   ],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileComponent implements OnInit, OnDestroy {
-  activeTab: TabType = 'account';
+
+  activeTab = signal<TabType>('account');
   accountForm!: FormGroup;
   passwordForm!: FormGroup;
-  isLoadingAccount = false;
-  isLoadingPassword = false;
-  isMobileMenuOpen = false;
+  isLoadingAccount = signal(false);
+  isLoadingPassword = signal(false);
+  isMobileMenuOpen = signal(false);
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -93,12 +95,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   setActiveTab(tab: TabType): void {
-    this.activeTab = tab;
-    this.isMobileMenuOpen = false;
+    this.activeTab.set(tab);
+    this.isMobileMenuOpen.set(false);
   }
 
   toggleMobileMenu(): void {
-    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    this.isMobileMenuOpen.set(!this.isMobileMenuOpen());
   }
 
   onSubmitAccount(): void {
@@ -107,13 +109,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isLoadingAccount = true;
+    this.isLoadingAccount.set(true);
     const formData = this.accountForm.getRawValue();
 
     // Since we don't have a user update endpoint in the AuthService yet,
     // we'll show a notification that this feature is coming soon
     setTimeout(() => {
-      this.isLoadingAccount = false;
+      this.isLoadingAccount.set(false);
       this.notificationService.info('ฟีเจอร์นี้กำลังพัฒนา กรุณารอการอัปเดต');
     }, 500);
 
@@ -137,13 +139,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isLoadingPassword = true;
+    this.isLoadingPassword.set(true);
     const { currentPassword, newPassword } = this.passwordForm.value;
 
     // Since we don't have a password change endpoint in the AuthService yet,
     // we'll show a notification that this feature is coming soon
     setTimeout(() => {
-      this.isLoadingPassword = false;
+      this.isLoadingPassword.set(false);
       this.passwordForm.reset();
       this.notificationService.info('ฟีเจอร์นี้กำลังพัฒนา กรุณารอการอัปเดต');
     }, 500);

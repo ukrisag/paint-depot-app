@@ -31,6 +31,11 @@ export const ADMIN_ROUTES: Routes = [
         path: 'brands',
         loadComponent: () => import('./pages/brands/brand-list-admin.component').then(m => m.BrandListAdminComponent)
       },
+      // Gallery
+      {
+        path: 'gallery',
+        loadComponent: () => import('./pages/gallery/gallery-admin.component').then(m => m.GalleryAdminComponent)
+      },
       // Orders
       {
         path: 'orders',

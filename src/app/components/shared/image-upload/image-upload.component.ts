@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectorRef, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal, OnInit, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -16,7 +16,8 @@ export interface ProductImage {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './image-upload.component.html',
-  styleUrls: ['./image-upload.component.css']
+  styleUrls: ['./image-upload.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImageUploadComponent implements OnInit, OnChanges {
   @Input() images: ProductImage[] = [];
@@ -26,11 +27,11 @@ export class ImageUploadComponent implements OnInit, OnChanges {
 
   @Output() imagesChange = new EventEmitter<ProductImage[]>();
 
-  isDragging = false;
-  error: string | null = null;
-  editingAltIndex: number | null = null;
+  isDragging = signal(false);
+  error = signal<string | null>(null);
+  editingAltIndex = signal<number | null>(null);
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor() {}
 
   ngOnInit() {
     this.ensurePrimaryImage();
@@ -39,7 +40,6 @@ export class ImageUploadComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['images'] && changes['images'].currentValue) {
       this.ensurePrimaryImage();
-      this.cdr.detectChanges();
     }
   }
 
@@ -53,19 +53,19 @@ export class ImageUploadComponent implements OnInit, OnChanges {
   onDragOver(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
-    this.isDragging = true;
+    this.isDragging.set(true);
   }
 
   onDragLeave(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
-    this.isDragging = false;
+    this.isDragging.set(false);
   }
 
   onDrop(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
-    this.isDragging = false;
+    this.isDragging.set(false);
 
     const files = event.dataTransfer?.files;
     if (files) {
@@ -83,12 +83,12 @@ export class ImageUploadComponent implements OnInit, OnChanges {
   }
 
   private handleFiles(files: File[]) {
-    this.error = null;
+    this.error.set(null);
 
     // Check if we can add more images
     const remainingSlots = this.maxImages - this.images.length;
     if (remainingSlots <= 0) {
-      this.error = `สามารถอัปโหลดได้สูงสุด ${this.maxImages} รูป`;
+      this.error.set(`สามารถอัปโหลดได้สูงสุด ${this.maxImages} รูป`);
       return;
     }
 
@@ -97,11 +97,11 @@ export class ImageUploadComponent implements OnInit, OnChanges {
 
     filesToProcess.forEach(file => {
       if (!file.type.startsWith('image/')) {
-        this.error = 'กรุณาเลือกไฟล์รูปภาพเท่านั้น';
+        this.error.set('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
         return;
       }
       if (file.size > this.maxSize) {
-        this.error = `ขนาดไฟล์ไม่ควรเกิน ${this.maxSize / 1024 / 1024}MB`;
+        this.error.set(`ขนาดไฟล์ไม่ควรเกิน ${this.maxSize / 1024 / 1024}MB`);
         return;
       }
 
@@ -118,7 +118,6 @@ export class ImageUploadComponent implements OnInit, OnChanges {
 
         this.images.push(newImage);
         this.imagesChange.emit(this.images);
-        this.cdr.detectChanges();
       };
       reader.readAsDataURL(file);
     });
@@ -129,25 +128,21 @@ export class ImageUploadComponent implements OnInit, OnChanges {
       img.isPrimary = i === index;
     });
     this.imagesChange.emit(this.images);
-    this.cdr.detectChanges();
   }
 
   removeImage(index: number) {
     const wasPrimary = this.images[index].isPrimary;
     this.images.splice(index, 1);
 
-    // If removed image was primary, set first image as primary
     if (wasPrimary && this.images.length > 0) {
       this.images[0].isPrimary = true;
     }
 
-    // Update display order
     this.images.forEach((img, i) => {
       img.displayOrder = i;
     });
 
     this.imagesChange.emit(this.images);
-    this.cdr.detectChanges();
   }
 
   moveUp(index: number) {
@@ -166,22 +161,20 @@ export class ImageUploadComponent implements OnInit, OnChanges {
       img.displayOrder = i;
     });
     this.imagesChange.emit(this.images);
-    this.cdr.detectChanges();
   }
 
   startEditAlt(index: number) {
-    this.editingAltIndex = index;
+    this.editingAltIndex.set(index);
   }
 
   saveAltText(index: number, altText: string) {
     this.images[index].altText = altText;
-    this.editingAltIndex = null;
+    this.editingAltIndex.set(null);
     this.imagesChange.emit(this.images);
-    this.cdr.detectChanges();
   }
 
   cancelEditAlt() {
-    this.editingAltIndex = null;
+    this.editingAltIndex.set(null);
   }
 
   formatFileSize(bytes: number): string {
@@ -196,7 +189,6 @@ export class ImageUploadComponent implements OnInit, OnChanges {
     if (confirm('ต้องการลบรูปภาพทั้งหมดหรือไม่?')) {
       this.images = [];
       this.imagesChange.emit(this.images);
-      this.cdr.detectChanges();
     }
   }
 }

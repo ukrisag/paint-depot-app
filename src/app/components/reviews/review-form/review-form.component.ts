@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ReviewService } from '../../../services/review.service';
@@ -11,6 +11,7 @@ import { ReviewDto, CreateReviewDto } from '../../../services/openapi-client/mod
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './review-form.component.html',
   styleUrl: './review-form.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewFormComponent implements OnInit {
   @Input() productId!: number;
@@ -45,18 +46,6 @@ export class ReviewFormComponent implements OnInit {
 
   getStarArray(): number[] {
     return [1, 2, 3, 4, 5];
-  }
-
-  setRating(rating: number) {
-    this.reviewForm.patchValue({ rating });
-  }
-
-  setHoveredStar(star: number) {
-    this.hoveredStar = star;
-  }
-
-  clearHoveredStar() {
-    this.hoveredStar = 0;
   }
 
   isStarFilled(star: number): boolean {
@@ -114,5 +103,17 @@ export class ReviewFormComponent implements OnInit {
 
   get comment() {
     return this.reviewForm.get('comment');
+  }
+
+  setRating(rating: number) {
+    this.reviewForm.patchValue({ rating });
+  }
+
+  setHoveredStar(star: number) {
+    this.hoveredStar = star;
+  }
+
+  clearHoveredStar() {
+    this.hoveredStar = 0;
   }
 }

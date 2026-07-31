@@ -6,57 +6,57 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Primary - Purple/Magenta (hero mid-tone)
+        // Primary - BWT Navy Blue (lighter shades)
         primary: {
-          50: '#faf5ff',
-          100: '#f3e8ff',
-          200: '#e9d5ff',
-          300: '#d8b4fe',
-          400: '#c084fc',
-          500: '#a855f7',
-          600: '#9333ea',
-          700: '#7e22ce',
-          800: '#6b21a8',
-          900: '#581c87',
+          50: '#e3f2fd',
+          100: '#bbdefb',
+          200: '#90caf9',
+          300: '#64b5f6',
+          400: '#42a5f5',
+          500: '#2196F3',  // Main BWT Blue (lighter than #002B7F)
+          600: '#1E88E5',  // Slightly darker
+          700: '#1976D2',
+          800: '#1565C0',
+          900: '#0D47A1',
         },
-        // Brand - Indigo (hero starting tone)
+        // Brand - BWT Dark Blue (original dark blue for accents)
         brand: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
+          50: '#e8eaf6',
+          100: '#c5cae9',
+          200: '#9fa8da',
+          300: '#7986cb',
+          400: '#5c6bc0',
+          500: '#3f51b5',
+          600: '#3949ab',
+          700: '#303f9f',
+          800: '#283593',
+          900: '#002B7F',  // Original BWT Navy
         },
-        // Secondary - Pink (hero ending tone)
+        // Secondary - BWT Orange/Gold (lighter shades)
         secondary: {
-          50: '#fdf2f8',
-          100: '#fce7f3',
-          200: '#fbcfe8',
-          300: '#f9a8d4',
-          400: '#f472b6',
-          500: '#ec4899',
-          600: '#db2777',
-          700: '#be185d',
-          800: '#9d174d',
-          900: '#831843',
+          50: '#fff8e1',
+          100: '#ffecb3',
+          200: '#ffe082',
+          300: '#ffd54f',
+          400: '#ffca28',
+          500: '#FFA726',  // Main BWT Orange (lighter)
+          600: '#FF9800',
+          700: '#FB8C00',
+          800: '#F57C00',
+          900: '#E65100',
         },
-        // Accent - Orange (gradient CTAs)
+        // Accent - BWT Gold (warmer tones)
         accent: {
-          50: '#fff7ed',
-          100: '#ffedd5',
-          200: '#fed7aa',
-          300: '#fdba74',
-          400: '#fb923c',
-          500: '#f97316',
-          600: '#ea580c',
-          700: '#c2410c',
-          800: '#9a3412',
-          900: '#7c2d12',
+          50: '#fffbf0',
+          100: '#fff4d9',
+          200: '#ffedb3',
+          300: '#ffe18c',
+          400: '#ffd666',
+          500: '#FFB74D',  // BWT Gold
+          600: '#FFA726',
+          700: '#FF9800',
+          800: '#F57C00',
+          900: '#E65100',
         },
         // Neutral - Cool Grays (complements hero)
         neutral: {

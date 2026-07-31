@@ -1,1 +1,324 @@
 /* Register component styles */
+
+/* ============================================
+   Gradient Background with Animated Blobs
+   ============================================ */
+.auth-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  background: linear-gradient(135deg, #fdf4ff 0%, #f5f3ff 30%, #fff7ed 70%, #fef3c7 100%);
+}
+
+.gradient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.4;
+  will-change: transform;
+}
+
+.blob-1 {
+  width: 550px;
+  height: 550px;
+  top: -15%;
+  left: -15%;
+  background: linear-gradient(135deg, #002B7F 0%, #0047AB 100%);
+}
+
+.blob-2 {
+  width: 450px;
+  height: 450px;
+  bottom: -15%;
+  right: -15%;
+  background: linear-gradient(135deg, #F7A627 0%, #FFB84D 100%);
+}
+
+.blob-3 {
+  width: 400px;
+  height: 400px;
+  top: 40%;
+  right: 10%;
+  background: linear-gradient(135deg, #0047AB 0%, #F7A627 100%);
+}
+
+.blob-4 {
+  width: 380px;
+  height: 380px;
+  bottom: 30%;
+  left: 5%;
+  background: linear-gradient(135deg, #002B7F 0%, #0047AB 100%);
+}
+
+.gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(255, 255, 255, 0.3) 100%);
+}
+
+/* ============================================
+   SVG Decorative Elements
+   ============================================ */
+.auth-decoration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.decoration-svg {
+  position: absolute;
+  opacity: 0.35;
+}
+
+.decoration-top-left {
+  width: 280px;
+  height: 280px;
+  top: -40px;
+  left: -40px;
+}
+
+.decoration-bottom-right {
+  width: 320px;
+  height: 320px;
+  bottom: -70px;
+  right: -70px;
+}
+
+.decoration-top-right {
+  width: 250px;
+  height: 250px;
+  top: 20%;
+  right: -50px;
+}
+
+/* ============================================
+   Glassmorphism Card
+   ============================================ */
+.glass-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 10px 40px 0 rgba(0, 43, 127, 0.12),
+    0 5px 20px 0 rgba(247, 166, 39, 0.06),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.9);
+  border-radius: 28px;
+  padding: 2.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  box-shadow:
+    0 14px 56px 0 rgba(0, 43, 127, 0.16),
+    0 7px 28px 0 rgba(247, 166, 39, 0.09),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   Gradient Text
+   ============================================ */
+.gradient-text {
+  background: linear-gradient(135deg, #002B7F 0%, #0047AB 40%, #F7A627 70%, #FFB84D 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  animation: gradient-shift 4s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+}
+
+/* ============================================
+   Form Section Titles
+   ============================================ */
+.form-section-title {
+  position: relative;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #9333ea 0%, #db2777 50%, #f97316 100%);
+  border-radius: 2px;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+@media (max-width: 768px) {
+  .glass-card {
+    padding: 2rem;
+    border-radius: 24px;
+  }
+
+  .blob-1,
+  .blob-2,
+  .blob-3,
+  .blob-4 {
+    width: 350px;
+    height: 350px;
+    filter: blur(70px);
+  }
+
+  .decoration-top-left,
+  .decoration-bottom-right,
+  .decoration-top-right {
+    width: 180px;
+    height: 180px;
+  }
+
+  .decoration-top-left {
+    top: -30px;
+    left: -30px;
+  }
+
+  .decoration-bottom-right {
+    bottom: -40px;
+    right: -40px;
+  }
+
+  .decoration-top-right {
+    top: 15%;
+    right: -40px;
+  }
+}
+
+@media (max-width: 640px) {
+  .glass-card {
+    padding: 1.5rem;
+    border-radius: 20px;
+  }
+
+  .blob-1,
+  .blob-2,
+  .blob-3,
+  .blob-4 {
+    width: 280px;
+    height: 280px;
+    filter: blur(60px);
+  }
+
+  .decoration-svg {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .glass-card {
+    padding: 1.25rem;
+  }
+
+  .blob-1,
+  .blob-2,
+  .blob-3,
+  .blob-4 {
+    width: 220px;
+    height: 220px;
+    filter: blur(50px);
+  }
+
+  .form-section-title {
+    font-size: 1rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* ============================================
+   Enhanced Form Elements
+   ============================================ */
+.form-section {
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure form elements have proper layering */
+.form-grid,
+.form-group,
+.btn {
+  position: relative;
+  z-index: 1;
+}
+
+/* Grid layout enhancements */
+.form-grid-2 {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .form-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Enhanced checkbox container */
+.form-checkbox-container {
+  background: rgba(255, 255, 255, 0.5);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(147, 51, 234, 0.1);
+  transition: all 0.3s ease;
+}
+
+.form-checkbox-container:hover {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(147, 51, 234, 0.2);
+}
+
+/* Enhanced helper text */
+.form-helper {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(79, 70, 229, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid #4f46e5;
+}
+
+/* Link enhancement */
+a {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  filter: brightness(1.1);
+}
+
+/* Button spacing */
+.btn-block {
+  width: 100%;
+}
+
+.btn-lg {
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+}

@@ -1,4 +1,184 @@
-/* Image Upload Component Styles */
+/* Premium Image Upload Component Styles */
+
 :host {
   display: block;
+}
+
+/* Backdrop blur effects */
+.backdrop-blur-xl {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Gradient text effect */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Upload area hover effects */
+[class*="border-dashed"] {
+  position: relative;
+  background-size: 200% 200%;
+  transition: all 0.3s ease;
+}
+
+[class*="border-dashed"]:hover {
+  border-color: rgba(147, 51, 234, 0.5);
+}
+
+/* Animated gradient border */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.bg-gradient-to-br.from-gray-50.to-purple-50\/30 {
+  background-image: linear-gradient(
+    to bottom right,
+    rgb(249, 250, 251),
+    rgba(243, 232, 255, 0.3)
+  );
+}
+
+/* Image card shadows */
+.shadow-lg {
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-2xl {
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-purple-200 {
+  box-shadow:
+    0 10px 15px -3px rgba(147, 51, 234, 0.2),
+    0 4px 6px -2px rgba(147, 51, 234, 0.1);
+}
+
+/* Button glassmorphism */
+button[class*="backdrop-blur"] {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover scale effect */
+button[class*="hover:scale-"] {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Image preview hover effects */
+.group:hover img {
+  transform: scale(1.1);
+}
+
+/* Gradient button shine effect */
+button[class*="gradient"]::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: rotate(45deg);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+
+button[class*="gradient"]:hover::after {
+  transform: rotate(45deg) translate(50%, 50%);
+}
+
+/* Primary badge glow effect */
+span[class*="from-purple-600"] {
+  position: relative;
+}
+
+span[class*="from-purple-600"]::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: inherit;
+  border-radius: inherit;
+  opacity: 0.3;
+  filter: blur(8px);
+  z-index: -1;
+}
+
+/* Smooth transitions for all interactive elements */
+button,
+input,
+[class*="transition"] {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus states */
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid rgba(147, 51, 234, 0.5);
+  outline-offset: 2px;
+}
+
+/* Ring effect for primary images */
+.ring-2 {
+  box-shadow:
+    0 0 0 2px white,
+    0 0 0 4px currentColor,
+    0 10px 15px -3px rgba(147, 51, 234, 0.3);
+}
+
+/* Error box animation support */
+.from-red-50 {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Decorative blur elements */
+.blur-2xl {
+  filter: blur(40px);
+}
+
+/* Underline animation for file select */
+label span[class*="absolute"] {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Upload icon rotation on drag */
+.rotate-6 {
+  transform: rotate(6deg) scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .grid-cols-1 {
+    gap: 1rem;
+  }
+
+  button[class*="backdrop-blur"] {
+    padding: 0.5rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  button {
+    display: none;
+  }
 }

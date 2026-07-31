@@ -8,8 +8,11 @@ import { ProfileComponent } from './components/user/profile/profile';
 import { CategoriesComponent } from './components/categories/categories';
 import { BrandsComponent } from './components/brands/brands';
 import { AboutComponent } from './components/about/about.component';
+import { GalleryComponent } from './components/gallery/gallery.component';
 import { LoginComponent } from './components/auth/login/login.component';
 import { RegisterComponent } from './components/auth/register/register.component';
+import { ForgotPasswordComponent } from './components/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/auth/reset-password/reset-password.component';
 import { OrderConfirmationComponent } from './components/orders/order-confirmation/order-confirmation.component';
 import { OrderListComponent } from './components/orders/order-list/order-list.component';
 import { OrderDetailComponent } from './components/orders/order-detail/order-detail.component';
@@ -30,10 +33,13 @@ export const routes: Routes = [
   },
   { path: 'login', redirectTo: 'auth/login', pathMatch: 'full' },
   { path: 'register', redirectTo: 'auth/register', pathMatch: 'full' },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'products', component: ProductListComponent },
   { path: 'products/:slug', component: ProductDetailComponent },
   { path: 'categories', component: CategoriesComponent },
   { path: 'brands', component: BrandsComponent },
+  { path: 'gallery', component: GalleryComponent },
   { path: 'about', component: AboutComponent },
   { path: 'cart', component: CartComponent, canActivate: [authGuard] },
   { path: 'wishlist', component: WishlistComponent, canActivate: [authGuard] },

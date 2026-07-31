@@ -20,6 +20,7 @@ export interface CreateOrderDto {
     shippingProvince: string;
     shippingPostalCode: string;
     paymentMethod: string;
+    invoiceType?: string | null;
     shippingMethod?: string | null;
     couponCode?: string | null;
     customerNotes?: string | null;

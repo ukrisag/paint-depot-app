@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,32 +15,42 @@ import { Cart, CartItem } from '../../../models/cart.model';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './checkout.component.html',
-  styleUrls: ['./checkout.component.css']
+  styleUrls: ['./checkout.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CheckoutComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   checkoutForm!: FormGroup;
-  currentStep = 1;
+  currentStep = signal(1);
   totalSteps = 3;
 
-  cart: Cart | null = null;
-  isLoading = false;
-  isSubmitting = false;
+  cart = signal<Cart | null>(null);
+  isLoading = signal(false);
+  isSubmitting = signal(false);
 
   // Coupon
-  couponCode = '';
-  appliedCoupon: any = null;
-  isValidatingCoupon = false;
+  couponCode = signal('');
+  appliedCoupon = signal<any>(null);
+  isValidatingCoupon = signal(false);
 
   // Shipping
-  shippingFee = 50; // Flat rate 50 THB
+  shippingFee = signal(50); // Flat rate 50 THB
 
   // Payment methods
   paymentMethods = [
-    { value: 'BankTransfer', label: 'โอนเงินผ่านธนาคาร', icon: '🏦' },
-    { value: 'CashOnDelivery', label: 'ชำระเงินปลายทาง (COD)', icon: '💵' }
+    { value: 'transfer', label: 'โอนเงินผ่านธนาคาร', icon: '🏦' },
+    { value: 'cash', label: 'เงินสด (ชำระที่ร้าน)', icon: '💵' }
   ];
+
+  // Invoice types
+  invoiceTypes = [
+    { value: 'tax_invoice', label: 'ใบกำกับภาษี (Tax Invoice)', description: 'มี VAT 7%' },
+    { value: 'cash_invoice', label: 'ใบเสร็จรับเงิน (Cash Receipt)', description: 'ไม่มี VAT' }
+  ];
+
+  // VAT rate
+  readonly VAT_RATE = 0.07; // 7%
 
   // Bank details (shown when Bank Transfer is selected)
   bankDetails = {
@@ -56,13 +66,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     private orderService: OrderService,
     private couponService: CouponService,
     private notificationService: NotificationService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.loadCart();
+    this.setupPaymentMethodListener();
   }
 
   ngOnDestroy(): void {
@@ -88,20 +98,21 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
       // Step 2: Payment Method
       paymentInfo: this.fb.group({
-        paymentMethod: ['BankTransfer', Validators.required],
+        paymentMethod: ['transfer', Validators.required],
+        invoiceType: ['tax_invoice', Validators.required],
         customerNotes: ['']
       })
     });
   }
 
   loadCart(): void {
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.cartService.cart$
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (cart) => {
-          this.cart = cart;
-          this.isLoading = false;
+          this.cart.set(cart);
+          this.isLoading.set(false);
 
           // Redirect to cart if empty
           if (!cart || cart.items.length === 0) {
@@ -111,21 +122,34 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading cart:', error);
-          this.isLoading = false;
+          this.isLoading.set(false);
           this.notificationService.error('ไม่สามารถโหลดข้อมูลตะกร้าสินค้าได้');
         }
       });
   }
 
+  /**
+   * Auto-set invoice type when payment method changes
+   */
+  setupPaymentMethodListener(): void {
+    this.paymentInfoForm.get('paymentMethod')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((paymentMethod) => {
+        // Auto-set invoice type based on payment method
+        const invoiceType = paymentMethod === 'cash' ? 'cash_invoice' : 'tax_invoice';
+        this.paymentInfoForm.patchValue({ invoiceType }, { emitEvent: false });
+      });
+  }
+
   // Step Navigation
   nextStep(): void {
-    if (this.currentStep === 1) {
+    if (this.currentStep() === 1) {
       if (this.shippingInfoForm.invalid) {
         this.markFormGroupTouched(this.shippingInfoForm);
         this.notificationService.error('กรุณากรอกข้อมูลให้ครบถ้วน');
         return;
       }
-    } else if (this.currentStep === 2) {
+    } else if (this.currentStep() === 2) {
       if (this.paymentInfoForm.invalid) {
         this.markFormGroupTouched(this.paymentInfoForm);
         this.notificationService.error('กรุณาเลือกวิธีการชำระเงิน');
@@ -133,64 +157,61 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (this.currentStep < this.totalSteps) {
-      this.currentStep++;
+    if (this.currentStep() < this.totalSteps) {
+      this.currentStep.update(step => step + 1);
       this.scrollToTop();
     }
   }
 
   previousStep(): void {
-    if (this.currentStep > 1) {
-      this.currentStep--;
+    if (this.currentStep() > 1) {
+      this.currentStep.update(step => step - 1);
       this.scrollToTop();
     }
   }
 
   goToStep(step: number): void {
     // Can only go back or to completed steps
-    if (step < this.currentStep) {
-      this.currentStep = step;
+    if (step < this.currentStep()) {
+      this.currentStep.set(step);
       this.scrollToTop();
     }
   }
 
   // Coupon Validation
   validateCoupon(): void {
-    if (!this.couponCode || this.couponCode.trim() === '') {
+    const code = this.couponCode();
+    if (!code || code.trim() === '') {
       this.notificationService.error('กรุณากรอกรหัสคูปอง');
       return;
     }
 
-    this.isValidatingCoupon = true;
-    this.cdr.detectChanges();
+    this.isValidatingCoupon.set(true);
     const subtotal = this.getSubtotal();
 
-    this.couponService.validateCoupon(this.couponCode.trim(), subtotal)
+    this.couponService.validateCoupon(code.trim(), subtotal)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (result) => {
-          this.isValidatingCoupon = false;
+          this.isValidatingCoupon.set(false);
           if (result.isValid) {
-            this.appliedCoupon = result;
+            this.appliedCoupon.set(result);
             this.notificationService.success('ใช้คูปองสำเร็จ');
           } else {
             this.notificationService.error(result.message || 'คูปองไม่ถูกต้อง');
           }
-          this.cdr.detectChanges();
         },
         error: (error) => {
-          this.isValidatingCoupon = false;
+          this.isValidatingCoupon.set(false);
           this.notificationService.error(error.error?.message || 'ไม่สามารถตรวจสอบคูปองได้');
-          this.cdr.detectChanges();
         }
       });
   }
 
   removeCoupon(): void {
-    this.appliedCoupon = null;
-    this.couponCode = '';
+    this.appliedCoupon.set(null);
+    this.couponCode.set('');
     this.notificationService.info('ยกเลิกการใช้คูปอง');
-    this.cdr.detectChanges();
   }
 
   // Order Submission
@@ -200,7 +221,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.cart || this.cart.items.length === 0) {
+    const currentCart = this.cart();
+    if (!currentCart || currentCart.items.length === 0) {
       this.notificationService.error('ตะกร้าสินค้าของคุณว่างเปล่า');
       return;
     }
@@ -222,20 +244,21 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
       // Payment Information
       paymentMethod: payment.paymentMethod,
+      invoiceType: payment.invoiceType,
       shippingMethod: 'Standard', // Default shipping method
 
       // Optional
-      couponCode: this.appliedCoupon ? this.couponCode : null,
+      couponCode: this.appliedCoupon() ? this.couponCode() : null,
       customerNotes: payment.customerNotes || null
     };
 
-    this.isSubmitting = true;
+    this.isSubmitting.set(true);
 
     this.orderService.createOrder(orderData)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (order) => {
-          this.isSubmitting = false;
+          this.isSubmitting.set(false);
           this.notificationService.success('สั่งซื้อสินค้าสำเร็จ');
 
           // Clear cart
@@ -245,7 +268,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           this.router.navigate(['/order-confirmation', order.id]);
         },
         error: (error) => {
-          this.isSubmitting = false;
+          this.isSubmitting.set(false);
           console.error('Error creating order:', error);
           this.notificationService.error(
             error.error?.message || 'ไม่สามารถสร้างคำสั่งซื้อได้ กรุณาลองใหม่อีกครั้ง'
@@ -256,22 +279,32 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   // Calculations
   getSubtotal(): number {
-    return this.cart?.subtotal || 0;
+    return this.cart()?.subtotal || 0;
   }
 
   getDiscountAmount(): number {
-    return this.appliedCoupon?.discountAmount || 0;
+    return this.appliedCoupon()?.discountAmount || 0;
   }
 
   getShippingFee(): number {
-    return this.shippingFee;
+    return this.shippingFee();
+  }
+
+  getTaxAmount(): number {
+    const invoiceType = this.paymentInfoForm.get('invoiceType')?.value;
+    if (invoiceType === 'tax_invoice') {
+      const taxableAmount = this.getSubtotal() - this.getDiscountAmount() + this.getShippingFee();
+      return Math.round(taxableAmount * this.VAT_RATE * 100) / 100;
+    }
+    return 0;
   }
 
   getTotal(): number {
     const subtotal = this.getSubtotal();
     const discount = this.getDiscountAmount();
     const shipping = this.getShippingFee();
-    return subtotal - discount + shipping;
+    const tax = this.getTaxAmount();
+    return subtotal - discount + shipping + tax;
   }
 
   // Form Getters
@@ -285,6 +318,18 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   get selectedPaymentMethod(): string {
     return this.paymentInfoForm.get('paymentMethod')?.value;
+  }
+
+  get selectedInvoiceType(): string {
+    return this.paymentInfoForm.get('invoiceType')?.value;
+  }
+
+  get isCashPayment(): boolean {
+    return this.selectedPaymentMethod === 'cash';
+  }
+
+  get isTaxInvoice(): boolean {
+    return this.selectedInvoiceType === 'tax_invoice';
   }
 
   // Helper Methods

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -12,16 +12,16 @@ import { ImageFallbackDirective } from '../../directives/image-fallback.directiv
   imports: [CommonModule, RouterLink, ProductCardComponent, ImageFallbackDirective],
   templateUrl: './home.html',
   styleUrl: './home.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent implements OnInit {
-  featuredProducts: Product[] = [];
-  bestsellerProducts: Product[] = [];
-  brands: Brand[] = [];
-  loading = true;
+  featuredProducts = signal<Product[]>([]);
+  bestsellerProducts = signal<Product[]>([]);
+  brands = signal<Brand[]>([]);
+  loading = signal(true);
 
   constructor(
-    private productService: ProductService,
-    private cdr: ChangeDetectorRef
+    private productService: ProductService
   ) {}
 
   ngOnInit() {
@@ -29,7 +29,7 @@ export class HomeComponent implements OnInit {
   }
 
   loadData() {
-    this.loading = true;
+    this.loading.set(true);
     console.log('🔄 Loading home page data...');
 
     // Load all data in parallel
@@ -48,11 +48,10 @@ export class HomeComponent implements OnInit {
         console.log('Bestseller products:', data.bestsellers);
         console.log('Brands:', data.brands);
 
-        this.featuredProducts = data.featured;
-        this.bestsellerProducts = data.bestsellers;
-        this.brands = data.brands;
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.featuredProducts.set(data.featured);
+        this.bestsellerProducts.set(data.bestsellers);
+        this.brands.set(data.brands);
+        this.loading.set(false);
       },
       error: (error) => {
         console.error('❌ Error loading home data:', error);
@@ -61,8 +60,7 @@ export class HomeComponent implements OnInit {
           status: error.status,
           error: error.error
         });
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       }
     });
   }

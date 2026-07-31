@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Product } from '../../../models/product.model';
@@ -13,17 +13,18 @@ import { ImageFallbackDirective } from '../../../directives/image-fallback.direc
   imports: [CommonModule, RouterLink, ImageFallbackDirective],
   templateUrl: './product-card.html',
   styleUrl: './product-card.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductCardComponent {
   @Input() product!: Product;
-  isWishlistLoading = false;
+  isWishlistLoading = signal(false);
+  Math = Math; // Expose Math to template
 
   constructor(
     private cartService: CartService,
     private notificationService: NotificationService,
     private wishlistService: WishlistService,
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private authService: AuthService
   ) {}
 
   addToCart(event: Event) {
@@ -98,12 +99,11 @@ export class ProductCardComponent {
     }
 
     // Prevent multiple clicks while loading
-    if (this.isWishlistLoading) {
+    if (this.isWishlistLoading()) {
       return;
     }
 
-    this.isWishlistLoading = true;
-    this.cdr.detectChanges();
+    this.isWishlistLoading.set(true);
 
     // Check if product is already in wishlist
     const currentlyInWishlist = this.isInWishlist();
@@ -113,14 +113,12 @@ export class ProductCardComponent {
       this.wishlistService.removeFromWishlist(this.product.id).subscribe({
         next: () => {
           this.notificationService.success('ลบสินค้าออกจากรายการโปรดแล้ว');
-          this.isWishlistLoading = false;
-          this.cdr.detectChanges();
+          this.isWishlistLoading.set(false);
         },
         error: (error) => {
           console.error('Error removing from wishlist', error);
           this.notificationService.error('เกิดข้อผิดพลาดในการลบสินค้า');
-          this.isWishlistLoading = false;
-          this.cdr.detectChanges();
+          this.isWishlistLoading.set(false);
         }
       });
     } else {
@@ -128,8 +126,7 @@ export class ProductCardComponent {
       this.wishlistService.addToWishlist(this.product.id).subscribe({
         next: () => {
           this.notificationService.success('เพิ่มสินค้าในรายการโปรดแล้ว');
-          this.isWishlistLoading = false;
-          this.cdr.detectChanges();
+          this.isWishlistLoading.set(false);
         },
         error: (error) => {
           console.error('Error adding to wishlist', error);
@@ -143,8 +140,7 @@ export class ProductCardComponent {
             this.notificationService.error('เกิดข้อผิดพลาดในการเพิ่มสินค้า');
           }
 
-          this.isWishlistLoading = false;
-          this.cdr.detectChanges();
+          this.isWishlistLoading.set(false);
         }
       });
     }

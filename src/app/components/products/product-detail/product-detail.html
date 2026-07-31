@@ -1,282 +1,577 @@
-<div class="bg-white">
-  @if (loading) {
-    <div class="container mx-auto px-4 py-20 flex justify-center">
-      <div class="animate-spin h-8 w-8 border-2 border-gray-900 border-t-transparent rounded-full"></div>
+<div class="min-h-screen bg-gray-50">
+  @if (loading()) {
+    <!-- Premium Loading State -->
+    <div class="flex justify-center items-center py-32">
+      <div class="relative">
+        <div class="animate-spin rounded-full h-24 w-24 border-4 border-blue-200 border-t-blue-500"></div>
+        <div class="absolute top-0 left-0 animate-ping rounded-full h-24 w-24 border-4 border-blue-400 border-t-transparent opacity-20"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="w-12 h-12 bg-blue-500 rounded-full animate-pulse"></div>
+        </div>
+      </div>
     </div>
-  } @else if (product) {
+  } @else if (product()) {
     <div class="container mx-auto px-4 py-12">
-      <div class="grid md:grid-cols-2 gap-12">
-        <!-- Image -->
-        <div>
-          <div class="bg-gray-100 aspect-square">
-            <img [src]="getPrimaryImage()" [alt]="product.name" class="w-full h-full object-cover" />
+      <!-- Breadcrumb -->
+      <nav class="mb-8 breadcrumb-nav" aria-label="Breadcrumb">
+        <ol class="flex items-center gap-2 text-sm">
+          <li>
+            <a routerLink="/" class="text-gray-600 hover:text-blue-600 transition-colors">หน้าแรก</a>
+          </li>
+          <li class="text-gray-400">/</li>
+          <li>
+            <a routerLink="/products" class="text-gray-600 hover:text-blue-600 transition-colors">สินค้า</a>
+          </li>
+          <li class="text-gray-400">/</li>
+          <li class="text-gray-900 font-medium">{{ product()!.name }}</li>
+        </ol>
+      </nav>
+
+      <!-- Main Product Section -->
+      <div class="grid lg:grid-cols-2 gap-10 mb-20 max-w-7xl mx-auto lg:items-stretch">
+        <!-- Left: Image Gallery -->
+        <div class="product-gallery flex gap-4 h-fit">
+          <!-- Thumbnail Gallery (Vertical) -->
+          @if (product()!.images && (product()!.images?.length ?? 0) > 1) {
+            <div class="thumbnail-gallery-vertical flex flex-col gap-3 max-h-[600px] overflow-y-auto pr-2">
+              @for (image of product()!.images; track image.id) {
+                <button
+                  (click)="selectImage(image)"
+                  class="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-white border-2 transition-all duration-300 hover:shadow-lg"
+                  [class.border-blue-600]="selectedImageId() === image.id"
+                  [class.shadow-md]="selectedImageId() === image.id"
+                  [class.border-gray-200]="selectedImageId() !== image.id"
+                  [class.hover:border-blue-400]="selectedImageId() !== image.id"
+                  [class.ring-2]="selectedImageId() === image.id"
+                  [class.ring-blue-200]="selectedImageId() === image.id"
+                  [class.ring-offset-1]="selectedImageId() === image.id"
+                  [class.hover:scale-105]="selectedImageId() !== image.id"
+                >
+                  <img
+                    [src]="image.imageUrl"
+                    [alt]="image.altText || product()!.name"
+                    class="w-full h-full object-cover"
+                  />
+                </button>
+              }
+            </div>
+          }
+
+          <!-- Main Image Container -->
+          <div class="main-image-container flex-1 bg-white rounded-3xl overflow-hidden border-2 border-gray-100 shadow-xl group">
+            <div class="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+              <img
+                [src]="getSelectedImage()"
+                [alt]="product()!.name"
+                class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+              />
+
+              <!-- Badges -->
+              <div class="absolute top-6 left-6 flex flex-col gap-3 z-10 badges-container">
+                @if (product()!.isNewArrival) {
+                  <span class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full text-sm font-bold shadow-xl backdrop-blur-sm">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                    สินค้าใหม่
+                  </span>
+                }
+                @if (product()!.isBestseller) {
+                  <span class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full text-sm font-bold shadow-xl backdrop-blur-sm">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                      <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                    </svg>
+                    ขายดี
+                  </span>
+                }
+              </div>
+
+              <!-- Wishlist Button -->
+              <button class="absolute top-6 right-6 w-14 h-14 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white hover:scale-110 transition-all shadow-lg z-10 wishlist-btn group/wishlist">
+                <svg class="w-6 h-6 text-red-500 group-hover/wishlist:text-red-600 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Info -->
-        <div>
-          @if (product.brand) {
-            <p class="text-sm text-gray-500 mb-2">{{ product.brand.name }}</p>
+        <!-- Right: Product Info -->
+        <div class="product-info flex flex-col h-full">
+          <!-- Brand -->
+          @if (product()!.brand) {
+            <div class="brand-badge inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full text-xs font-semibold text-blue-900 mb-3 hover:shadow-sm transition-all w-fit">
+              <svg class="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              {{ product()!.brand?.name }}
+            </div>
           }
 
-          <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ product.name }}</h1>
+          <!-- Product Title -->
+          <h1 class="product-title text-2xl md:text-3xl font-bold mb-3 text-gray-900 leading-snug">
+            {{ product()!.name }}
+          </h1>
 
-          <!-- Price and Stock Section -->
-          <div class="mb-6">
-            <p class="text-3xl font-bold text-gray-900 mb-3">
-              ฿{{ selectedVariant?.price?.toLocaleString() }}
-            </p>
-
-            <!-- Stock Status - Prominent Display -->
-            @if (isOutOfStock()) {
-              <!-- OUT OF STOCK - Big Red Alert -->
-              <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-4">
-                <div class="flex items-start gap-3">
-                  <div class="flex-shrink-0">
-                    <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+          <!-- Rating and Reviews -->
+          @if (product()?.averageRating && product()?.reviewCount) {
+            <div class="rating-section flex items-center gap-2 mb-4">
+              <div class="flex items-center gap-0.5">
+                @for (star of getStarArray(product()?.averageRating ?? 0); track $index) {
+                  @if (star) {
+                    <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                     </svg>
-                  </div>
-                  <div class="flex-1">
-                    <h3 class="text-lg font-bold text-red-900 mb-1">สินค้าหมด</h3>
-                    <p class="text-sm text-red-700">ขออภัย สินค้าชิ้นนี้หมดชั่วคราว</p>
-                  </div>
-                </div>
-              </div>
-            } @else if (isLowStock()) {
-              <!-- LOW STOCK - Yellow Warning -->
-              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-                <div class="flex items-center gap-2">
-                  <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                  </svg>
-                  <p class="font-semibold text-yellow-900">
-                    สินค้าใกล้หมด! เหลือเพียง <span class="text-lg">{{ selectedVariant?.stockQuantity }}</span> ชิ้น
-                  </p>
-                </div>
-              </div>
-            } @else {
-              <!-- IN STOCK - Green Badge -->
-              <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 text-green-700 rounded-lg font-medium mb-4">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                </svg>
-                <span>สินค้าพร้อมจัดส่ง</span>
-                @if (selectedVariant && selectedVariant.stockQuantity > 0) {
-                  <span class="text-green-600">• มีสินค้า {{ selectedVariant.stockQuantity }} ชิ้น</span>
+                  } @else {
+                    <svg class="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                    </svg>
+                  }
                 }
               </div>
-            }
+              <span class="text-sm font-bold text-gray-900">{{ product()?.averageRating }}</span>
+              <span class="text-gray-400 text-sm">·</span>
+              <a href="#reviews" class="text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline">{{ product()?.reviewCount }} รีวิว</a>
+            </div>
+          }
+
+          <!-- Short Description -->
+          <p class="text-gray-600 text-sm mb-5 leading-relaxed flex-1">{{ product()!.shortDescription }}</p>
+
+          <!-- Price Section -->
+          <div class="price-section bg-gradient-to-br from-blue-50 to-white rounded-lg p-3.5 border border-blue-200 shadow-sm mb-4">
+            <div class="flex items-end gap-2.5 mb-0.5">
+              <div>
+                <p class="text-xs text-gray-500 font-medium mb-0.5">ราคา</p>
+                <span class="text-2xl font-black bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                  ฿{{ selectedVariant()?.price?.toLocaleString() }}
+                </span>
+              </div>
+              @if (selectedVariant()?.compareAtPrice && (selectedVariant()?.compareAtPrice ?? 0) > (selectedVariant()?.price ?? 0)) {
+                <div class="flex flex-col items-start mb-0.5">
+                  <span class="text-sm text-gray-400 line-through">
+                    ฿{{ selectedVariant()?.compareAtPrice?.toLocaleString() }}
+                  </span>
+                  <span class="px-1.5 py-0.5 bg-red-500 text-white rounded text-xs font-bold">
+                    -{{ Math.round((((selectedVariant()?.compareAtPrice ?? 0) - (selectedVariant()?.price ?? 0)) / (selectedVariant()?.compareAtPrice ?? 1)) * 100) }}%
+                  </span>
+                </div>
+              }
+            </div>
+            <p class="text-xs text-gray-500">ราคารวม VAT แล้ว</p>
           </div>
 
-          <p class="text-gray-600 mb-8">{{ product.shortDescription }}</p>
+          <!-- Stock Status (Only show if out of stock or low stock) -->
+          @if (isOutOfStock() || isLowStock()) {
+            <div class="stock-status mb-4">
+              @if (isOutOfStock()) {
+                <div class="bg-red-500 text-white rounded-lg p-3 flex items-center gap-3 shadow-sm">
+                  <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-sm">สินค้าหมด</h3>
+                    <p class="text-xs opacity-90">ขออภัย สินค้าชิ้นนี้หมดชั่วคราว</p>
+                  </div>
+                </div>
+              } @else if (isLowStock()) {
+                <div class="bg-orange-500 text-white rounded-lg p-3 flex items-center gap-3 shadow-sm animate-pulse-slow">
+                  <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-sm">สินค้าใกล้หมด!</h3>
+                    <p class="text-xs opacity-90">เหลือเพียง <span class="font-bold">{{ selectedVariant()?.stockQuantity }}</span> ชิ้น รีบสั่งซื้อเลย</p>
+                  </div>
+                </div>
+              }
+            </div>
+          }
 
-          <!-- Variants -->
-          @if (product.variants && product.variants.length > 1) {
-            <div class="mb-6">
-              <p class="text-sm font-medium text-gray-900 mb-3">เลือกขนาด</p>
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                @for (variant of product.variants; track variant.id) {
+          <!-- Variant Selector -->
+          @if (product()!.variants && (product()!.variants?.length ?? 0) > 1) {
+            <div class="variant-section mb-4">
+              <h3 class="text-sm font-bold text-gray-900 mb-2 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                </svg>
+                เลือกขนาด/สี
+              </h3>
+              <div class="grid grid-cols-2 gap-2">
+                @for (variant of product()!.variants; track variant.id) {
                   <button
                     (click)="selectVariant(variant)"
                     [disabled]="variant.stockQuantity <= 0"
-                    [class.bg-primary-600]="selectedVariant?.id === variant.id && variant.stockQuantity > 0"
-                    [class.text-white]="selectedVariant?.id === variant.id && variant.stockQuantity > 0"
-                    [class.border-primary-600]="selectedVariant?.id === variant.id && variant.stockQuantity > 0"
-                    [class.bg-white]="selectedVariant?.id !== variant.id || variant.stockQuantity <= 0"
-                    [class.text-gray-900]="selectedVariant?.id !== variant.id && variant.stockQuantity > 0"
-                    [class.bg-gray-100]="variant.stockQuantity <= 0"
+                    class="variant-btn relative px-3 py-2 rounded-lg border-2 transition-all duration-300 font-semibold text-xs hover:shadow-md"
+                    [class.border-blue-600]="selectedVariant()?.id === variant.id && variant.stockQuantity > 0"
+                    [class.bg-blue-50]="selectedVariant()?.id === variant.id && variant.stockQuantity > 0"
+                    [class.text-blue-900]="selectedVariant()?.id === variant.id && variant.stockQuantity > 0"
+                    [class.shadow-sm]="selectedVariant()?.id === variant.id && variant.stockQuantity > 0"
+                    [class.border-gray-200]="selectedVariant()?.id !== variant.id && variant.stockQuantity > 0"
+                    [class.hover:border-blue-400]="variant.stockQuantity > 0"
+                    [class.hover:bg-gray-50]="selectedVariant()?.id !== variant.id && variant.stockQuantity > 0"
+                    [class.bg-gray-50]="variant.stockQuantity <= 0"
                     [class.text-gray-400]="variant.stockQuantity <= 0"
+                    [class.border-gray-200]="variant.stockQuantity <= 0"
                     [class.cursor-not-allowed]="variant.stockQuantity <= 0"
-                    class="relative px-4 py-3 border-2 rounded-lg transition-all duration-200 hover:border-primary-600 font-medium"
+                    [class.opacity-60]="variant.stockQuantity <= 0"
                   >
-                    <!-- Variant Name -->
-                    <div class="flex flex-col items-center">
-                      <span [class.line-through]="variant.stockQuantity <= 0">{{ variant.name }}</span>
+                    <!-- Color Swatch if available -->
+                    @if (variant.colorCode) {
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="w-8 h-8 rounded border-2 shadow-sm flex-shrink-0"
+                          [class.border-white]="selectedVariant()?.id === variant.id"
+                          [class.border-gray-300]="selectedVariant()?.id !== variant.id"
+                          [style.background-color]="variant.colorCode"
+                        ></div>
+                        <div class="text-left flex-1 min-w-0">
+                          <div class="font-bold truncate leading-tight" [class.line-through]="variant.stockQuantity <= 0">
+                            {{ variant.name }}
+                            @if (variant.stockQuantity <= 0) {
+                              <span class="text-red-600 ml-1">(หมด)</span>
+                            } @else if (variant.stockQuantity <= 5) {
+                              <span class="text-orange-600 ml-1">({{ variant.stockQuantity }})</span>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="text-center">
+                        <div class="font-bold leading-tight" [class.line-through]="variant.stockQuantity <= 0">
+                          {{ variant.name }}
+                          @if (variant.stockQuantity <= 0) {
+                            <span class="text-red-600 ml-1">(หมด)</span>
+                          } @else if (variant.stockQuantity <= 5) {
+                            <span class="text-orange-600 ml-1">({{ variant.stockQuantity }})</span>
+                          }
+                        </div>
+                      </div>
+                    }
 
-                      <!-- Stock Info -->
-                      @if (variant.stockQuantity <= 0) {
-                        <span class="text-xs text-red-600 font-semibold mt-1">หมด</span>
-                      } @else if (variant.stockQuantity <= 5) {
-                        <span class="text-xs text-yellow-600 mt-1">เหลือ {{ variant.stockQuantity }}</span>
-                      }
-                    </div>
-
-                    <!-- Out of Stock Badge -->
+                    <!-- Out of Stock Overlay -->
                     @if (variant.stockQuantity <= 0) {
-                      <div class="absolute inset-0 flex items-center justify-center bg-gray-900/10 rounded-lg">
-                        <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">สินค้าหมด</span>
+                      <div class="absolute inset-0 flex items-center justify-center bg-gray-900/5 rounded-lg backdrop-blur-[1px]">
+                        <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">หมด</span>
+                      </div>
+                    }
+
+                    <!-- Selected Checkmark -->
+                    @if (selectedVariant()?.id === variant.id && variant.stockQuantity > 0) {
+                      <div class="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center shadow-md border-2 border-white">
+                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
                       </div>
                     }
                   </button>
                 }
               </div>
-
-              <!-- Help Text -->
-              @if (product.variants.some(v => v.stockQuantity <= 0)) {
-                <p class="text-xs text-gray-500 mt-2">
-                  💡 ขนาดที่แสดง "หมด" ไม่สามารถเลือกได้ในขณะนี้
-                </p>
-              }
             </div>
           }
 
-          <!-- Quantity -->
+          <!-- Quantity Selector -->
           @if (!isOutOfStock()) {
-            <div class="mb-6">
-              <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-medium text-gray-900">จำนวนที่ต้องการ</p>
-                @if (selectedVariant && selectedVariant.stockQuantity > 0) {
-                  <p class="text-sm font-semibold text-primary-600">
-                    คงเหลือ: {{ selectedVariant.stockQuantity }} ชิ้น
-                  </p>
+            <div class="quantity-section mb-4">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-bold text-gray-900">จำนวน</h3>
+                @if (selectedVariant() && (selectedVariant()?.stockQuantity ?? 0) > 0) {
+                  <span class="text-xs text-gray-500">
+                    คงเหลือ: {{ selectedVariant()?.stockQuantity }} ชิ้น
+                  </span>
                 }
               </div>
-              <div class="flex items-center gap-4">
+
+              <div class="flex items-center gap-2 bg-white rounded-lg p-1.5 border border-gray-300 hover:border-blue-400 transition-colors">
                 <button
                   (click)="decrementQuantity()"
-                  [disabled]="quantity <= 1"
-                  class="w-12 h-12 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold text-lg"
+                  [disabled]="quantity() <= 1"
+                  class="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-blue-50 hover:text-blue-600 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed font-bold text-base active:scale-95"
                 >
-                  -
+                  −
                 </button>
-                <div class="flex-1 max-w-[120px]">
-                  <input
-                    type="number"
-                    [(ngModel)]="quantity"
-                    [min]="1"
-                    [max]="getMaxQuantity()"
-                    class="w-full px-4 py-3 text-center text-lg font-bold border-2 border-gray-300 rounded-lg focus:border-primary-600 focus:ring-2 focus:ring-primary-200 outline-none"
-                  />
-                </div>
+
+                <input
+                  type="number"
+                  [ngModel]="quantity()" (ngModelChange)="quantity.set($event)"
+                  [min]="1"
+                  [max]="getMaxQuantity()"
+                  class="flex-1 text-center text-base font-bold bg-transparent border-none outline-none text-gray-900"
+                />
+
                 <button
                   (click)="incrementQuantity()"
-                  [disabled]="quantity >= getMaxQuantity()"
-                  class="w-12 h-12 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold text-lg"
+                  [disabled]="quantity() >= getMaxQuantity()"
+                  class="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-blue-50 hover:text-blue-600 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed font-bold text-base active:scale-95"
                 >
                   +
                 </button>
               </div>
 
-              <!-- Max Quantity Warning -->
-              @if (quantity >= getMaxQuantity()) {
-                <p class="text-xs text-yellow-600 mt-2 flex items-center gap-1">
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+              @if (quantity() >= getMaxQuantity()) {
+                <p class="text-xs text-orange-600 mt-1.5 flex items-center gap-1">
+                  <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                   </svg>
-                  คุณเลือกสินค้าครบจำนวนที่มีในสต็อกแล้ว
+                  <span>คุณเลือกสินค้าครบจำนวนที่มีในสต็อกแล้ว</span>
                 </p>
               }
             </div>
           }
 
-          <!-- Add to Cart -->
+          <!-- Add to Cart Button -->
           <button
             (click)="addToCart()"
             [disabled]="isOutOfStock()"
-            class="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition-colors mb-4 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            class="add-to-cart-btn w-full py-3 rounded-lg font-bold text-base transition-all hover:shadow-lg flex items-center justify-center gap-2 active:scale-98"
+            [class.bg-blue-600]="!isOutOfStock()"
+            [class.hover:bg-blue-700]="!isOutOfStock()"
+            [class.text-white]="!isOutOfStock()"
+            [class.shadow-md]="!isOutOfStock()"
+            [class.bg-gray-300]="isOutOfStock()"
+            [class.text-gray-500]="isOutOfStock()"
+            [class.cursor-not-allowed]="isOutOfStock()"
           >
             @if (isOutOfStock()) {
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"></path>
+                <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/>
               </svg>
               <span>สินค้าหมด</span>
             } @else {
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
               </svg>
               <span>เพิ่มเข้าตะกร้า</span>
             }
           </button>
-
-          <!-- Description -->
-          @if (product.fullDescription) {
-            <div class="border-t pt-8 mt-8">
-              <h3 class="font-medium text-gray-900 mb-3">รายละเอียด</h3>
-              <p class="text-gray-600 whitespace-pre-line">{{ product.fullDescription }}</p>
-            </div>
-          }
         </div>
       </div>
 
-      <!-- Reviews Section -->
-      <div class="mt-16 border-t pt-12">
-        <!-- Reviews Header -->
-        <div class="flex items-center justify-between mb-8">
-          <div>
-            <h2 class="text-2xl font-bold text-gray-900 mb-2">รีวิวสินค้า</h2>
-            @if (getApprovedReviews().length > 0) {
-              <div class="flex items-center gap-3">
-                <div class="flex items-center gap-1">
-                  @for (filled of getStarArray(getAverageRating()); track $index) {
-                    @if (filled) {
-                      <svg class="w-5 h-5 text-yellow-400 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                      </svg>
-                    } @else {
-                      <svg class="w-5 h-5 text-gray-300 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                      </svg>
-                    }
+      <!-- Product Specifications Section -->
+      @if (product()!.specifications || product()!.features || product()!.fullDescription) {
+        <div class="specifications-section mb-20">
+          <div class="bg-white rounded-3xl border-2 border-gray-100 shadow-xl overflow-hidden">
+            <!-- Tabs -->
+            <div class="tabs-header flex border-b-2 border-gray-100 bg-gray-50/50">
+              <button
+                (click)="activeTab.set('description')"
+                class="tab-btn flex-1 px-8 py-5 font-bold transition-all relative group"
+                [class.bg-white]="activeTab() === 'description'"
+                [class.text-blue-600]="activeTab() === 'description'"
+                [class.shadow-sm]="activeTab() === 'description'"
+                [class.text-gray-600]="activeTab() !== 'description'"
+                [class.hover:bg-white/50]="activeTab() !== 'description'"
+                [class.hover:text-gray-900]="activeTab() !== 'description'"
+              >
+                <span class="flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+                  </svg>
+                  รายละเอียด
+                </span>
+                @if (activeTab() === 'description') {
+                  <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-lg"></div>
+                }
+              </button>
+
+              @if (product()!.specifications) {
+                <button
+                  (click)="activeTab.set('specs')"
+                  class="tab-btn flex-1 px-8 py-5 font-bold transition-all relative group"
+                  [class.bg-white]="activeTab() === 'specs'"
+                  [class.text-blue-600]="activeTab() === 'specs'"
+                  [class.shadow-sm]="activeTab() === 'specs'"
+                  [class.text-gray-600]="activeTab() !== 'specs'"
+                  [class.hover:bg-white/50]="activeTab() !== 'specs'"
+                  [class.hover:text-gray-900]="activeTab() !== 'specs'"
+                >
+                  <span class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    ข้อมูลจำเพาะ
+                  </span>
+                  @if (activeTab() === 'specs') {
+                    <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-lg"></div>
+                  }
+                </button>
+              }
+
+              @if (product()!.features && (product()!.features?.length ?? 0) > 0) {
+                <button
+                  (click)="activeTab.set('features')"
+                  class="tab-btn flex-1 px-8 py-5 font-bold transition-all relative group"
+                  [class.bg-white]="activeTab() === 'features'"
+                  [class.text-blue-600]="activeTab() === 'features'"
+                  [class.shadow-sm]="activeTab() === 'features'"
+                  [class.text-gray-600]="activeTab() !== 'features'"
+                  [class.hover:bg-white/50]="activeTab() !== 'features'"
+                  [class.hover:text-gray-900]="activeTab() !== 'features'"
+                >
+                  <span class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                    </svg>
+                    คุณสมบัติ
+                  </span>
+                  @if (activeTab() === 'features') {
+                    <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-lg"></div>
+                  }
+                </button>
+              }
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content p-8">
+              @if (activeTab() === 'description' && product()!.fullDescription) {
+                <div class="description-content prose max-w-none">
+                  <div class="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-6 border border-blue-100">
+                    <p class="text-gray-700 text-base leading-relaxed whitespace-pre-line">{{ product()!.fullDescription }}</p>
+                  </div>
+                </div>
+              }
+
+              @if (activeTab() === 'specs' && product()!.specifications) {
+                <div class="specs-grid grid md:grid-cols-2 gap-4">
+                  @for (spec of getSpecsArray(); track spec.key) {
+                    <div class="spec-item flex items-start gap-4 p-5 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all">
+                      <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <dt class="text-sm font-bold text-gray-500 mb-1.5">{{ spec.key }}</dt>
+                        <dd class="text-lg font-black text-gray-900">{{ spec.value }}</dd>
+                      </div>
+                    </div>
                   }
                 </div>
-                <span class="text-lg font-medium text-gray-900">{{ getAverageRating() }}</span>
-                <span class="text-gray-500">จาก {{ getApprovedReviews().length }} รีวิว</span>
-              </div>
-            }
-          </div>
+              }
 
-          @if (isAuthenticated) {
-            <button
-              (click)="openReviewForm()"
-              class="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
-            >
-              <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-              <span>เขียนรีวิว</span>
-            </button>
-          }
+              @if (activeTab() === 'features' && product()!.features && (product()!.features?.length ?? 0) > 0) {
+                <div class="features-list grid md:grid-cols-2 gap-4">
+                  @for (feature of product()!.features; track $index) {
+                    <div class="feature-item flex items-start gap-4 p-5 bg-gradient-to-br from-green-50 to-white rounded-2xl border border-green-200 hover:border-green-400 hover:shadow-md transition-all">
+                      <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                      </div>
+                      <p class="text-gray-700 font-semibold leading-relaxed flex-1">{{ feature }}</p>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
         </div>
+      }
 
-        <!-- Reviews List -->
-        @if (loadingReviews) {
-          <div class="flex justify-center py-12">
-            <div class="animate-spin h-8 w-8 border-2 border-gray-900 border-t-transparent rounded-full"></div>
-          </div>
-        } @else if (getApprovedReviews().length === 0) {
-          <!-- Empty State -->
-          <div class="text-center py-12 bg-gray-50 rounded-lg">
-            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-            </svg>
-            <p class="text-gray-600 text-lg mb-4">ยังไม่มีรีวิว เป็นคนแรกที่รีวิวสินค้านี้!</p>
+      <!-- Reviews Section -->
+      <div class="reviews-section" id="reviews">
+        <div class="bg-white rounded-3xl border-2 border-gray-100 shadow-xl overflow-hidden">
+          <!-- Reviews Header -->
+          <div class="reviews-header flex flex-col md:flex-row md:items-center justify-between p-8 gap-6 bg-gradient-to-br from-blue-50 via-white to-blue-50 border-b-2 border-gray-100">
+            <div>
+              <h2 class="text-3xl font-black text-gray-900 mb-3 flex items-center gap-3">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+                รีวิวสินค้า
+              </h2>
+              @if (getApprovedReviews().length > 0) {
+                <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-1">
+                    @for (filled of getStarArray(getAverageRating()); track $index) {
+                      @if (filled) {
+                        <svg class="w-6 h-6 text-yellow-400 fill-current drop-shadow-md" viewBox="0 0 20 20">
+                          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                        </svg>
+                      } @else {
+                        <svg class="w-6 h-6 text-gray-300 fill-current" viewBox="0 0 20 20">
+                          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                        </svg>
+                      }
+                    }
+                  </div>
+                  <span class="text-3xl font-black bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">{{ getAverageRating() }}</span>
+                  <span class="text-gray-600 font-medium">·</span>
+                  <span class="text-gray-600 font-semibold">{{ getApprovedReviews().length }} รีวิว</span>
+                </div>
+              }
+            </div>
+
             @if (isAuthenticated) {
               <button
                 (click)="openReviewForm()"
-                class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                class="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-2xl font-bold hover:shadow-xl transition-all flex items-center gap-3 active:scale-95 shadow-lg"
               >
-                เขียนรีวิวเลย
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                </svg>
+                <span>เขียนรีวิว</span>
               </button>
             }
           </div>
-        } @else {
-          <!-- Review Cards -->
-          <div class="grid gap-4">
-            @for (review of getApprovedReviews(); track review.id) {
-              <app-review-card [review]="review"></app-review-card>
+
+          <!-- Reviews Content -->
+          <div class="reviews-content p-8">
+            @if (loadingReviews()) {
+              <div class="flex justify-center py-20">
+                <div class="relative">
+                  <div class="animate-spin rounded-full h-20 w-20 border-4 border-blue-200 border-t-blue-600"></div>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-10 h-10 bg-blue-600 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            } @else if (getApprovedReviews().length === 0) {
+              <!-- Empty State -->
+              <div class="text-center py-20">
+                <div class="w-40 h-40 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
+                  <svg class="w-20 h-20 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                  </svg>
+                </div>
+                <h3 class="text-3xl font-black text-gray-900 mb-4">ยังไม่มีรีวิว</h3>
+                <p class="text-gray-600 text-lg mb-8 max-w-md mx-auto">เป็นคนแรกที่รีวิวสินค้านี้และช่วยให้ลูกค้าท่านอื่นตัดสินใจได้ง่ายขึ้น</p>
+                @if (isAuthenticated) {
+                  <button
+                    (click)="openReviewForm()"
+                    class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-2xl font-bold hover:shadow-xl transition-all active:scale-95 shadow-lg"
+                  >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    เขียนรีวิวเลย
+                  </button>
+                }
+              </div>
+            } @else {
+              <!-- Review Cards -->
+              <div class="reviews-list grid gap-6">
+                @for (review of getApprovedReviews(); track review.id) {
+                  <app-review-card [review]="review"></app-review-card>
+                }
+              </div>
             }
           </div>
-        }
+        </div>
       </div>
     </div>
   }
 </div>
 
 <!-- Review Form Modal -->
-@if (showReviewForm && product) {
+@if (showReviewForm() && product()) {
   <app-review-form
-    [productId]="product.id"
+    [productId]="product()!.id"
     (reviewSubmitted)="onReviewSubmitted()"
     (formClosed)="closeReviewForm()"
   ></app-review-form>

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -11,21 +11,20 @@ import { Cart, CartItem } from '../../../models/cart.model';
   imports: [CommonModule, RouterLink],
   templateUrl: './cart.html',
   styleUrl: './cart.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CartComponent implements OnInit, OnDestroy {
-  cart: Cart | null = null;
+  cart = signal<Cart | null>(null);
   private subscription?: Subscription;
 
   constructor(
     public cartService: CartService,
-    private notificationService: NotificationService,
-    private cdr: ChangeDetectorRef
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
     this.subscription = this.cartService.cart$.subscribe(cart => {
-      this.cart = cart;
-      this.cdr.detectChanges();
+      this.cart.set(cart);
     });
   }
 

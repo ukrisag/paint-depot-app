@@ -9,6 +9,7 @@ export interface Toast {
 
 export interface ConfirmDialog {
   message: string;
+  type?: 'danger' | 'warning' | 'info';
   confirmText?: string;
   cancelText?: string;
   onConfirm: () => void;
@@ -68,15 +69,6 @@ export class NotificationService {
       return;
     }
 
-    // ลบ timeout ของ toast เก่าทั้งหมด
-    currentToasts.forEach(t => {
-      const timeout = this.toastTimeouts.get(t.id);
-      if (timeout) {
-        clearTimeout(timeout);
-        this.toastTimeouts.delete(t.id);
-      }
-    });
-
     const toast: Toast = {
       id: ++this.toastIdCounter,
       message,
@@ -88,21 +80,18 @@ export class NotificationService {
     if (newToasts.length > this.MAX_TOASTS) {
       const removedToasts = newToasts.slice(0, newToasts.length - this.MAX_TOASTS);
       removedToasts.forEach(t => {
-        const timeout = this.toastTimeouts.get(t.id);
-        if (timeout) {
-          clearTimeout(timeout);
-          this.toastTimeouts.delete(t.id);
-        }
+        this.removeToast(t.id);
       });
       newToasts = newToasts.slice(-this.MAX_TOASTS);
     }
 
     this.toastsSubject.next(newToasts);
 
-    // Auto remove after 3 seconds
+    // Auto remove: 2 seconds for success/info, 4 seconds for error
+    const duration = type === 'error' ? 4000 : 2000;
     const timeout = setTimeout(() => {
       this.removeToast(toast.id);
-    }, 3000);
+    }, duration);
 
     this.toastTimeouts.set(toast.id, timeout);
   }
@@ -130,10 +119,12 @@ export class NotificationService {
     onConfirm: () => void,
     onCancel?: () => void,
     confirmText: string = 'ยืนยัน',
-    cancelText: string = 'ยกเลิก'
+    cancelText: string = 'ยกเลิก',
+    type: 'danger' | 'warning' | 'info' = 'info'
   ) {
     this.confirmDialogSubject.next({
       message,
+      type,
       confirmText,
       cancelText,
       onConfirm,

@@ -1,32 +1,130 @@
-<div class="bg-white min-h-screen">
-  <div class="container mx-auto px-4 py-12">
-    <h1 class="text-3xl font-bold text-gray-900 mb-8">แบรนด์</h1>
+<!-- Modern Brands Page with Gradient Hero -->
+<div class="min-h-screen bg-gray-50">
 
-    @if (loading) {
-      <div class="text-center py-16 text-gray-500">กำลังโหลด...</div>
+  <!-- Hero Section with Gradient Background -->
+  <div class="relative overflow-hidden bg-blue-600 text-white">
+    <!-- Animated Background Blobs -->
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="absolute top-0 -left-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+      <div class="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+      <div class="absolute -bottom-8 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- Gradient Overlay Pattern -->
+    <div class="absolute inset-0 bg-transparent"></div>
+
+    <div class="container mx-auto px-4 py-16 sm:py-20 relative z-10">
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb-container mb-8 text-sm">
+        <a routerLink="/" class="text-white/80 hover:text-white transition-colors">
+          <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+          หน้าแรก
+        </a>
+        <span class="mx-2 text-white/60">/</span>
+        <span class="text-white font-medium">แบรนด์</span>
+      </nav>
+
+      <!-- Hero Content -->
+      <div class="hero-content max-w-4xl">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black mb-4 leading-tight">
+          แบรนด์คุณภาพ
+        </h1>
+        <p class="text-lg sm:text-xl text-white/90 mb-6 max-w-2xl">
+          ค้นพบแบรนด์ชั้นนำที่เราคัดสรรมาเพื่อคุณ พร้อมสินค้าคุณภาพระดับพรีเมียม
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Brands Grid Section -->
+  <div class="container mx-auto px-4 py-12 sm:py-16">
+    @if (loading()) {
+      <!-- Modern Loading State -->
+      <div class="loading-container flex flex-col items-center justify-center py-20">
+        <div class="relative">
+          <!-- Spinning rings -->
+          <div class="w-20 h-20 border-4 border-brand-200 rounded-full animate-spin border-t-brand-600"></div>
+          <div class="absolute top-2 left-2 w-16 h-16 border-4 border-blue-200 rounded-full animate-spin border-t-purple-600 animation-delay-150"></div>
+          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full animate-pulse"></div>
+        </div>
+        <p class="mt-6 text-gray-600 font-medium">กำลังโหลดแบรนด์...</p>
+      </div>
     } @else {
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        @for (brand of brands; track brand.id) {
+      <!-- Brands Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+        @for (brand of brands(); track brand.id) {
           <div
             (click)="goToBrand(brand.id)"
-            class="p-6 border rounded-lg hover:shadow-lg transition-shadow cursor-pointer text-center"
+            class="brand-card group relative bg-white rounded-3xl p-8 cursor-pointer transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 overflow-hidden border border-gray-100"
           >
-            @if (brand.logoUrl) {
-              <div class="h-32 flex items-center justify-center mb-4">
-                <img
-                  [src]="brand.logoUrl"
-                  [alt]="brand.name"
-                  class="max-h-full max-w-full object-contain"
-                />
+            <!-- Gradient Overlay on Hover -->
+            <div class="absolute inset-0 bg-gray-100 group-/10 group-/10 group-/10 transition-all duration-500 rounded-3xl"></div>
+
+            <!-- Decorative Corner Glow -->
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-gray-100 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+
+            <div class="relative z-10 text-center">
+              <!-- Logo Container -->
+              @if (brand.logoUrl) {
+                <div class="h-32 flex items-center justify-center mb-6 transform group-hover:scale-105 transition-transform duration-500">
+                  <img
+                    [src]="brand.logoUrl"
+                    [alt]="brand.name"
+                    class="max-h-full max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500"
+                  />
+                </div>
+              } @else {
+                <!-- Fallback Icon if no logo -->
+                <div class="h-32 flex items-center justify-center mb-6">
+                  <div class="w-20 h-20 rounded-2xl bg-white flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                    </svg>
+                  </div>
+                </div>
+              }
+
+              <!-- Brand Name with Gradient on Hover -->
+              <h3 class="text-xl font-bold mb-2 text-gray-900 group- group- transition-all duration-500">
+                {{ brand.name }}
+              </h3>
+
+              <!-- Description -->
+              @if (brand.description) {
+                <p class="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2">
+                  {{ brand.description }}
+                </p>
+              }
+
+              <!-- View Products Link with Animation -->
+              <div class="flex items-center justify-center text-brand-600 font-semibold text-sm group-hover:text-blue-600 transition-colors">
+                <span>ดูสินค้า</span>
+                <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-2 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                </svg>
               </div>
-            }
-            <h3 class="text-lg font-medium text-gray-900 mb-1">{{ brand.name }}</h3>
-            @if (brand.description) {
-              <p class="text-gray-600 text-sm">{{ brand.description }}</p>
-            }
+            </div>
+
+            <!-- Bottom Border Gradient -->
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 rounded-b-3xl"></div>
           </div>
         }
       </div>
+
+      <!-- Empty State (if no brands) -->
+      @if (brands().length === 0) {
+        <div class="text-center py-20">
+          <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-white mb-6">
+            <svg class="w-12 h-12 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">ไม่พบแบรนด์</h3>
+          <p class="text-gray-600">กรุณาลองใหม่อีกครั้งในภายหลัง</p>
+        </div>
+      }
     }
   </div>
 </div>

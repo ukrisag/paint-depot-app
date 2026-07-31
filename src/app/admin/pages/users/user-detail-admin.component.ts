@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -16,22 +16,22 @@ import { OrderDto } from '../../../services/openapi-client/model/orderDto';
   styleUrls: ['./user-detail-admin.component.css']
 })
 export class UserDetailAdminComponent implements OnInit {
-  user?: UserDto;
-  userId?: number;
-  userOrders: OrderDto[] = [];
+  user = signal<UserDto | undefined>(undefined);
+  userId = signal<number | undefined>(undefined);
+  userOrders = signal<OrderDto[]>([]);
 
-  loading = true;
-  loadingOrders = false;
-  updating = false;
-  error = '';
+  loading = signal(true);
+  loadingOrders = signal(false);
+  updating = signal(false);
+  error = signal('');
 
   // Role update form
-  selectedRole = '';
-  editingRole = false;
+  selectedRole = signal('');
+  editingRole = signal(false);
 
   // Ban/Activate confirmation
-  showToggleConfirm = false;
-  toggleAction: 'ban' | 'activate' = 'ban';
+  showToggleConfirm = signal(false);
+  toggleAction = signal<'ban' | 'activate'>('ban');
 
   // Available roles
   roles = [
@@ -41,58 +41,55 @@ export class UserDetailAdminComponent implements OnInit {
   ];
 
   // Stats
-  totalOrders = 0;
-  totalSpent = 0;
+  totalOrders = signal(0);
+  totalSpent = signal(0);
 
   constructor(
     private adminUserService: AdminUserService,
     private adminOrderService: AdminOrderService,
     private notificationService: NotificationService,
     private router: Router,
-    private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.userId = parseInt(id, 10);
-      this.loadUser(this.userId);
-      this.loadUserOrders(this.userId);
+      this.userId.set(parseInt(id, 10));
+      this.loadUser(this.userId()!);
+      this.loadUserOrders(this.userId()!);
     } else {
-      this.error = 'User ID not found';
-      this.loading = false;
+      this.error.set('User ID not found');
+      this.loading.set(false);
     }
   }
 
   loadUser(id: number): void {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
 
     this.adminUserService.getUserById(id).subscribe({
       next: (user) => {
         if (user) {
-          this.user = user;
-          this.selectedRole = user.role || '';
+          this.user.set(user);
+          this.selectedRole.set(user.role || '');
         } else {
-          this.error = 'User not found';
+          this.error.set('User not found');
           this.notificationService.error('User not found');
         }
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       },
       error: (err) => {
-        this.error = 'Unable to load user details';
+        this.error.set('Unable to load user details');
         this.notificationService.error('Unable to load user details');
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
         console.error('Error loading user:', err);
       }
     });
   }
 
   loadUserOrders(userId: number): void {
-    this.loadingOrders = true;
+    this.loadingOrders.set(true);
 
     // Load all orders and filter by user ID
     this.adminOrderService.getAllOrders(1, 100).subscribe({
@@ -101,43 +98,41 @@ export class UserDetailAdminComponent implements OnInit {
         const userOrders = (response.data || []).filter((o: OrderDto) => o.userId === userId);
 
         // Sort by date (newest first) and take only recent 10
-        this.userOrders = userOrders
+        this.userOrders.set(userOrders
           .sort((a: OrderDto, b: OrderDto) => {
             const dateA = new Date(a.createdAt || 0).getTime();
             const dateB = new Date(b.createdAt || 0).getTime();
             return dateB - dateA;
           })
-          .slice(0, 10);
+          .slice(0, 10));
 
         // Calculate stats (exclude cancelled orders)
         const activeOrders = userOrders.filter((o: OrderDto) =>
           o.status?.toLowerCase() !== 'cancelled'
         );
-        this.totalOrders = activeOrders.length;
-        this.totalSpent = activeOrders.reduce((sum: number, order: OrderDto) => sum + (order.totalAmount || 0), 0);
+        this.totalOrders.set(activeOrders.length);
+        this.totalSpent.set(activeOrders.reduce((sum: number, order: OrderDto) => sum + (order.totalAmount || 0), 0));
 
-        this.loadingOrders = false;
-        this.cdr.detectChanges();
+        this.loadingOrders.set(false);
       },
       error: (err) => {
         console.error('Error loading user orders:', err);
-        this.loadingOrders = false;
-        this.cdr.detectChanges();
+        this.loadingOrders.set(false);
       }
     });
   }
 
   onEditRole(): void {
-    this.editingRole = true;
+    this.editingRole.set(true);
   }
 
   onCancelEditRole(): void {
-    this.editingRole = false;
-    this.selectedRole = this.user?.role || '';
+    this.editingRole.set(false);
+    this.selectedRole.set(this.user()?.role || '');
   }
 
   onSaveRole(): void {
-    if (!this.userId || !this.selectedRole) {
+    if (!this.userId() || !this.selectedRole()) {
       this.notificationService.error('Please select a role');
       return;
     }
@@ -145,27 +140,25 @@ export class UserDetailAdminComponent implements OnInit {
     // Note: This would require an API endpoint to update user role
     // For now, we'll show a message that this feature needs backend support
     this.notificationService.info('Role update feature requires additional API endpoint implementation');
-    this.editingRole = false;
+    this.editingRole.set(false);
 
     // Uncomment this when the API endpoint is available:
     /*
-    this.updating = true;
+    this.updating.set(true);
 
     // Call API to update role
-    this.adminUserService.updateUserRole(this.userId, { role: this.selectedRole }).subscribe({
+    this.adminUserService.updateUserRole(this.userId()!, { role: this.selectedRole() }).subscribe({
       next: (updatedUser) => {
         if (updatedUser) {
-          this.user = updatedUser;
+          this.user.set(updatedUser);
           this.notificationService.success('User role updated successfully');
         }
-        this.updating = false;
-        this.editingRole = false;
-        this.cdr.detectChanges();
+        this.updating.set(false);
+        this.editingRole.set(false);
       },
       error: (err) => {
         this.notificationService.error('Unable to update user role');
-        this.updating = false;
-        this.cdr.detectChanges();
+        this.updating.set(false);
         console.error('Error updating user role:', err);
       }
     });
@@ -173,40 +166,38 @@ export class UserDetailAdminComponent implements OnInit {
   }
 
   onToggleStatusClick(): void {
-    this.toggleAction = this.user?.status === 'Active' ? 'ban' : 'activate';
-    this.showToggleConfirm = true;
+    this.toggleAction.set(this.user()?.status === 'Active' ? 'ban' : 'activate');
+    this.showToggleConfirm.set(true);
   }
 
   onConfirmToggleStatus(): void {
-    if (!this.userId) return;
+    if (!this.userId()) return;
 
-    this.updating = true;
-    const newStatus = this.toggleAction === 'ban' ? 'Banned' : 'Active';
+    this.updating.set(true);
+    const newStatus = this.toggleAction() === 'ban' ? 'Banned' : 'Active';
 
-    this.adminUserService.updateUserStatus(this.userId, { status: newStatus }).subscribe({
+    this.adminUserService.updateUserStatus(this.userId()!, { status: newStatus }).subscribe({
       next: (updatedUser) => {
         if (updatedUser) {
-          this.user = updatedUser;
+          this.user.set(updatedUser);
           this.notificationService.success(
-            this.toggleAction === 'ban' ? 'User banned successfully' : 'User activated successfully'
+            this.toggleAction() === 'ban' ? 'User banned successfully' : 'User activated successfully'
           );
         }
-        this.showToggleConfirm = false;
-        this.updating = false;
-        this.cdr.detectChanges();
+        this.showToggleConfirm.set(false);
+        this.updating.set(false);
       },
       error: (err) => {
         this.notificationService.error('Unable to update user status');
-        this.showToggleConfirm = false;
-        this.updating = false;
-        this.cdr.detectChanges();
+        this.showToggleConfirm.set(false);
+        this.updating.set(false);
         console.error('Error updating user status:', err);
       }
     });
   }
 
   onCancelToggleStatus(): void {
-    this.showToggleConfirm = false;
+    this.showToggleConfirm.set(false);
   }
 
   onBack(): void {

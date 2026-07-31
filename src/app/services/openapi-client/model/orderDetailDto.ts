@@ -17,6 +17,7 @@ export interface OrderDetailDto {
     status?: string | null;
     paymentStatus?: string | null;
     paymentMethod?: string | null;
+    invoiceType?: string | null;
     paymentSlipUrl?: string | null;
     subtotal?: number;
     discountAmount?: number;

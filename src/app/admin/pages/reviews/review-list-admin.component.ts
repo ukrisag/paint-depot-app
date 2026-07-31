@@ -1,8 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminReviewService } from '../../services/admin-review.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ReportService } from '../../../services/report.service';
 import { ReviewDto } from '../../../services/openapi-client/model/reviewDto';
 
 @Component({
@@ -13,38 +14,38 @@ import { ReviewDto } from '../../../services/openapi-client/model/reviewDto';
   styleUrls: ['./review-list-admin.component.css']
 })
 export class ReviewListAdminComponent implements OnInit {
-  reviews: ReviewDto[] = [];
-  filteredReviews: ReviewDto[] = [];
+  reviews = signal<ReviewDto[]>([]);
+  filteredReviews = signal<ReviewDto[]>([]);
 
-  loading = true;
-  error = '';
+  loading = signal(true);
+  error = signal('');
 
   // Filters
-  searchQuery = '';
-  selectedStatus?: string;
-  selectedRating?: number;
+  searchQuery = signal('');
+  selectedStatus = signal<string | undefined>(undefined);
+  selectedRating = signal<number | undefined>(undefined);
 
   // Pagination
-  currentPage = 1;
-  pageSize = 20;
-  totalItems = 0;
-  totalPages = 1;
+  currentPage = signal(1);
+  pageSize = signal(20);
+  totalItems = signal(0);
+  totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()));
 
   // Selection for bulk actions
-  selectedReviewIds = new Set<number>();
-  selectAll = false;
+  selectedReviewIds = signal(new Set<number>());
+  selectAll = signal(false);
 
   // Modal states
-  showDetailModal = false;
-  showDeleteConfirm = false;
-  showApproveConfirm = false;
-  showRejectConfirm = false;
-  showBulkApproveConfirm = false;
-  showBulkRejectConfirm = false;
+  showDetailModal = signal(false);
+  showDeleteConfirm = signal(false);
+  showApproveConfirm = signal(false);
+  showRejectConfirm = signal(false);
+  showBulkApproveConfirm = signal(false);
+  showBulkRejectConfirm = signal(false);
 
   // Current review for actions
-  currentReview?: ReviewDto;
-  adminResponseText = '';
+  currentReview = signal<ReviewDto | undefined>(undefined);
+  adminResponseText = signal('');
 
   // Available statuses
   statuses = [
@@ -59,7 +60,7 @@ export class ReviewListAdminComponent implements OnInit {
   constructor(
     private adminReviewService: AdminReviewService,
     private notificationService: NotificationService,
-    private cdr: ChangeDetectorRef
+    private reportService: ReportService
   ) {}
 
   ngOnInit(): void {
@@ -67,45 +68,43 @@ export class ReviewListAdminComponent implements OnInit {
   }
 
   loadReviews(): void {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
 
     // Note: This is a mock implementation
     // In production, you need an API endpoint that returns all reviews
     // For now, we'll use empty array or mock data
     this.adminReviewService.getAllReviews().subscribe({
       next: (reviews) => {
-        this.reviews = reviews || [];
+        this.reviews.set(reviews || []);
         this.applyFilters();
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       },
       error: (err) => {
-        this.error = 'Unable to load reviews';
+        this.error.set('Unable to load reviews');
         this.notificationService.error('Unable to load reviews');
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
         console.error('Error loading reviews:', err);
       }
     });
   }
 
   applyFilters(): void {
-    let filtered = [...this.reviews];
+    let filtered = [...this.reviews()];
 
     // Filter by status
-    if (this.selectedStatus) {
-      filtered = filtered.filter(r => r.status === this.selectedStatus);
+    if (this.selectedStatus()) {
+      filtered = filtered.filter(r => r.status === this.selectedStatus());
     }
 
     // Filter by rating
-    if (this.selectedRating) {
-      filtered = filtered.filter(r => r.rating === this.selectedRating);
+    if (this.selectedRating()) {
+      filtered = filtered.filter(r => r.rating === this.selectedRating());
     }
 
     // Filter by search query (product name or reviewer name)
-    if (this.searchQuery) {
-      const query = this.searchQuery.toLowerCase();
+    if (this.searchQuery()) {
+      const query = this.searchQuery().toLowerCase();
       filtered = filtered.filter(r =>
         (r.userName?.toLowerCase().includes(query)) ||
         (r.title?.toLowerCase().includes(query)) ||
@@ -113,51 +112,50 @@ export class ReviewListAdminComponent implements OnInit {
       );
     }
 
-    this.filteredReviews = filtered;
-    this.totalItems = filtered.length;
-    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+    this.filteredReviews.set(filtered);
+    this.totalItems.set(filtered.length);
 
     // Reset to first page if current page is out of bounds
-    if (this.currentPage > this.totalPages && this.totalPages > 0) {
-      this.currentPage = 1;
+    if (this.currentPage() > this.totalPages() && this.totalPages() > 0) {
+      this.currentPage.set(1);
     }
   }
 
   onSearch(): void {
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.applyFilters();
   }
 
   onFilterChange(): void {
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.applyFilters();
   }
 
   clearFilters(): void {
-    this.searchQuery = '';
-    this.selectedStatus = undefined;
-    this.selectedRating = undefined;
-    this.currentPage = 1;
+    this.searchQuery.set('');
+    this.selectedStatus.set(undefined);
+    this.selectedRating.set(undefined);
+    this.currentPage.set(1);
     this.applyFilters();
   }
 
   onPageChange(page: number): void {
-    if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
+    if (page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
     window.scrollTo(0, 0);
   }
 
   getPaginatedReviews(): ReviewDto[] {
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    return this.filteredReviews.slice(startIndex, endIndex);
+    const startIndex = (this.currentPage() - 1) * this.pageSize();
+    const endIndex = startIndex + this.pageSize();
+    return this.filteredReviews().slice(startIndex, endIndex);
   }
 
   getPageNumbers(): number[] {
     const pages: number[] = [];
     const maxPages = 5;
-    let startPage = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-    let endPage = Math.min(this.totalPages, startPage + maxPages - 1);
+    let startPage = Math.max(1, this.currentPage() - Math.floor(maxPages / 2));
+    let endPage = Math.min(this.totalPages(), startPage + maxPages - 1);
 
     if (endPage - startPage < maxPages - 1) {
       startPage = Math.max(1, endPage - maxPages + 1);
@@ -172,157 +170,167 @@ export class ReviewListAdminComponent implements OnInit {
 
   // View detail modal
   onViewDetail(review: ReviewDto): void {
-    this.currentReview = review;
-    this.adminResponseText = review.adminResponse || '';
-    this.showDetailModal = true;
+    this.currentReview.set(review);
+    this.adminResponseText.set(review.adminResponse || '');
+    this.showDetailModal.set(true);
   }
 
   closeDetailModal(): void {
-    this.showDetailModal = false;
-    this.currentReview = undefined;
-    this.adminResponseText = '';
+    this.showDetailModal.set(false);
+    this.currentReview.set(undefined);
+    this.adminResponseText.set('');
   }
 
   // Approve review
   onApproveClick(review: ReviewDto): void {
-    this.currentReview = review;
-    this.showApproveConfirm = true;
+    this.currentReview.set(review);
+    this.showApproveConfirm.set(true);
   }
 
   onConfirmApprove(): void {
-    if (!this.currentReview?.id) return;
+    if (!this.currentReview()?.id) return;
 
-    this.adminReviewService.approveReview(this.currentReview.id, this.adminResponseText || undefined).subscribe({
+    this.adminReviewService.approveReview(this.currentReview()!.id!, this.adminResponseText() || undefined).subscribe({
       next: (updatedReview) => {
         if (updatedReview) {
-          const index = this.reviews.findIndex(r => r.id === updatedReview.id);
-          if (index !== -1) {
-            this.reviews[index] = updatedReview;
-          }
+          this.reviews.update(reviews => {
+            const index = reviews.findIndex(r => r.id === updatedReview.id);
+            if (index !== -1) {
+              const updated = [...reviews];
+              updated[index] = updatedReview;
+              return updated;
+            }
+            return reviews;
+          });
           this.applyFilters();
           this.notificationService.success('Review approved successfully');
         }
-        this.showApproveConfirm = false;
-        this.currentReview = undefined;
-        this.adminResponseText = '';
-        this.cdr.detectChanges();
+        this.showApproveConfirm.set(false);
+        this.currentReview.set(undefined);
+        this.adminResponseText.set('');
       },
       error: (err) => {
         this.notificationService.error('Unable to approve review');
-        this.showApproveConfirm = false;
-        this.currentReview = undefined;
-        this.adminResponseText = '';
-        this.cdr.detectChanges();
+        this.showApproveConfirm.set(false);
+        this.currentReview.set(undefined);
+        this.adminResponseText.set('');
         console.error('Error approving review:', err);
       }
     });
   }
 
   onCancelApprove(): void {
-    this.showApproveConfirm = false;
-    this.currentReview = undefined;
-    this.adminResponseText = '';
+    this.showApproveConfirm.set(false);
+    this.currentReview.set(undefined);
+    this.adminResponseText.set('');
   }
 
   // Reject review
   onRejectClick(review: ReviewDto): void {
-    this.currentReview = review;
-    this.showRejectConfirm = true;
+    this.currentReview.set(review);
+    this.showRejectConfirm.set(true);
   }
 
   onConfirmReject(): void {
-    if (!this.currentReview?.id) return;
+    if (!this.currentReview()?.id) return;
 
-    this.adminReviewService.rejectReview(this.currentReview.id).subscribe({
+    this.adminReviewService.rejectReview(this.currentReview()!.id!).subscribe({
       next: (updatedReview) => {
         if (updatedReview) {
-          const index = this.reviews.findIndex(r => r.id === updatedReview.id);
-          if (index !== -1) {
-            this.reviews[index] = updatedReview;
-          }
+          this.reviews.update(reviews => {
+            const index = reviews.findIndex(r => r.id === updatedReview.id);
+            if (index !== -1) {
+              const updated = [...reviews];
+              updated[index] = updatedReview;
+              return updated;
+            }
+            return reviews;
+          });
           this.applyFilters();
           this.notificationService.success('Review rejected successfully');
         }
-        this.showRejectConfirm = false;
-        this.currentReview = undefined;
-        this.cdr.detectChanges();
+        this.showRejectConfirm.set(false);
+        this.currentReview.set(undefined);
       },
       error: (err) => {
         this.notificationService.error('Unable to reject review');
-        this.showRejectConfirm = false;
-        this.currentReview = undefined;
-        this.cdr.detectChanges();
+        this.showRejectConfirm.set(false);
+        this.currentReview.set(undefined);
         console.error('Error rejecting review:', err);
       }
     });
   }
 
   onCancelReject(): void {
-    this.showRejectConfirm = false;
-    this.currentReview = undefined;
+    this.showRejectConfirm.set(false);
+    this.currentReview.set(undefined);
   }
 
   // Delete review
   onDeleteClick(review: ReviewDto): void {
-    this.currentReview = review;
-    this.showDeleteConfirm = true;
+    this.currentReview.set(review);
+    this.showDeleteConfirm.set(true);
   }
 
   onConfirmDelete(): void {
-    if (!this.currentReview?.id) return;
+    if (!this.currentReview()?.id) return;
 
-    this.adminReviewService.deleteReview(this.currentReview.id).subscribe({
+    this.adminReviewService.deleteReview(this.currentReview()!.id!).subscribe({
       next: () => {
-        this.reviews = this.reviews.filter(r => r.id !== this.currentReview?.id);
+        this.reviews.update(reviews => reviews.filter(r => r.id !== this.currentReview()?.id));
         this.applyFilters();
         this.notificationService.success('Review deleted successfully');
-        this.showDeleteConfirm = false;
-        this.currentReview = undefined;
-        this.cdr.detectChanges();
+        this.showDeleteConfirm.set(false);
+        this.currentReview.set(undefined);
       },
       error: (err) => {
         this.notificationService.error('Unable to delete review');
-        this.showDeleteConfirm = false;
-        this.currentReview = undefined;
-        this.cdr.detectChanges();
+        this.showDeleteConfirm.set(false);
+        this.currentReview.set(undefined);
         console.error('Error deleting review:', err);
       }
     });
   }
 
   onCancelDelete(): void {
-    this.showDeleteConfirm = false;
-    this.currentReview = undefined;
+    this.showDeleteConfirm.set(false);
+    this.currentReview.set(undefined);
   }
 
   // Bulk selection
   toggleSelectAll(): void {
-    if (this.selectAll) {
+    if (this.selectAll()) {
       // Select all on current page
-      this.getPaginatedReviews().forEach(review => {
-        if (review.id) {
-          this.selectedReviewIds.add(review.id);
-        }
+      this.selectedReviewIds.update(ids => {
+        const newIds = new Set(ids);
+        this.getPaginatedReviews().forEach(review => {
+          if (review.id) {
+            newIds.add(review.id);
+          }
+        });
+        return newIds;
       });
     } else {
       // Deselect all
-      this.selectedReviewIds.clear();
+      this.selectedReviewIds.set(new Set<number>());
     }
-    this.cdr.detectChanges();
   }
 
   toggleReviewSelection(reviewId: number | undefined): void {
     if (!reviewId) return;
 
-    if (this.selectedReviewIds.has(reviewId)) {
-      this.selectedReviewIds.delete(reviewId);
-    } else {
-      this.selectedReviewIds.add(reviewId);
-    }
+    this.selectedReviewIds.update(ids => {
+      const newIds = new Set(ids);
+      if (newIds.has(reviewId)) {
+        newIds.delete(reviewId);
+      } else {
+        newIds.add(reviewId);
+      }
+      return newIds;
+    });
 
     // Update selectAll checkbox state
     this.updateSelectAllState();
-    this.cdr.detectChanges();
   }
 
   updateSelectAllState(): void {
@@ -330,25 +338,25 @@ export class ReviewListAdminComponent implements OnInit {
       .map(r => r.id)
       .filter(id => id !== undefined) as number[];
 
-    this.selectAll = currentPageReviewIds.length > 0 &&
-      currentPageReviewIds.every(id => this.selectedReviewIds.has(id));
+    this.selectAll.set(currentPageReviewIds.length > 0 &&
+      currentPageReviewIds.every(id => this.selectedReviewIds().has(id)));
   }
 
   isReviewSelected(reviewId: number | undefined): boolean {
-    return reviewId !== undefined && this.selectedReviewIds.has(reviewId);
+    return reviewId !== undefined && this.selectedReviewIds().has(reviewId);
   }
 
   // Bulk approve
   onBulkApproveClick(): void {
-    if (this.selectedReviewIds.size === 0) {
+    if (this.selectedReviewIds().size === 0) {
       this.notificationService.info('Please select reviews to approve');
       return;
     }
-    this.showBulkApproveConfirm = true;
+    this.showBulkApproveConfirm.set(true);
   }
 
   onConfirmBulkApprove(): void {
-    const reviewIds = Array.from(this.selectedReviewIds);
+    const reviewIds = Array.from(this.selectedReviewIds());
     let completedCount = 0;
     let errorCount = 0;
 
@@ -357,10 +365,15 @@ export class ReviewListAdminComponent implements OnInit {
         next: (updatedReview) => {
           completedCount++;
           if (updatedReview) {
-            const index = this.reviews.findIndex(r => r.id === updatedReview.id);
-            if (index !== -1) {
-              this.reviews[index] = updatedReview;
-            }
+            this.reviews.update(reviews => {
+              const index = reviews.findIndex(r => r.id === updatedReview.id);
+              if (index !== -1) {
+                const updated = [...reviews];
+                updated[index] = updatedReview;
+                return updated;
+              }
+              return reviews;
+            });
           }
 
           if (completedCount + errorCount === reviewIds.length) {
@@ -380,20 +393,20 @@ export class ReviewListAdminComponent implements OnInit {
   }
 
   onCancelBulkApprove(): void {
-    this.showBulkApproveConfirm = false;
+    this.showBulkApproveConfirm.set(false);
   }
 
   // Bulk reject
   onBulkRejectClick(): void {
-    if (this.selectedReviewIds.size === 0) {
+    if (this.selectedReviewIds().size === 0) {
       this.notificationService.info('Please select reviews to reject');
       return;
     }
-    this.showBulkRejectConfirm = true;
+    this.showBulkRejectConfirm.set(true);
   }
 
   onConfirmBulkReject(): void {
-    const reviewIds = Array.from(this.selectedReviewIds);
+    const reviewIds = Array.from(this.selectedReviewIds());
     let completedCount = 0;
     let errorCount = 0;
 
@@ -402,10 +415,15 @@ export class ReviewListAdminComponent implements OnInit {
         next: (updatedReview) => {
           completedCount++;
           if (updatedReview) {
-            const index = this.reviews.findIndex(r => r.id === updatedReview.id);
-            if (index !== -1) {
-              this.reviews[index] = updatedReview;
-            }
+            this.reviews.update(reviews => {
+              const index = reviews.findIndex(r => r.id === updatedReview.id);
+              if (index !== -1) {
+                const updated = [...reviews];
+                updated[index] = updatedReview;
+                return updated;
+              }
+              return reviews;
+            });
           }
 
           if (completedCount + errorCount === reviewIds.length) {
@@ -425,14 +443,14 @@ export class ReviewListAdminComponent implements OnInit {
   }
 
   onCancelBulkReject(): void {
-    this.showBulkRejectConfirm = false;
+    this.showBulkRejectConfirm.set(false);
   }
 
   finishBulkOperation(successCount: number, errorCount: number, action: string): void {
-    this.selectedReviewIds.clear();
-    this.selectAll = false;
-    this.showBulkApproveConfirm = false;
-    this.showBulkRejectConfirm = false;
+    this.selectedReviewIds.set(new Set<number>());
+    this.selectAll.set(false);
+    this.showBulkApproveConfirm.set(false);
+    this.showBulkRejectConfirm.set(false);
     this.applyFilters();
 
     if (errorCount === 0) {
@@ -442,8 +460,6 @@ export class ReviewListAdminComponent implements OnInit {
     } else {
       this.notificationService.info(`${successCount} review(s) ${action}, ${errorCount} failed`);
     }
-
-    this.cdr.detectChanges();
   }
 
   // Helper methods
@@ -485,5 +501,16 @@ export class ReviewListAdminComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     }).format(date);
+  }
+
+  // Report downloads
+  downloadExcel(): void {
+    this.reportService.downloadReviewsExcel();
+    this.notificationService.success('กำลังดาวน์โหลดรายงาน Excel...');
+  }
+
+  downloadPdf(): void {
+    this.reportService.downloadReviewsPdf();
+    this.notificationService.success('กำลังดาวน์โหลดรายงาน PDF...');
   }
 }

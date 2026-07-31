@@ -7,9 +7,9 @@
 
   <!-- Filters Bar -->
   <div class="mb-6 bg-white rounded-lg shadow p-4">
-    <!-- Search -->
-    <div class="mb-4">
-      <div class="w-full">
+    <!-- Search and Export Buttons -->
+    <div class="mb-4 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+      <div class="w-full sm:flex-1">
         <input
           type="text"
           [(ngModel)]="searchQuery"
@@ -17,6 +17,23 @@
           placeholder="ค้นหาเลขที่คำสั่งซื้อ..."
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+      </div>
+      <!-- Export Buttons -->
+      <div class="flex gap-2">
+        <button
+          (click)="downloadExcel()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+        >
+          <span>📊</span>
+          <span>Excel</span>
+        </button>
+        <button
+          (click)="downloadPdf()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+        >
+          <span>📄</span>
+          <span>PDF</span>
+        </button>
       </div>
     </div>
 
@@ -72,17 +89,17 @@
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="loading" class="flex justify-center items-center py-12">
+  <div *ngIf="loading()" class="flex justify-center items-center py-12">
     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-    {{ error }}
+  <div *ngIf="error() && !loading()" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+    {{ error() }}
   </div>
 
   <!-- Orders Table (Desktop) -->
-  <div *ngIf="!loading && !error" class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+  <div *ngIf="!loading() && !error()" class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
@@ -95,7 +112,7 @@
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        <tr *ngFor="let order of orders" class="hover:bg-gray-50">
+        <tr *ngFor="let order of orders()" class="hover:bg-gray-50">
           <!-- Order Number -->
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="text-sm font-medium text-gray-900 font-mono">{{ order.orderNumber }}</div>
@@ -138,14 +155,14 @@
     </table>
 
     <!-- Empty State -->
-    <div *ngIf="orders.length === 0" class="text-center py-12">
+    <div *ngIf="orders().length === 0" class="text-center py-12">
       <p class="text-gray-500">ไม่พบคำสั่งซื้อ</p>
     </div>
   </div>
 
   <!-- Orders Cards (Mobile/Tablet) -->
-  <div *ngIf="!loading && !error" class="lg:hidden space-y-4">
-    <div *ngFor="let order of orders" class="bg-white rounded-lg shadow p-4">
+  <div *ngIf="!loading() && !error()" class="lg:hidden space-y-4">
+    <div *ngFor="let order of orders()" class="bg-white rounded-lg shadow p-4">
       <div class="flex justify-between items-start mb-3">
         <div>
           <div class="text-sm font-medium text-gray-900 font-mono">{{ order.orderNumber }}</div>
@@ -181,27 +198,27 @@
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="orders.length === 0" class="text-center py-12 bg-white rounded-lg">
+    <div *ngIf="orders().length === 0" class="text-center py-12 bg-white rounded-lg">
       <p class="text-gray-500">ไม่พบคำสั่งซื้อ</p>
     </div>
   </div>
 
   <!-- Pagination -->
-  <div *ngIf="!loading && !error && totalPages > 1" class="mt-6">
+  <div *ngIf="!loading() && !error() && totalPages() > 1" class="mt-6">
     <div class="bg-white rounded-lg shadow px-4 py-3">
       <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
         <!-- Page Info -->
         <div class="text-sm text-gray-600">
-          แสดง {{ orders.length }} จาก {{ totalItems }} รายการ
+          แสดง {{ orders().length }} จาก {{ totalItems() }} รายการ
         </div>
 
         <!-- Page Numbers -->
         <div class="flex items-center gap-2">
           <!-- Previous Button -->
           <button
-            (click)="onPageChange(currentPage - 1)"
-            [disabled]="currentPage === 1"
-            [class]="currentPage === 1
+            (click)="onPageChange(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+            [class]="currentPage() === 1
               ? 'px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed'
               : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
           >
@@ -212,7 +229,7 @@
           <button
             *ngFor="let page of getPageNumbers()"
             (click)="onPageChange(page)"
-            [class]="page === currentPage
+            [class]="page === currentPage()
               ? 'px-3 py-1 rounded bg-primary-600 text-white'
               : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
           >
@@ -221,9 +238,9 @@
 
           <!-- Next Button -->
           <button
-            (click)="onPageChange(currentPage + 1)"
-            [disabled]="currentPage === totalPages"
-            [class]="currentPage === totalPages
+            (click)="onPageChange(currentPage() + 1)"
+            [disabled]="currentPage() === totalPages()"
+            [class]="currentPage() === totalPages()
               ? 'px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed'
               : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
           >

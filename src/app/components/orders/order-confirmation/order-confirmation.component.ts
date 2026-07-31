@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
@@ -12,13 +12,26 @@ import { OrderDetailDto } from '../../../services/openapi-client/model/models';
   imports: [CommonModule],
   templateUrl: './order-confirmation.component.html',
   styleUrls: ['./order-confirmation.component.css']
+  // Temporarily disable OnPush to test
+  // changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OrderConfirmationComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  order: OrderDetailDto | null = null;
-  isLoading = true;
-  error: string | null = null;
+  order = signal<OrderDetailDto | null>(null);
+  isLoading = signal(true);
+  error = signal<string | null>(null);
+
+  // Computed signals for reactive values
+  subtotalBeforeDiscount = computed(() => {
+    const currentOrder = this.order();
+    if (!currentOrder) return 0;
+    return currentOrder.subtotal || 0;
+  });
+
+  isBankTransfer = computed(() => {
+    return this.order()?.paymentMethod === 'transfer';
+  });
 
   // Bank details for payment instructions
   bankDetails = {
@@ -34,15 +47,20 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    console.log('OrderConfirmationComponent constructor called');
+  }
 
   ngOnInit(): void {
+    console.log('OrderConfirmationComponent ngOnInit called');
     const orderId = this.route.snapshot.paramMap.get('id');
+    console.log('Order ID from route:', orderId);
     if (orderId) {
       this.loadOrder(+orderId);
     } else {
-      this.error = 'ไม่พบหมายเลขคำสั่งซื้อ';
-      this.isLoading = false;
+      console.log('No order ID found in route');
+      this.error.set('ไม่พบหมายเลขคำสั่งซื้อ');
+      this.isLoading.set(false);
     }
   }
 
@@ -52,45 +70,41 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
   }
 
   loadOrder(orderId: number): void {
-    this.isLoading = true;
-    this.error = null;
-    this.cdr.detectChanges();
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    console.log('Loading order with ID:', orderId);
 
     this.orderService.getOrderById(orderId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (order) => {
-          this.order = order;
-          this.isLoading = false;
-          this.cdr.detectChanges();
+          console.log('Order loaded successfully:', order);
+          console.log('Order items:', order?.items);
+          this.order.set(order);
+          this.isLoading.set(false);
+          this.cdr.markForCheck(); // Force change detection
         },
         error: (err) => {
           console.error('Error loading order:', err);
-          this.error = 'ไม่สามารถโหลดข้อมูลคำสั่งซื้อได้';
-          this.isLoading = false;
+          console.error('Error details:', err.error);
+          this.error.set('ไม่สามารถโหลดข้อมูลคำสั่งซื้อได้');
+          this.isLoading.set(false);
+          this.cdr.markForCheck(); // Force change detection
           this.notificationService.error('เกิดข้อผิดพลาดในการโหลดข้อมูลคำสั่งซื้อ');
-          this.cdr.detectChanges();
         }
       });
   }
 
   viewOrderDetail(): void {
-    if (this.order?.id) {
-      this.router.navigate(['/orders', this.order.id]);
+    const currentOrder = this.order();
+    if (currentOrder?.id) {
+      this.router.navigate(['/orders', currentOrder.id]);
     }
   }
 
   goHome(): void {
     this.router.navigate(['/']);
-  }
-
-  get subtotalBeforeDiscount(): number {
-    if (!this.order) return 0;
-    return (this.order.subtotal || 0) + (this.order.discountAmount || 0);
-  }
-
-  get isBankTransfer(): boolean {
-    return this.order?.paymentMethod === 'BankTransfer';
   }
 
   formatDate(dateString: string | null | undefined): string {

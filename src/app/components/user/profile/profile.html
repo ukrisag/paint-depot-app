@@ -1,165 +1,156 @@
-<div class="min-h-screen bg-gray-50">
+<!-- Clean Modern Profile Page -->
+<div class="min-h-screen profile-wrapper">
   <div class="container mx-auto px-4 py-8">
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">บัญชีของฉัน</h1>
-      <p class="text-gray-600 mt-2">จัดการข้อมูลส่วนตัว คำสั่งซื้อ และความปลอดภัยของบัญชี</p>
+    <!-- Hero Section -->
+    <div class="hero-section" #heroSection>
+      <div class="hero-content">
+        <div class="hero-avatar-wrapper">
+          <div class="hero-avatar">
+            <span class="avatar-text">{{ currentUser?.firstName?.charAt(0) || 'U' }}{{ currentUser?.lastName?.charAt(0) || '' }}</span>
+          </div>
+        </div>
+        <div class="hero-text">
+          <h1 class="hero-title">{{ currentUser?.fullName || 'ผู้ใช้งาน' }}</h1>
+          <p class="hero-subtitle">{{ currentUser?.email }}</p>
+          <div class="hero-badge">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span>Premium Member</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="flex flex-col lg:flex-row gap-6">
-      <!-- Mobile Tab Dropdown -->
+    <div class="flex flex-col lg:flex-row gap-6 mt-8">
+      <!-- Mobile Tab Selector -->
       <div class="lg:hidden">
         <button
           (click)="toggleMobileMenu()"
-          class="w-full flex items-center justify-between bg-white px-4 py-3 rounded-lg shadow-sm border border-gray-200"
+          class="mobile-tab-button"
           type="button"
+          #mobileButton
         >
-          <span class="font-medium text-gray-900">
-            @switch (activeTab) {
+          <span class="font-medium">
+            @switch (activeTab()) {
               @case ('account') { ข้อมูลบัญชี }
               @case ('orders') { คำสั่งซื้อ }
               @case ('wishlist') { รายการโปรด }
               @case ('password') { เปลี่ยนรหัสผ่าน }
             }
           </span>
-          <svg class="w-5 h-5 text-gray-500 transition-transform" [class.rotate-180]="isMobileMenuOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 transition-transform duration-300" [class.rotate-180]="isMobileMenuOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </button>
 
-        <!-- Mobile Dropdown Menu -->
-        <div *ngIf="isMobileMenuOpen" class="mt-2 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <button
-            (click)="setActiveTab('account')"
-            class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors"
-            [class.bg-primary-50]="activeTab === 'account'"
-            [class.text-primary-600]="activeTab === 'account'"
-            [class.font-medium]="activeTab === 'account'"
-            type="button"
-          >
-            ข้อมูลบัญชี
+        <div *ngIf="isMobileMenuOpen()" class="mobile-menu" #mobileMenu>
+          <button (click)="setActiveTab('account')" class="mobile-menu-item" [class.active]="activeTab() === 'account'" type="button">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            <span>ข้อมูลบัญชี</span>
           </button>
-          <button
-            (click)="setActiveTab('orders')"
-            class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-t border-gray-100"
-            [class.bg-primary-50]="activeTab === 'orders'"
-            [class.text-primary-600]="activeTab === 'orders'"
-            [class.font-medium]="activeTab === 'orders'"
-            type="button"
-          >
-            คำสั่งซื้อ
+          <button (click)="setActiveTab('orders')" class="mobile-menu-item" [class.active]="activeTab() === 'orders'" type="button">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            </svg>
+            <span>คำสั่งซื้อ</span>
           </button>
-          <button
-            (click)="setActiveTab('wishlist')"
-            class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-t border-gray-100"
-            [class.bg-primary-50]="activeTab === 'wishlist'"
-            [class.text-primary-600]="activeTab === 'wishlist'"
-            [class.font-medium]="activeTab === 'wishlist'"
-            type="button"
-          >
-            รายการโปรด
+          <button (click)="setActiveTab('wishlist')" class="mobile-menu-item" [class.active]="activeTab() === 'wishlist'" type="button">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+            </svg>
+            <span>รายการโปรด</span>
           </button>
-          <button
-            (click)="setActiveTab('password')"
-            class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-t border-gray-100"
-            [class.bg-primary-50]="activeTab === 'password'"
-            [class.text-primary-600]="activeTab === 'password'"
-            [class.font-medium]="activeTab === 'password'"
-            type="button"
-          >
-            เปลี่ยนรหัสผ่าน
+          <button (click)="setActiveTab('password')" class="mobile-menu-item" [class.active]="activeTab() === 'password'" type="button">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+            <span>เปลี่ยนรหัสผ่าน</span>
           </button>
         </div>
       </div>
 
       <!-- Desktop Sidebar -->
-      <div class="hidden lg:block lg:w-64 flex-shrink-0">
-        <div class="bg-white rounded-lg shadow-sm p-4">
-          <!-- User Info -->
-          <div class="border-b border-gray-200 pb-4 mb-4">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                {{ currentUser?.firstName?.charAt(0) || 'U' }}{{ currentUser?.lastName?.charAt(0) || '' }}
-              </div>
-              <div>
-                <p class="font-medium text-gray-900">{{ currentUser?.fullName || 'ผู้ใช้งาน' }}</p>
-                <p class="text-sm text-gray-500">{{ currentUser?.email }}</p>
-              </div>
-            </div>
-          </div>
-
+      <div class="hidden lg:block lg:w-80 flex-shrink-0">
+        <div class="sidebar-card" #sidebar>
           <!-- Navigation -->
-          <nav class="space-y-1">
+          <nav class="space-y-2">
             <button
               (click)="setActiveTab('account')"
-              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
-              [class.bg-primary-50]="activeTab === 'account'"
-              [class.text-primary-600]="activeTab === 'account'"
-              [class.font-medium]="activeTab === 'account'"
-              [class.text-gray-700]="activeTab !== 'account'"
-              [class.hover:bg-gray-50]="activeTab !== 'account'"
+              class="nav-button"
+              [class.active]="activeTab() === 'account'"
               type="button"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-              </svg>
-              <span>ข้อมูลบัญชี</span>
+              <div class="nav-button-content">
+                <div class="nav-icon-wrapper">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                </div>
+                <span>ข้อมูลบัญชี</span>
+              </div>
+              <div class="nav-indicator"></div>
             </button>
 
             <button
               (click)="setActiveTab('orders')"
-              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
-              [class.bg-primary-50]="activeTab === 'orders'"
-              [class.text-primary-600]="activeTab === 'orders'"
-              [class.font-medium]="activeTab === 'orders'"
-              [class.text-gray-700]="activeTab !== 'orders'"
-              [class.hover:bg-gray-50]="activeTab !== 'orders'"
+              class="nav-button"
+              [class.active]="activeTab() === 'orders'"
               type="button"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-              </svg>
-              <span>คำสั่งซื้อ</span>
+              <div class="nav-button-content">
+                <div class="nav-icon-wrapper">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                  </svg>
+                </div>
+                <span>คำสั่งซื้อ</span>
+              </div>
+              <div class="nav-indicator"></div>
             </button>
 
             <button
               (click)="setActiveTab('wishlist')"
-              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
-              [class.bg-primary-50]="activeTab === 'wishlist'"
-              [class.text-primary-600]="activeTab === 'wishlist'"
-              [class.font-medium]="activeTab === 'wishlist'"
-              [class.text-gray-700]="activeTab !== 'wishlist'"
-              [class.hover:bg-gray-50]="activeTab !== 'wishlist'"
+              class="nav-button"
+              [class.active]="activeTab() === 'wishlist'"
               type="button"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-              </svg>
-              <span>รายการโปรด</span>
+              <div class="nav-button-content">
+                <div class="nav-icon-wrapper">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                  </svg>
+                </div>
+                <span>รายการโปรด</span>
+              </div>
+              <div class="nav-indicator"></div>
             </button>
 
             <button
               (click)="setActiveTab('password')"
-              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
-              [class.bg-primary-50]="activeTab === 'password'"
-              [class.text-primary-600]="activeTab === 'password'"
-              [class.font-medium]="activeTab === 'password'"
-              [class.text-gray-700]="activeTab !== 'password'"
-              [class.hover:bg-gray-50]="activeTab !== 'password'"
+              class="nav-button"
+              [class.active]="activeTab() === 'password'"
               type="button"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-              </svg>
-              <span>เปลี่ยนรหัสผ่าน</span>
+              <div class="nav-button-content">
+                <div class="nav-icon-wrapper">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                  </svg>
+                </div>
+                <span>เปลี่ยนรหัสผ่าน</span>
+              </div>
+              <div class="nav-indicator"></div>
             </button>
           </nav>
 
           <!-- Logout Button -->
-          <div class="mt-4 pt-4 border-t border-gray-200">
+          <div class="mt-6 pt-6 border-t border-gray-200">
             <button
               (click)="logout()"
-              class="w-full flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              class="logout-button"
               type="button"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,184 +162,220 @@
         </div>
       </div>
 
-      <!-- Main Content -->
-      <div class="flex-1">
-        <!-- Tab 1: Account Info -->
-        <div *ngIf="activeTab === 'account'" class="bg-white rounded-lg shadow-sm p-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-6">ข้อมูลบัญชี</h2>
+      <!-- Main Content Area -->
+      <div class="flex-1 min-w-0">
+        <!-- Account Info Tab -->
+        <div *ngIf="activeTab() === 'account'" class="content-card" #accountTab>
+          <div class="card-header">
+            <h2 class="card-title">ข้อมูลบัญชี</h2>
+            <p class="card-subtitle">จัดการข้อมูลส่วนตัวของคุณ</p>
+          </div>
 
           <form [formGroup]="accountForm" (ngSubmit)="onSubmitAccount()">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- First Name -->
-              <div>
-                <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
-                  ชื่อ <span class="text-red-500">*</span>
-                </label>
+              <div class="form-group">
                 <input
                   type="text"
                   id="firstName"
                   formControlName="firstName"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  [class.border-red-500]="accountForm.get('firstName')?.touched && accountForm.get('firstName')?.invalid"
+                  class="form-input peer"
+                  placeholder=" "
+                  [class.error]="accountForm.get('firstName')?.touched && accountForm.get('firstName')?.invalid"
                 />
-                <p *ngIf="getFieldError(accountForm, 'firstName')" class="mt-1 text-sm text-red-600">
+                <label for="firstName" class="form-label">
+                  ชื่อ <span class="text-red-500">*</span>
+                </label>
+                <p *ngIf="getFieldError(accountForm, 'firstName')" class="form-error">
                   {{ getFieldError(accountForm, 'firstName') }}
                 </p>
               </div>
 
               <!-- Last Name -->
-              <div>
-                <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
-                  นามสกุล <span class="text-red-500">*</span>
-                </label>
+              <div class="form-group">
                 <input
                   type="text"
                   id="lastName"
                   formControlName="lastName"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  [class.border-red-500]="accountForm.get('lastName')?.touched && accountForm.get('lastName')?.invalid"
+                  class="form-input peer"
+                  placeholder=" "
+                  [class.error]="accountForm.get('lastName')?.touched && accountForm.get('lastName')?.invalid"
                 />
-                <p *ngIf="getFieldError(accountForm, 'lastName')" class="mt-1 text-sm text-red-600">
+                <label for="lastName" class="form-label">
+                  นามสกุล <span class="text-red-500">*</span>
+                </label>
+                <p *ngIf="getFieldError(accountForm, 'lastName')" class="form-error">
                   {{ getFieldError(accountForm, 'lastName') }}
                 </p>
               </div>
 
               <!-- Email (Read-only) -->
-              <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                  อีเมล
-                </label>
+              <div class="form-group">
                 <input
                   type="email"
                   id="email"
                   formControlName="email"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                  class="form-input peer disabled"
+                  placeholder=" "
                   readonly
                 />
-                <p class="mt-1 text-xs text-gray-500">ไม่สามารถเปลี่ยนอีเมลได้</p>
+                <label for="email" class="form-label">
+                  อีเมล
+                </label>
+                <p class="form-hint mt-2 text-sm text-gray-500">ไม่สามารถเปลี่ยนอีเมลได้</p>
               </div>
 
               <!-- Phone -->
-              <div>
-                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
-                  เบอร์โทรศัพท์
-                </label>
+              <div class="form-group">
                 <input
                   type="tel"
                   id="phone"
                   formControlName="phone"
-                  placeholder="0812345678"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  [class.border-red-500]="accountForm.get('phone')?.touched && accountForm.get('phone')?.invalid"
+                  class="form-input peer"
+                  placeholder=" "
+                  [class.error]="accountForm.get('phone')?.touched && accountForm.get('phone')?.invalid"
                 />
-                <p *ngIf="getFieldError(accountForm, 'phone')" class="mt-1 text-sm text-red-600">
+                <label for="phone" class="form-label">
+                  เบอร์โทรศัพท์
+                </label>
+                <p *ngIf="getFieldError(accountForm, 'phone')" class="form-error">
                   {{ getFieldError(accountForm, 'phone') }}
                 </p>
               </div>
             </div>
 
             <!-- Submit Button -->
-            <div class="mt-6">
+            <div class="mt-8">
               <button
                 type="submit"
-                class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:bg-neutral-400 disabled:cursor-not-allowed flex items-center gap-2"
-                [disabled]="isLoadingAccount"
+                class="submit-button"
+                [disabled]="isLoadingAccount()"
               >
-                <span *ngIf="isLoadingAccount" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                <span>{{ isLoadingAccount ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง' }}</span>
+                <span *ngIf="isLoadingAccount()" class="button-spinner"></span>
+                <span>{{ isLoadingAccount() ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง' }}</span>
+                <svg *ngIf="!isLoadingAccount()" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
               </button>
             </div>
           </form>
         </div>
 
-        <!-- Tab 2: Orders -->
-        <div *ngIf="activeTab === 'orders'" class="bg-white rounded-lg shadow-sm p-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-6">คำสั่งซื้อของฉัน</h2>
+        <!-- Orders Tab -->
+        <div *ngIf="activeTab() === 'orders'" class="content-card" #ordersTab>
+          <div class="card-header">
+            <h2 class="card-title">คำสั่งซื้อของฉัน</h2>
+            <p class="card-subtitle">ติดตามและจัดการคำสั่งซื้อของคุณ</p>
+          </div>
           <app-order-list></app-order-list>
         </div>
 
-        <!-- Tab 3: Wishlist -->
-        <div *ngIf="activeTab === 'wishlist'">
+        <!-- Wishlist Tab -->
+        <div *ngIf="activeTab() === 'wishlist'" class="content-card" #wishlistTab>
           <app-wishlist></app-wishlist>
         </div>
 
-        <!-- Tab 4: Change Password -->
-        <div *ngIf="activeTab === 'password'" class="bg-white rounded-lg shadow-sm p-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-6">เปลี่ยนรหัสผ่าน</h2>
+        <!-- Password Tab -->
+        <div *ngIf="activeTab() === 'password'" class="content-card" #passwordTab>
+          <div class="card-header">
+            <h2 class="card-title">เปลี่ยนรหัสผ่าน</h2>
+            <p class="card-subtitle">อัปเดตรหัสผ่านเพื่อความปลอดภัย</p>
+          </div>
 
-          <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()" class="max-w-md">
+          <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()" class="max-w-2xl">
             <!-- Current Password -->
-            <div class="mb-6">
-              <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-2">
-                รหัสผ่านปัจจุบัน <span class="text-red-500">*</span>
-              </label>
+            <div class="form-group">
               <input
                 type="password"
                 id="currentPassword"
                 formControlName="currentPassword"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                [class.border-red-500]="passwordForm.get('currentPassword')?.touched && passwordForm.get('currentPassword')?.invalid"
+                class="form-input peer"
+                placeholder=" "
+                [class.error]="passwordForm.get('currentPassword')?.touched && passwordForm.get('currentPassword')?.invalid"
               />
-              <p *ngIf="getFieldError(passwordForm, 'currentPassword')" class="mt-1 text-sm text-red-600">
+              <label for="currentPassword" class="form-label">
+                รหัสผ่านปัจจุบัน <span class="text-red-500">*</span>
+              </label>
+              <p *ngIf="getFieldError(passwordForm, 'currentPassword')" class="form-error">
                 {{ getFieldError(passwordForm, 'currentPassword') }}
               </p>
             </div>
 
             <!-- New Password -->
-            <div class="mb-6">
-              <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">
-                รหัสผ่านใหม่ <span class="text-red-500">*</span>
-              </label>
+            <div class="form-group">
               <input
                 type="password"
                 id="newPassword"
                 formControlName="newPassword"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                [class.border-red-500]="passwordForm.get('newPassword')?.touched && passwordForm.get('newPassword')?.invalid"
+                class="form-input peer"
+                placeholder=" "
+                [class.error]="passwordForm.get('newPassword')?.touched && passwordForm.get('newPassword')?.invalid"
               />
-              <p *ngIf="getFieldError(passwordForm, 'newPassword')" class="mt-1 text-sm text-red-600">
+              <label for="newPassword" class="form-label">
+                รหัสผ่านใหม่ <span class="text-red-500">*</span>
+              </label>
+              <p *ngIf="getFieldError(passwordForm, 'newPassword')" class="form-error">
                 {{ getFieldError(passwordForm, 'newPassword') }}
               </p>
             </div>
 
             <!-- Confirm Password -->
-            <div class="mb-6">
-              <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
-                ยืนยันรหัสผ่านใหม่ <span class="text-red-500">*</span>
-              </label>
+            <div class="form-group">
               <input
                 type="password"
                 id="confirmPassword"
                 formControlName="confirmPassword"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                [class.border-red-500]="passwordForm.get('confirmPassword')?.touched && (passwordForm.get('confirmPassword')?.invalid || getPasswordFormError())"
+                class="form-input peer"
+                placeholder=" "
+                [class.error]="passwordForm.get('confirmPassword')?.touched && (passwordForm.get('confirmPassword')?.invalid || getPasswordFormError())"
               />
-              <p *ngIf="getFieldError(passwordForm, 'confirmPassword')" class="mt-1 text-sm text-red-600">
+              <label for="confirmPassword" class="form-label">
+                ยืนยันรหัสผ่านใหม่ <span class="text-red-500">*</span>
+              </label>
+              <p *ngIf="getFieldError(passwordForm, 'confirmPassword')" class="form-error">
                 {{ getFieldError(passwordForm, 'confirmPassword') }}
               </p>
-              <p *ngIf="getPasswordFormError()" class="mt-1 text-sm text-red-600">
+              <p *ngIf="getPasswordFormError()" class="form-error">
                 {{ getPasswordFormError() }}
               </p>
             </div>
 
-            <!-- Password Requirements -->
-            <div class="mb-6 p-4 bg-primary-50 rounded-lg">
-              <p class="text-sm font-medium text-gray-700 mb-2">ข้อกำหนดรหัสผ่าน:</p>
-              <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
-                <li>รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร</li>
-                <li>รหัสผ่านใหม่และการยืนยันต้องตรงกัน</li>
+            <!-- Security Info Card -->
+            <div class="security-card">
+              <div class="security-header">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <h3>ข้อกำหนดรหัสผ่าน</h3>
+              </div>
+              <ul class="security-list">
+                <li>
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span>รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร</span>
+                </li>
+                <li>
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span>รหัสผ่านใหม่และการยืนยันต้องตรงกัน</span>
+                </li>
               </ul>
             </div>
 
             <!-- Submit Button -->
-            <div>
+            <div class="mt-8">
               <button
                 type="submit"
-                class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:bg-neutral-400 disabled:cursor-not-allowed flex items-center gap-2"
-                [disabled]="isLoadingPassword"
+                class="submit-button"
+                [disabled]="isLoadingPassword()"
               >
-                <span *ngIf="isLoadingPassword" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                <span>{{ isLoadingPassword ? 'กำลังบันทึก...' : 'เปลี่ยนรหัสผ่าน' }}</span>
+                <span *ngIf="isLoadingPassword()" class="button-spinner"></span>
+                <span>{{ isLoadingPassword() ? 'กำลังบันทึก...' : 'เปลี่ยนรหัสผ่าน' }}</span>
+                <svg *ngIf="!isLoadingPassword()" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
               </button>
             </div>
           </form>

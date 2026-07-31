@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -17,19 +17,18 @@ import { CreateCouponDto } from '../../../services/openapi-client/model/createCo
 export class CouponFormAdminComponent implements OnInit {
   couponForm!: FormGroup;
 
-  isEditMode = false;
-  couponId?: number;
-  loading = true;
-  submitting = false;
-  error = '';
+  isEditMode = signal(false);
+  couponId = signal<number | undefined>(undefined);
+  loading = signal(true);
+  submitting = signal(false);
+  error = signal('');
 
   constructor(
     private fb: FormBuilder,
     private adminCouponService: AdminCouponService,
     private notificationService: NotificationService,
     private router: Router,
-    private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
+    private route: ActivatedRoute
   ) {
     this.initializeForm();
   }
@@ -38,14 +37,14 @@ export class CouponFormAdminComponent implements OnInit {
     // Check if we're in edit mode
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.isEditMode = true;
-      this.couponId = parseInt(id, 10);
+      this.isEditMode.set(true);
+      this.couponId.set(parseInt(id, 10));
     }
 
-    if (this.isEditMode && this.couponId) {
-      this.loadCoupon(this.couponId);
+    if (this.isEditMode() && this.couponId()) {
+      this.loadCoupon(this.couponId()!);
     } else {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
@@ -85,25 +84,23 @@ export class CouponFormAdminComponent implements OnInit {
   }
 
   loadCoupon(id: number): void {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
 
     this.adminCouponService.getCouponById(id).subscribe({
       next: (coupon) => {
         if (coupon) {
           this.populateForm(coupon);
         } else {
-          this.error = 'ไม่พบคูปอง';
+          this.error.set('ไม่พบคูปอง');
           this.notificationService.error('ไม่พบคูปอง');
         }
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       },
       error: (err) => {
-        this.error = 'ไม่สามารถโหลดข้อมูลคูปองได้';
+        this.error.set('ไม่สามารถโหลดข้อมูลคูปองได้');
         this.notificationService.error('ไม่สามารถโหลดข้อมูลคูปองได้');
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
         console.error('Error loading coupon:', err);
       }
     });
@@ -122,6 +119,27 @@ export class CouponFormAdminComponent implements OnInit {
       validUntil: this.formatDateForInput(coupon.validUntil),
       isActive: coupon.isActive
     });
+
+    // Mark form as pristine after loading data to prevent immediate validation
+    this.couponForm.markAsPristine();
+    this.couponForm.markAsUntouched();
+
+    // Debug: log form status
+    console.log('Coupon form populated with:', this.couponForm.value);
+    console.log('Coupon form valid:', this.couponForm.valid);
+    console.log('Coupon form errors:', this.getFormValidationErrors());
+  }
+
+  // Helper method to debug form validation errors
+  private getFormValidationErrors(): any {
+    const errors: any = {};
+    Object.keys(this.couponForm.controls).forEach(key => {
+      const control = this.couponForm.get(key);
+      if (control && control.errors) {
+        errors[key] = control.errors;
+      }
+    });
+    return errors;
   }
 
   formatDateForInput(dateString: string | null | undefined): string | null {
@@ -146,7 +164,7 @@ export class CouponFormAdminComponent implements OnInit {
       return;
     }
 
-    this.submitting = true;
+    this.submitting.set(true);
     const formValue = this.couponForm.value;
 
     // Convert code to uppercase
@@ -163,17 +181,16 @@ export class CouponFormAdminComponent implements OnInit {
       isActive: formValue.isActive
     };
 
-    if (this.isEditMode && this.couponId) {
+    if (this.isEditMode() && this.couponId()) {
       // Update coupon
-      this.adminCouponService.updateCoupon(this.couponId, couponData).subscribe({
+      this.adminCouponService.updateCoupon(this.couponId()!, couponData).subscribe({
         next: () => {
           this.notificationService.success('บันทึกข้อมูลคูปองเรียบร้อยแล้ว');
           this.router.navigate(['/admin/coupons']);
         },
         error: (err) => {
           this.notificationService.error('ไม่สามารถบันทึกข้อมูลคูปองได้');
-          this.submitting = false;
-          this.cdr.detectChanges();
+          this.submitting.set(false);
           console.error('Error updating coupon:', err);
         }
       });
@@ -186,8 +203,7 @@ export class CouponFormAdminComponent implements OnInit {
         },
         error: (err) => {
           this.notificationService.error('ไม่สามารถเพิ่มคูปองได้');
-          this.submitting = false;
-          this.cdr.detectChanges();
+          this.submitting.set(false);
           console.error('Error creating coupon:', err);
         }
       });

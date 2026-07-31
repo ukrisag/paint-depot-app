@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -22,17 +22,17 @@ import { environment } from '../../../../environments/environment';
 })
 export class ProductFormAdminComponent implements OnInit {
   productForm!: FormGroup;
-  categories: CategoryDto[] = [];
-  brands: BrandDto[] = [];
-  productImages: ProductImage[] = [];
+  categories = signal<CategoryDto[]>([]);
+  brands = signal<BrandDto[]>([]);
+  productImages = signal<ProductImage[]>([]);
 
-  isEditMode = false;
-  productId?: number;
-  loading = true;
-  submitting = false;
-  error = '';
+  isEditMode = signal(false);
+  productId = signal<number | undefined>(undefined);
+  loading = signal(true);
+  submitting = signal(false);
+  error = signal('');
 
-  private originalImages: ProductImage[] = [];
+  private originalImages = signal<ProductImage[]>([]);
   private apiUrl = environment.apiUrl;
 
   constructor(
@@ -41,7 +41,6 @@ export class ProductFormAdminComponent implements OnInit {
     private notificationService: NotificationService,
     private router: Router,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef,
     private http: HttpClient
   ) {
     this.initializeForm();
@@ -51,17 +50,17 @@ export class ProductFormAdminComponent implements OnInit {
     // Check if we're in edit mode
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.isEditMode = true;
-      this.productId = parseInt(id, 10);
+      this.isEditMode.set(true);
+      this.productId.set(parseInt(id, 10));
     }
 
     this.loadCategories();
     this.loadBrands();
 
-    if (this.isEditMode && this.productId) {
-      this.loadProduct(this.productId);
+    if (this.isEditMode() && this.productId()) {
+      this.loadProduct(this.productId()!);
     } else {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
@@ -106,24 +105,20 @@ export class ProductFormAdminComponent implements OnInit {
 
   addVariant(): void {
     this.variants.push(this.createVariantGroup());
-    this.cdr.detectChanges();
   }
 
   removeVariant(index: number): void {
     this.variants.removeAt(index);
-    this.cdr.detectChanges();
   }
 
   loadCategories(): void {
     this.adminProductService.getCategories().subscribe({
       next: (categories) => {
-        this.categories = categories.filter(c => c.isActive);
-        this.cdr.detectChanges();
+        this.categories.set(categories.filter(c => c.isActive));
       },
       error: (err) => {
         console.error('Error loading categories:', err);
         this.notificationService.error('ไม่สามารถโหลดหมวดหมู่ได้');
-        this.cdr.detectChanges();
       }
     });
   }
@@ -131,48 +126,48 @@ export class ProductFormAdminComponent implements OnInit {
   loadBrands(): void {
     this.adminProductService.getBrands().subscribe({
       next: (brands) => {
-        this.brands = brands.filter(b => b.isActive);
-        this.cdr.detectChanges();
+        this.brands.set(brands.filter(b => b.isActive));
       },
       error: (err) => {
         console.error('Error loading brands:', err);
         this.notificationService.error('ไม่สามารถโหลดแบรนด์ได้');
-        this.cdr.detectChanges();
       }
     });
   }
 
   loadProduct(id: number): void {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
 
     this.adminProductService.getProductById(id).subscribe({
       next: (product) => {
         if (product) {
           this.populateForm(product);
         } else {
-          this.error = 'ไม่พบสินค้า';
+          this.error.set('ไม่พบสินค้า');
           this.notificationService.error('ไม่พบสินค้า');
         }
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       },
       error: (err) => {
-        this.error = 'ไม่สามารถโหลดข้อมูลสินค้าได้';
+        this.error.set('ไม่สามารถโหลดข้อมูลสินค้าได้');
         this.notificationService.error('ไม่สามารถโหลดข้อมูลสินค้าได้');
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
         console.error('Error loading product:', err);
       }
     });
   }
 
   populateForm(product: ProductDetailDto): void {
+    // Convert IDs to numbers to ensure proper matching with select options
+    const categoryId = product.categoryId ? Number(product.categoryId) : null;
+    const brandId = product.brandId ? Number(product.brandId) : null;
+
     this.productForm.patchValue({
       name: product.name,
       sku: product.sku,
-      categoryId: product.categoryId,
-      brandId: product.brandId,
+      categoryId: categoryId,
+      brandId: brandId,
       shortDescription: product.shortDescription,
       fullDescription: product.fullDescription,
       basePrice: product.basePrice,
@@ -185,16 +180,16 @@ export class ProductFormAdminComponent implements OnInit {
 
     // Populate existing images
     if (product.images && product.images.length > 0) {
-      this.productImages = product.images.map(img => ({
+      const images = product.images.map(img => ({
         id: img.id,
         url: img.imageUrl || '',
         isPrimary: img.isPrimary || false,
         altText: img.altText || '',
         displayOrder: img.displayOrder || 0
       }));
+      this.productImages.set(images);
       // Keep a copy of original images to detect changes
-      this.originalImages = JSON.parse(JSON.stringify(this.productImages));
-      this.cdr.detectChanges();
+      this.originalImages.set(JSON.parse(JSON.stringify(images)));
     }
 
     // Populate existing variants
@@ -202,8 +197,28 @@ export class ProductFormAdminComponent implements OnInit {
       product.variants.forEach(variant => {
         this.variants.push(this.createVariantGroup(variant));
       });
-      this.cdr.detectChanges();
     }
+
+    // Mark form as pristine after loading data to prevent immediate validation
+    this.productForm.markAsPristine();
+    this.productForm.markAsUntouched();
+
+    // Debug: log form status
+    console.log('Form populated with:', this.productForm.value);
+    console.log('Form valid:', this.productForm.valid);
+    console.log('Form errors:', this.getFormValidationErrors());
+  }
+
+  // Helper method to debug form validation errors
+  private getFormValidationErrors(): any {
+    const errors: any = {};
+    Object.keys(this.productForm.controls).forEach(key => {
+      const control = this.productForm.get(key);
+      if (control && control.errors) {
+        errors[key] = control.errors;
+      }
+    });
+    return errors;
   }
 
   onSubmit(): void {
@@ -213,7 +228,7 @@ export class ProductFormAdminComponent implements OnInit {
       return;
     }
 
-    this.submitting = true;
+    this.submitting.set(true);
     const formValue = this.productForm.value;
 
     // Generate slug from name
@@ -228,11 +243,11 @@ export class ProductFormAdminComponent implements OnInit {
       compareAtPrice: formValue.compareAtPrice ? parseFloat(formValue.compareAtPrice) : null
     };
 
-    if (this.isEditMode && this.productId) {
+    if (this.isEditMode() && this.productId()) {
       // Update product, then handle images and variants
-      this.adminProductService.updateProduct(this.productId, productData).pipe(
-        switchMap(() => this.handleImageUpdates(this.productId!)),
-        switchMap(() => this.handleVariantUpdates(this.productId!))
+      this.adminProductService.updateProduct(this.productId()!, productData).pipe(
+        switchMap(() => this.handleImageUpdates(this.productId()!)),
+        switchMap(() => this.handleVariantUpdates(this.productId()!))
       ).subscribe({
         next: () => {
           this.notificationService.success('บันทึกข้อมูลสินค้าเรียบร้อยแล้ว');
@@ -240,7 +255,7 @@ export class ProductFormAdminComponent implements OnInit {
         },
         error: (err) => {
           this.notificationService.error('ไม่สามารถบันทึกข้อมูลสินค้าได้');
-          this.submitting = false;
+          this.submitting.set(false);
           console.error('Error updating product:', err);
         }
       });
@@ -249,14 +264,14 @@ export class ProductFormAdminComponent implements OnInit {
       this.adminProductService.createProduct(productData).pipe(
         switchMap((product: any) => {
           if (product && product.id) {
-            this.productId = product.id;
+            this.productId.set(product.id);
             return this.handleImageUpdates(product.id);
           }
           return of(null);
         }),
         switchMap(() => {
-          if (this.productId) {
-            return this.handleVariantUpdates(this.productId);
+          if (this.productId()) {
+            return this.handleVariantUpdates(this.productId()!);
           }
           return of(null);
         })
@@ -267,7 +282,7 @@ export class ProductFormAdminComponent implements OnInit {
         },
         error: (err) => {
           this.notificationService.error('ไม่สามารถเพิ่มสินค้าได้');
-          this.submitting = false;
+          this.submitting.set(false);
           console.error('Error creating product:', err);
         }
       });
@@ -276,9 +291,11 @@ export class ProductFormAdminComponent implements OnInit {
 
   private handleImageUpdates(productId: number) {
     const operations: any[] = [];
+    const currentImages = this.productImages();
+    const origImages = this.originalImages();
 
     // 1. Upload new images (images with file but no id)
-    const newImages = this.productImages.filter(img => img.file && !img.id);
+    const newImages = currentImages.filter(img => img.file && !img.id);
     newImages.forEach((img, index) => {
       const uploadOp = this.uploadImageFile(img.file!).pipe(
         switchMap(imageUrl =>
@@ -299,9 +316,9 @@ export class ProductFormAdminComponent implements OnInit {
     });
 
     // 2. Update existing images
-    const existingImages = this.productImages.filter(img => img.id && !img.file);
+    const existingImages = currentImages.filter(img => img.id && !img.file);
     existingImages.forEach((img, index) => {
-      const original = this.originalImages.find(o => o.id === img.id);
+      const original = origImages.find(o => o.id === img.id);
       // Check if anything changed
       if (!original ||
           original.isPrimary !== img.isPrimary ||
@@ -325,8 +342,8 @@ export class ProductFormAdminComponent implements OnInit {
     });
 
     // 3. Delete removed images
-    const currentImageIds = this.productImages.filter(img => img.id).map(img => img.id);
-    const deletedImages = this.originalImages.filter(img => !currentImageIds.includes(img.id));
+    const currentImageIds = currentImages.filter(img => img.id).map(img => img.id);
+    const deletedImages = origImages.filter(img => !currentImageIds.includes(img.id));
     deletedImages.forEach(img => {
       if (img.id) {
         const deleteOp = this.adminProductService.deleteProductImage(productId, img.id).pipe(
@@ -470,18 +487,18 @@ export class ProductFormAdminComponent implements OnInit {
 
   getCategoryName(categoryId: number | null | undefined): string {
     if (!categoryId) return '';
-    const category = this.categories.find(c => c.id === categoryId);
+    const category = this.categories().find(c => c.id === categoryId);
     return category?.name || '';
   }
 
   getBrandName(brandId: number | null | undefined): string {
     if (!brandId) return '';
-    const brand = this.brands.find(b => b.id === brandId);
+    const brand = this.brands().find(b => b.id === brandId);
     return brand?.name || '';
   }
 
   onImagesChange(images: ProductImage[]): void {
-    this.productImages = images;
+    this.productImages.set(images);
     console.log('Product images updated:', images);
     // Note: You'll need to upload these images to your server when saving the product
     // For now, we're just storing the image URLs

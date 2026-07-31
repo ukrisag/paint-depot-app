@@ -1,5 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* Import Design System - must come before @tailwind directives */
+@import './styles/design-system.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -301,4 +304,17 @@ body {
 
 .brand-scroll-track:hover {
   animation-play-state: paused;
+}
+
+/* Toast/Notification z-index - above everything */
+.toast-container,
+.notification-container,
+[class*="toast"],
+[class*="notification"] {
+  z-index: 9999 !important;
+}
+
+/* Ensure toasts are above header */
+.swal2-container {
+  z-index: 9999 !important;
 }

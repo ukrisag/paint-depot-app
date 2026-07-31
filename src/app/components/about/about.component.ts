@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
@@ -7,9 +7,13 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './about.component.html',
-  styleUrls: ['./about.component.css']
+  styleUrls: ['./about.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AboutComponent {
+export class AboutComponent implements OnInit {
+  @ViewChild('featuresSection', { read: ElementRef }) featuresSection!: ElementRef;
+  @ViewChild('contactSection', { read: ElementRef }) contactSection!: ElementRef;
+
   // ข้อมูลร้าน - แก้ไขตามข้อมูลจริงของคุณ
   storeInfo = {
     name: 'Paint Depot',
@@ -39,33 +43,59 @@ export class AboutComponent {
       {
         icon: '🎨',
         title: 'สีคุณภาพพรีเมียม',
-        description: 'คัดสรรสีจากแบรนด์ชั้นนำ ทนทาน สีสวย'
+        description: 'คัดสรรสีจากแบรนด์ชั้นนำ ทนทาน สีสวย',
+        gradientFrom: '#9333ea',
+        gradientTo: '#db2777'
       },
       {
         icon: '🚚',
         title: 'จัดส่งทั่วประเทศ',
-        description: 'บริการจัดส่งรวดเร็ว ปลอดภัย ทั่วไทย'
+        description: 'บริการจัดส่งรวดเร็ว ปลอดภัย ทั่วไทย',
+        gradientFrom: '#db2777',
+        gradientTo: '#f97316'
       },
       {
         icon: '👨‍🔧',
         title: 'ให้คำปรึกษาฟรี',
-        description: 'ทีมผู้เชี่ยวชาญพร้อมให้คำแนะนำ'
+        description: 'ทีมผู้เชี่ยวชาญพร้อมให้คำแนะนำ',
+        gradientFrom: '#f97316',
+        gradientTo: '#4f46e5'
       },
       {
         icon: '💳',
         title: 'ชำระเงินสะดวก',
-        description: 'รองรับหลายช่องทาง ปลอดภัย 100%'
+        description: 'รองรับหลายช่องทาง ปลอดภัย 100%',
+        gradientFrom: '#4f46e5',
+        gradientTo: '#9333ea'
       }
     ]
   };
 
   mapUrl: SafeResourceUrl;
 
-  constructor(private sanitizer: DomSanitizer) {
+  constructor(
+    private sanitizer: DomSanitizer
+  ) {
     // สร้าง Google Maps embed URL
     const googleMapsUrl = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3875.5397736983895!2d${this.storeInfo.coordinates.lng}!3d${this.storeInfo.coordinates.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTPCsDQ1JzIyLjciTiAxMDDCsDMwJzA2LjUiRQ!5e0!3m2!1sth!2sth!4v1234567890123!5m2!1sth!2sth`;
 
     this.mapUrl = this.sanitizer.bypassSecurityTrustResourceUrl(googleMapsUrl);
+  }
+
+  ngOnInit() {
+    // Component initialization
+  }
+
+  scrollToContact() {
+    if (this.contactSection) {
+      this.contactSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  scrollToFeatures() {
+    if (this.featuresSection) {
+      this.featuresSection.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   openGoogleMaps() {

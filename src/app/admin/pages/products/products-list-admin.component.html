@@ -20,14 +20,30 @@
         />
       </div>
 
-      <!-- Add New Button -->
-      <button
-        (click)="onAddNew()"
-        class="w-full sm:w-auto px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
-      >
-        <span>+</span>
-        <span>เพิ่มสินค้าใหม่</span>
-      </button>
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-2">
+        <button
+          (click)="downloadExcel()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>📊</span>
+          <span>Excel</span>
+        </button>
+        <button
+          (click)="downloadPdf()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>📄</span>
+          <span>PDF</span>
+        </button>
+        <button
+          (click)="onAddNew()"
+          class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>+</span>
+          <span>เพิ่มสินค้าใหม่</span>
+        </button>
+      </div>
     </div>
 
     <!-- Filters Row -->
@@ -41,7 +57,7 @@
           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option [ngValue]="undefined">ทั้งหมด</option>
-          <option *ngFor="let category of categories" [ngValue]="category.id">
+          <option *ngFor="let category of categories()" [ngValue]="category.id">
             {{ category.name }}
           </option>
         </select>
@@ -56,7 +72,7 @@
           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option [ngValue]="undefined">ทั้งหมด</option>
-          <option *ngFor="let brand of brands" [ngValue]="brand.id">
+          <option *ngFor="let brand of brands()" [ngValue]="brand.id">
             {{ brand.name }}
           </option>
         </select>
@@ -104,17 +120,17 @@
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="loading" class="flex justify-center items-center py-12">
+  <div *ngIf="loading()" class="flex justify-center items-center py-12">
     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-    {{ error }}
+  <div *ngIf="error() && !loading()" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+    {{ error() }}
   </div>
 
   <!-- Products Table (Desktop) -->
-  <div *ngIf="!loading && !error" class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+  <div *ngIf="!loading() && !error()" class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
@@ -130,7 +146,7 @@
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        <tr *ngFor="let product of products" class="hover:bg-gray-50">
+        <tr *ngFor="let product of products()" class="hover:bg-gray-50">
           <!-- Image -->
           <td class="px-6 py-4 whitespace-nowrap">
             <img
@@ -208,14 +224,14 @@
     </table>
 
     <!-- Empty State -->
-    <div *ngIf="products.length === 0" class="text-center py-12">
+    <div *ngIf="products().length === 0" class="text-center py-12">
       <p class="text-gray-500">ไม่พบสินค้า</p>
     </div>
   </div>
 
   <!-- Products Cards (Mobile/Tablet) -->
-  <div *ngIf="!loading && !error" class="lg:hidden space-y-4">
-    <div *ngFor="let product of products" class="bg-white rounded-lg shadow p-4">
+  <div *ngIf="!loading() && !error()" class="lg:hidden space-y-4">
+    <div *ngFor="let product of products()" class="bg-white rounded-lg shadow p-4">
       <div class="flex gap-4">
         <!-- Image -->
         <img
@@ -262,27 +278,27 @@
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="products.length === 0" class="text-center py-12 bg-white rounded-lg">
+    <div *ngIf="products().length === 0" class="text-center py-12 bg-white rounded-lg">
       <p class="text-gray-500">ไม่พบสินค้า</p>
     </div>
   </div>
 
   <!-- Pagination -->
-  <div *ngIf="!loading && !error && totalPages > 1" class="mt-6">
+  <div *ngIf="!loading() && !error() && totalPages() > 1" class="mt-6">
     <div class="bg-white rounded-lg shadow px-4 py-3">
       <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
         <!-- Page Info -->
         <div class="text-sm text-gray-600">
-          แสดง {{ products.length }} จาก {{ totalItems }} รายการ
+          แสดง {{ products().length }} จาก {{ totalItems() }} รายการ
         </div>
 
         <!-- Page Numbers -->
         <div class="flex items-center gap-2">
           <!-- Previous Button -->
           <button
-            (click)="onPageChange(currentPage - 1)"
-            [disabled]="currentPage === 1"
-            [class]="currentPage === 1
+            (click)="onPageChange(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+            [class]="currentPage() === 1
               ? 'px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed'
               : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
           >
@@ -293,7 +309,7 @@
           <button
             *ngFor="let page of getPageNumbers()"
             (click)="onPageChange(page)"
-            [class]="page === currentPage
+            [class]="page === currentPage()
               ? 'px-3 py-1 rounded bg-primary-600 text-white'
               : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
           >
@@ -302,9 +318,9 @@
 
           <!-- Next Button -->
           <button
-            (click)="onPageChange(currentPage + 1)"
-            [disabled]="currentPage === totalPages"
-            [class]="currentPage === totalPages
+            (click)="onPageChange(currentPage() + 1)"
+            [disabled]="currentPage() === totalPages()"
+            [class]="currentPage() === totalPages()
               ? 'px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed'
               : 'px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50'"
           >
@@ -317,11 +333,11 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div *ngIf="showDeleteConfirm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+<div *ngIf="showDeleteConfirm()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
   <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
     <h3 class="text-lg font-semibold text-gray-900 mb-2">ยืนยันการลบสินค้า</h3>
     <p class="text-gray-600 mb-4">
-      คุณแน่ใจหรือไม่ว่าต้องการลบสินค้า "{{ productToDelete?.name }}"?
+      คุณแน่ใจหรือไม่ว่าต้องการลบสินค้า "{{ productToDelete()?.name }}"?
       การดำเนินการนี้ไม่สามารถย้อนกลับได้
     </p>
     <div class="flex gap-3 justify-end">

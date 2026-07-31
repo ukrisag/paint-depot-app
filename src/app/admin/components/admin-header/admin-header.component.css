@@ -2,3 +2,141 @@
 :host {
   display: block;
 }
+
+/* Admin Header */
+.admin-header {
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Menu Toggle Button */
+.menu-toggle {
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-toggle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(219, 39, 119, 0.3));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 1rem;
+}
+
+.menu-toggle:hover::before {
+  opacity: 1;
+}
+
+/* Search Container */
+.search-container input {
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.search-container input:focus {
+  box-shadow: 0 8px 25px rgba(147, 51, 234, 0.3);
+}
+
+/* Back Button */
+.back-btn {
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(147, 51, 234, 0.3);
+}
+
+/* Notification Button */
+.notification-btn {
+  position: relative;
+}
+
+.notification-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(219, 39, 119, 0.3));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 1rem;
+}
+
+.notification-btn:hover::before {
+  opacity: 1;
+}
+
+/* User Menu Toggle */
+.user-menu-toggle {
+  backdrop-filter: blur(10px);
+}
+
+.user-menu-toggle:hover {
+  box-shadow: 0 8px 20px rgba(147, 51, 234, 0.3);
+}
+
+/* User Dropdown */
+.user-dropdown {
+  animation: slideDown 0.3s ease-out;
+  z-index: 1000;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dropdown Items */
+.dropdown-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.dropdown-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, #9333ea, #db2777);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dropdown-item:hover::before {
+  opacity: 1;
+}
+
+/* Avatar Glow Effect */
+.user-menu-toggle:hover .w-10.h-10,
+.user-dropdown .w-12.h-12 {
+  animation: avatarGlow 2s ease-in-out infinite;
+}
+
+@keyframes avatarGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(219, 39, 119, 0.7);
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .admin-header {
+    height: 4rem;
+    padding: 0 1rem;
+  }
+}

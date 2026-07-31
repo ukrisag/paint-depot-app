@@ -1,6 +1,164 @@
-/* Animation for step transitions */
+/* ============================================
+   PREMIUM CHECKOUT PAGE STYLES
+   Modern design with gradients, glassmorphism,
+   and smooth animations
+   ============================================ */
+
+/* Floating Label Input Styles */
+.floating-input-wrapper {
+  position: relative;
+}
+
+.floating-input:placeholder-shown + .floating-label {
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: #6b7280;
+  left: 1.25rem;
+  padding: 0;
+  background: transparent;
+}
+
+.floating-input:focus + .floating-label,
+.floating-input:not(:placeholder-shown) + .floating-label {
+  top: -0.75rem;
+  transform: translateY(0);
+  font-size: 0.875rem;
+  left: 1.25rem;
+  padding: 0 0.5rem;
+  background: white;
+}
+
+/* Smooth focus transitions */
+.floating-input:focus {
+  outline: none;
+}
+
+/* Step Card Animation */
+.step-card {
+  animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Progress Bar Animation */
+.progress-bar {
+  box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Step Circle Pulse Effect */
+.step-active .step-circle {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(147, 51, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(147, 51, 234, 0.6);
+  }
+}
+
+/* Payment Card Hover Effect */
+.payment-card label {
+  position: relative;
+  overflow: hidden;
+}
+
+.payment-card label::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.payment-card label:hover::before {
+  left: 100%;
+}
+
+/* Glassmorphism Effects */
+.bg-white\/80 {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.bg-white\/60 {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.bg-white\/50 {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.backdrop-blur-xl {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Border Gradient */
+.border-gradient-to-r {
+  border-image: linear-gradient(to right, #9333ea, #db2777, #f97316) 1;
+}
+
+.border-gradient-to-br {
+  border-image: linear-gradient(to bottom right, #9333ea, #db2777) 1;
+}
+
+/* Custom Border Width */
+.border-3 {
+  border-width: 3px;
+}
+
+/* Premium Submit Button */
+.premium-submit-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.premium-submit-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.premium-submit-btn:active {
+  transform: scale(0.98) translateY(-1px);
+}
+
+/* Smooth Fade In Animation */
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.5s ease-out;
 }
 
 @keyframes fadeIn {
@@ -14,148 +172,340 @@
   }
 }
 
-/* Form Input Focus States */
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-/* Custom Radio Button Styles */
-input[type="radio"]:checked {
-  background-color: #2563eb;
-  border-color: #2563eb;
+::-webkit-scrollbar-track {
+  background: rgba(243, 244, 246, 0.5);
+  border-radius: 10px;
 }
 
-/* Custom Checkbox Styles */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #9333ea, #db2777);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #7c3aed, #be185d);
+}
+
+/* Floating Animation for Security Badges */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+#checkout-header .flex.items-center.gap-2 {
+  transition: transform 0.3s ease;
+}
+
+#checkout-header .flex.items-center.gap-2:hover {
+  animation: float 2s ease-in-out infinite;
+}
+
+/* Radio Button Custom Styles */
+input[type="radio"]:checked + label {
+  border-color: #db2777 !important;
+}
+
+.peer:checked ~ * {
+  border-color: #db2777;
+}
+
+/* Checkbox Custom Styles */
 input[type="checkbox"]:checked {
-  background-color: #2563eb;
-  border-color: #2563eb;
+  background-color: #9333ea;
+  border-color: #9333ea;
 }
 
-/* Loading Spinner */
-.spinner {
-  border: 2px solid #f3f4f6;
-  border-top: 2px solid #2563eb;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  animation: spin 1s linear infinite;
+/* Focus Ring for Accessibility */
+*:focus-visible {
+  outline: 2px solid #9333ea;
+  outline-offset: 2px;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+/* Button Ripple Effect */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
 }
 
-/* Progress Bar Animation */
-.progress-line {
-  transition: background-color 0.3s ease-in-out;
-}
-
-/* Button Hover Effects */
 button {
-  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
 }
 
-button:active {
-  transform: scale(0.98);
+button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
 }
 
-/* Sticky Sidebar */
+button:active::after {
+  animation: ripple 0.6s ease-out;
+}
+
+/* Gradient Text */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Shimmer Effect for Loading */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    to right,
+    #f3f4f6 0%,
+    #e5e7eb 20%,
+    #f3f4f6 40%,
+    #f3f4f6 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Shadow Glow Effects */
+.shadow-purple-glow {
+  box-shadow: 0 0 30px rgba(147, 51, 234, 0.3);
+}
+
+.shadow-pink-glow {
+  box-shadow: 0 0 30px rgba(219, 39, 119, 0.3);
+}
+
+.shadow-orange-glow {
+  box-shadow: 0 0 30px rgba(249, 115, 22, 0.3);
+}
+
+/* Hover Lift Effect */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Smooth Color Transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Sticky Sidebar Enhancement */
 .sticky {
   position: sticky;
 }
 
-/* Mobile Responsive Adjustments */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .sticky {
     position: relative;
-    top: 0;
+    top: 0 !important;
   }
 }
 
-/* Payment Method Card Hover */
-label:has(input[type="radio"]) {
-  transition: all 0.2s ease-in-out;
-}
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+  .step-card {
+    padding: 1.5rem !important;
+  }
 
-label:has(input[type="radio"]):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  .floating-input {
+    font-size: 1rem;
+  }
+
+  h1 {
+    font-size: 2rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+  }
+
+  .premium-submit-btn {
+    padding: 1rem 2rem !important;
+  }
 }
 
 /* Error Input Shake Animation */
-.border-red-500 {
-  animation: shake 0.3s ease-in-out;
+.border-red-400 {
+  animation: shake 0.4s ease-in-out;
 }
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
 }
 
-/* Order Summary Card Shadow */
-.shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-/* Success/Error Messages */
-.bg-green-50 {
-  background-color: #f0fdf4;
-}
-
-.bg-yellow-50 {
-  background-color: #fefce8;
-}
-
-.bg-blue-50 {
-  background-color: #eff6ff;
-}
-
-/* Disabled State */
-input:disabled,
-textarea:disabled,
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* Progress Step Transitions */
-.flex.items-center.justify-center.w-10.h-10 {
-  transition: all 0.3s ease-in-out;
-}
-
-/* Image Placeholder */
-img {
-  background-color: #f3f4f6;
-}
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Print Styles (for order confirmation) */
-@media print {
-  .no-print {
-    display: none;
+/* Success Checkmark Animation */
+@keyframes checkmark {
+  0% {
+    transform: scale(0) rotate(0deg);
   }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+  }
+}
+
+.success-checkmark {
+  animation: checkmark 0.5s ease-in-out;
+}
+
+/* Spinner Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Pulse Animation for Active Elements */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Card Entrance Animations */
+.card-entrance {
+  animation: cardEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Gradient Border Animation */
+@keyframes gradientBorder {
+  0% {
+    border-image-source: linear-gradient(45deg, #9333ea, #db2777, #f97316);
+  }
+  50% {
+    border-image-source: linear-gradient(225deg, #9333ea, #db2777, #f97316);
+  }
+  100% {
+    border-image-source: linear-gradient(45deg, #9333ea, #db2777, #f97316);
+  }
+}
+
+.animate-gradient-border {
+  animation: gradientBorder 3s ease-in-out infinite;
+}
+
+/* Print Styles */
+@media print {
+  .no-print,
+  button,
+  .sticky,
+  #progress-indicator,
+  .navigation-buttons {
+    display: none !important;
+  }
+
+  .step-card {
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb !important;
+  }
+
+  body {
+    background: white !important;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .floating-input {
+    border-width: 2px;
+  }
+
+  button {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark Mode Support (Future Enhancement) */
+@media (prefers-color-scheme: dark) {
+  /* Can be extended for dark mode in the future */
+}
+
+/* Selection Color */
+::selection {
+  background-color: rgba(147, 51, 234, 0.3);
+  color: inherit;
+}
+
+::-moz-selection {
+  background-color: rgba(147, 51, 234, 0.3);
+  color: inherit;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
 }
 
 /* Loading Overlay */
@@ -165,113 +515,95 @@ img {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
 }
 
-/* Card Transitions */
-.bg-white.rounded-lg {
-  transition: box-shadow 0.2s ease-in-out;
-}
-
-.bg-white.rounded-lg:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-/* Input Number Arrows Hide */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-/* Responsive Text */
-@media (max-width: 640px) {
-  h1 {
-    font-size: 1.875rem;
-  }
-
-  h2 {
-    font-size: 1.25rem;
-  }
-
-  .text-3xl {
-    font-size: 1.875rem;
-  }
-
-  .text-2xl {
-    font-size: 1.5rem;
-  }
-}
-
-/* Focus Visible for Accessibility */
-*:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}
-
-/* Grid Gap Responsive */
-@media (max-width: 768px) {
-  .grid.gap-4 {
-    gap: 1rem;
-  }
-
-  .grid.gap-8 {
-    gap: 1.5rem;
-  }
-}
-
-/* Button Loading State */
-button.loading {
+/* Tooltip Styles */
+[data-tooltip] {
   position: relative;
-  color: transparent;
 }
 
-button.loading::after {
-  content: "";
+[data-tooltip]::after {
+  content: attr(data-tooltip);
   position: absolute;
-  width: 16px;
-  height: 16px;
-  top: 50%;
+  bottom: 100%;
   left: 50%;
-  margin-left: -8px;
-  margin-top: -8px;
-  border: 2px solid #ffffff;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+  transform: translateX(-50%);
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
 }
 
-/* Smooth Scroll */
-html {
-  scroll-behavior: smooth;
+[data-tooltip]:hover::after {
+  opacity: 1;
 }
 
-/* Card Border Hover */
-.border-2:hover {
-  transition: border-color 0.2s ease-in-out;
+/* Utility Classes */
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Success Checkmark Animation */
-@keyframes checkmark {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 }
 
-.success-checkmark {
-  animation: checkmark 0.3s ease-in-out;
+.full-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+/* Z-Index Management */
+.z-modal {
+  z-index: 1000;
+}
+
+.z-overlay {
+  z-index: 999;
+}
+
+.z-dropdown {
+  z-index: 100;
+}
+
+/* Aspect Ratio Utilities */
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+/* Truncate Text */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

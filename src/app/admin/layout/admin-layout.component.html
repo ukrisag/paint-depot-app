@@ -1,29 +1,32 @@
-<div class="min-h-screen bg-gray-100">
-  <!-- Admin Header -->
+<div class="admin-layout">
+  <!-- Admin Header - Fixed at top -->
   <app-admin-header
     (toggleSidebar)="toggleSidebar()"
-    class="fixed top-0 left-0 right-0 z-30">
+    class="admin-header">
   </app-admin-header>
 
-  <div class="pt-16 flex">
-    <!-- Sidebar -->
+  <div class="admin-body">
+    <!-- Sidebar - Fixed on left -->
     <app-admin-sidebar
       [isOpen]="isSidebarOpen()"
       (close)="closeSidebar()"
-      class="fixed lg:static z-20">
+      class="admin-sidebar">
     </app-admin-sidebar>
 
     <!-- Overlay for mobile -->
     @if (isSidebarOpen()) {
       <div
-        class="fixed inset-0 bg-black bg-opacity-50 z-10 lg:hidden"
+        class="mobile-overlay"
         (click)="closeSidebar()">
       </div>
     }
 
-    <!-- Main Content -->
-    <main class="flex-1 p-6 lg:p-8 transition-all duration-300">
-      <router-outlet></router-outlet>
-    </main>
+    <!-- Main Content Area -->
+    <div class="main-wrapper" [class.sidebar-closed]="!isSidebarOpen()">
+      <!-- Scrollable Content -->
+      <main class="main-content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
   </div>
 </div>

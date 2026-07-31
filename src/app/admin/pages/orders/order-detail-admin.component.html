@@ -12,21 +12,21 @@
       </button>
       <h1 class="text-2xl font-bold text-gray-900">รายละเอียดคำสั่งซื้อ</h1>
     </div>
-    <p class="text-gray-600">{{ order?.orderNumber }}</p>
+    <p class="text-gray-600">{{ order()?.orderNumber }}</p>
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="loading" class="flex justify-center items-center py-12">
+  <div *ngIf="loading()" class="flex justify-center items-center py-12">
     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-    {{ error }}
+  <div *ngIf="error() && !loading()" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+    {{ error() }}
   </div>
 
   <!-- Order Details -->
-  <div *ngIf="!loading && !error && order" class="space-y-6">
+  <div *ngIf="!loading() && !error() && order()" class="space-y-6">
     <!-- Order Info & Status Update -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Order Info -->
@@ -36,35 +36,35 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1">เลขที่คำสั่งซื้อ</label>
-            <p class="text-gray-900 font-mono">{{ order.orderNumber }}</p>
+            <p class="text-gray-900 font-mono">{{ order()?.orderNumber }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1">วันที่สั่งซื้อ</label>
-            <p class="text-gray-900">{{ formatDate(order.createdAt) }}</p>
+            <p class="text-gray-900">{{ formatDate(order()?.createdAt) }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1">สถานะ</label>
-            <span [class]="getStatusClass(order.status)">
-              {{ getStatusLabel(order.status) }}
+            <span [class]="getStatusClass(order()?.status)">
+              {{ getStatusLabel(order()?.status) }}
             </span>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1">สถานะการชำระเงิน</label>
-            <p class="text-gray-900">{{ order.paymentStatus || '-' }}</p>
+            <p class="text-gray-900">{{ order()?.paymentStatus || '-' }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1">วิธีการชำระเงิน</label>
-            <p class="text-gray-900">{{ order.paymentMethod || '-' }}</p>
+            <p class="text-gray-900">{{ order()?.paymentMethod || '-' }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1">วิธีการจัดส่ง</label>
-            <p class="text-gray-900">{{ order.shippingMethod || '-' }}</p>
+            <p class="text-gray-900">{{ order()?.shippingMethod || '-' }}</p>
           </div>
         </div>
       </div>
 
       <!-- Payment Slip -->
-      <div *ngIf="order.paymentSlipUrl" class="bg-white rounded-lg shadow p-6">
+      <div *ngIf="order()?.paymentSlipUrl" class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
           <svg class="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
@@ -73,11 +73,11 @@
         </h2>
         <div class="space-y-4">
           <div class="border-2 border-gray-200 rounded-lg overflow-hidden inline-block bg-gray-50 p-2">
-            <img [src]="order.paymentSlipUrl" alt="Payment Slip" class="max-w-full max-h-96 object-contain">
+            <img [src]="order()?.paymentSlipUrl" alt="Payment Slip" class="max-w-full max-h-96 object-contain">
           </div>
           <div class="flex items-center gap-4">
             <a
-              [href]="order.paymentSlipUrl"
+              [href]="order()?.paymentSlipUrl"
               target="_blank"
               class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@
               เปิดรูปในหน้าต่างใหม่
             </a>
             <span class="text-sm text-gray-600">
-              อัปโหลดเมื่อ: {{ formatDate(order.updatedAt) }}
+              อัปโหลดเมื่อ: {{ formatDate(order()?.updatedAt) }}
             </span>
           </div>
           <div class="bg-primary-50 border border-blue-200 rounded-lg p-3">
@@ -136,16 +136,16 @@
 
           <button
             (click)="onUpdateStatus()"
-            [disabled]="updating"
+            [disabled]="updating()"
             class="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {{ updating ? 'กำลังอัปเดต...' : 'อัปเดตสถานะ' }}
+            {{ updating() ? 'กำลังอัปเดต...' : 'อัปเดตสถานะ' }}
           </button>
 
           <button
             *ngIf="canCancelOrder()"
             (click)="onCancelOrderClick()"
-            [disabled]="updating"
+            [disabled]="updating()"
             class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             ยกเลิกคำสั่งซื้อ
@@ -163,19 +163,19 @@
         <div class="space-y-3">
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1">ชื่อ-นามสกุล</label>
-            <p class="text-gray-900">{{ order.shippingFullName || '-' }}</p>
+            <p class="text-gray-900">{{ order()?.shippingFullName || '-' }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1">เบอร์โทร</label>
-            <p class="text-gray-900">{{ order.shippingPhone || '-' }}</p>
+            <p class="text-gray-900">{{ order()?.shippingPhone || '-' }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1">อีเมล</label>
-            <p class="text-gray-900">{{ order.shippingEmail || '-' }}</p>
+            <p class="text-gray-900">{{ order()?.shippingEmail || '-' }}</p>
           </div>
-          <div *ngIf="order.customerNotes">
+          <div *ngIf="order()?.customerNotes">
             <label class="block text-sm font-medium text-gray-600 mb-1">หมายเหตุจากลูกค้า</label>
-            <p class="text-gray-900">{{ order.customerNotes }}</p>
+            <p class="text-gray-900">{{ order()?.customerNotes }}</p>
           </div>
         </div>
       </div>
@@ -188,17 +188,17 @@
           <div>
             <p class="text-gray-900">{{ getFullAddress() }}</p>
           </div>
-          <div *ngIf="order.shippingTrackingNumber">
+          <div *ngIf="order()?.shippingTrackingNumber">
             <label class="block text-sm font-medium text-gray-600 mb-1">เลขพัสดุ</label>
-            <p class="text-gray-900 font-mono">{{ order.shippingTrackingNumber }}</p>
+            <p class="text-gray-900 font-mono">{{ order()?.shippingTrackingNumber }}</p>
           </div>
-          <div *ngIf="order.estimatedDeliveryDate">
+          <div *ngIf="order()?.estimatedDeliveryDate">
             <label class="block text-sm font-medium text-gray-600 mb-1">วันที่คาดว่าจะได้รับ</label>
-            <p class="text-gray-900">{{ formatDate(order.estimatedDeliveryDate) }}</p>
+            <p class="text-gray-900">{{ formatDate(order()?.estimatedDeliveryDate) }}</p>
           </div>
-          <div *ngIf="order.actualDeliveryDate">
+          <div *ngIf="order()?.actualDeliveryDate">
             <label class="block text-sm font-medium text-gray-600 mb-1">วันที่จัดส่งสำเร็จ</label>
-            <p class="text-gray-900">{{ formatDate(order.actualDeliveryDate) }}</p>
+            <p class="text-gray-900">{{ formatDate(order()?.actualDeliveryDate) }}</p>
           </div>
         </div>
       </div>
@@ -219,7 +219,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <tr *ngFor="let item of order.items">
+            <tr *ngFor="let item of order()?.items">
               <td class="px-4 py-4">
                 <div class="text-sm font-medium text-gray-900">{{ item.productName }}</div>
                 <div class="text-xs text-gray-500" *ngIf="item.sku">SKU: {{ item.sku }}</div>
@@ -243,28 +243,83 @@
         <div class="space-y-2">
           <div class="flex justify-between text-sm">
             <span class="text-gray-600">ยอดรวมสินค้า</span>
-            <span class="text-gray-900">{{ formatPrice(order.subtotal) }}</span>
+            <span class="text-gray-900">{{ formatPrice(order()?.subtotal) }}</span>
           </div>
-          <div class="flex justify-between text-sm" *ngIf="order.discountAmount">
+          <div class="flex justify-between text-sm" *ngIf="order()?.discountAmount">
             <span class="text-gray-600">ส่วนลด</span>
-            <span class="text-red-600">-{{ formatPrice(order.discountAmount) }}</span>
+            <span class="text-red-600">-{{ formatPrice(order()?.discountAmount) }}</span>
           </div>
-          <div class="flex justify-between text-sm" *ngIf="order.couponCode">
+          <div class="flex justify-between text-sm" *ngIf="order()?.couponCode">
             <span class="text-gray-600">รหัสคูปอง</span>
-            <span class="text-gray-900">{{ order.couponCode }}</span>
+            <span class="text-gray-900">{{ order()?.couponCode }}</span>
           </div>
           <div class="flex justify-between text-sm">
             <span class="text-gray-600">ค่าจัดส่ง</span>
-            <span class="text-gray-900">{{ formatPrice(order.shippingFee) }}</span>
+            <span class="text-gray-900">{{ formatPrice(order()?.shippingFee) }}</span>
           </div>
-          <div class="flex justify-between text-sm" *ngIf="order.taxAmount">
+          <div class="flex justify-between text-sm" *ngIf="order()?.taxAmount">
             <span class="text-gray-600">ภาษี</span>
-            <span class="text-gray-900">{{ formatPrice(order.taxAmount) }}</span>
+            <span class="text-gray-900">{{ formatPrice(order()?.taxAmount) }}</span>
           </div>
           <div class="flex justify-between text-lg font-semibold pt-2 border-t border-gray-200">
             <span class="text-gray-900">ยอดรวมทั้งหมด</span>
-            <span class="text-gray-900">{{ formatPrice(order.totalAmount) }}</span>
+            <span class="text-gray-900">{{ formatPrice(order()?.totalAmount) }}</span>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Download/Print Buttons -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">พิมพ์เอกสาร</h2>
+
+      <div class="space-y-4">
+        <!-- Standard PDFs (A4) -->
+        <div class="flex flex-col sm:flex-row gap-4">
+          <button
+            (click)="downloadOrderPdf()"
+            class="flex-1 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 focus:outline-none"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span>ดาวน์โหลดคำสั่งซื้อ (A4)</span>
+          </button>
+
+          <button
+            *ngIf="isPaid"
+            (click)="downloadInvoice()"
+            class="flex-1 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 focus:outline-none"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span>ดาวน์โหลดใบเสร็จ/ใบกำกับภาษี (A4)</span>
+          </button>
+        </div>
+
+        <!-- Thermal PDFs (80mm) -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
+          <button
+            (click)="downloadOrderPdfThermal()"
+            class="flex-1 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 focus:outline-none"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+            <span>Thermal: คำสั่งซื้อ (80mm)</span>
+          </button>
+
+          <button
+            *ngIf="isPaid"
+            (click)="downloadInvoiceThermal()"
+            class="flex-1 px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 focus:outline-none"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+            <span>Thermal: ใบเสร็จ/ใบกำกับภาษี (80mm)</span>
+          </button>
         </div>
       </div>
     </div>
@@ -301,7 +356,7 @@
         </div>
 
         <!-- Cancelled Status -->
-        <div *ngIf="order.cancelledAt" class="flex gap-4">
+        <div *ngIf="order()?.cancelledAt" class="flex gap-4">
           <div class="flex flex-col items-center">
             <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center">
               <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -311,26 +366,26 @@
           </div>
           <div class="flex-1">
             <p class="text-red-600 font-medium">ยกเลิกคำสั่งซื้อ</p>
-            <p class="text-sm text-gray-500 mt-1">{{ formatDate(order.cancelledAt) }}</p>
+            <p class="text-sm text-gray-500 mt-1">{{ formatDate(order()?.cancelledAt) }}</p>
           </div>
         </div>
       </div>
 
       <!-- Admin Notes Display -->
-      <div *ngIf="order.adminNotes" class="mt-6 pt-6 border-t border-gray-200">
+      <div *ngIf="order()?.adminNotes" class="mt-6 pt-6 border-t border-gray-200">
         <label class="block text-sm font-medium text-gray-600 mb-2">หมายเหตุจากแอดมิน</label>
-        <p class="text-gray-900 bg-gray-50 p-4 rounded-lg">{{ order.adminNotes }}</p>
+        <p class="text-gray-900 bg-gray-50 p-4 rounded-lg">{{ order()?.adminNotes }}</p>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Cancel Confirmation Modal -->
-<div *ngIf="showCancelConfirm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+<div *ngIf="showCancelConfirm()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
   <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
     <h3 class="text-lg font-semibold text-gray-900 mb-2">ยืนยันการยกเลิกคำสั่งซื้อ</h3>
     <p class="text-gray-600 mb-4">
-      คุณแน่ใจหรือไม่ว่าต้องการยกเลิกคำสั่งซื้อ "{{ order?.orderNumber }}"?
+      คุณแน่ใจหรือไม่ว่าต้องการยกเลิกคำสั่งซื้อ "{{ order()?.orderNumber }}"?
     </p>
     <div class="flex gap-3 justify-end">
       <button

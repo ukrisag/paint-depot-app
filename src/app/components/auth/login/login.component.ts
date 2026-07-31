@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
@@ -10,14 +10,17 @@ import { CartService } from '../../../services/cart.service';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginComponent {
   loginForm: FormGroup;
   loading = false;
   returnUrl: string = '/';
+  showPassword = false;
+  rememberMe = false;
 
   constructor(
     private fb: FormBuilder,
@@ -34,6 +37,10 @@ export class LoginComponent {
     });
 
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   onSubmit(): void {
@@ -67,5 +74,17 @@ export class LoginComponent {
 
   get password() {
     return this.loginForm.get('password');
+  }
+
+  loginWithGoogle() {
+    this.notificationService.info('การเข้าสู่ระบบด้วย Google จะเปิดใช้งานในอนาคต');
+    // TODO: Implement Google OAuth integration
+    // window.location.href = `${environment.apiUrl}/auth/google`;
+  }
+
+  loginWithFacebook() {
+    this.notificationService.info('การเข้าสู่ระบบด้วย Facebook จะเปิดใช้งานในอนาคต');
+    // TODO: Implement Facebook OAuth integration
+    // window.location.href = `${environment.apiUrl}/auth/facebook`;
   }
 }

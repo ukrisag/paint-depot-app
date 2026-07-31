@@ -1,11 +1,12 @@
 <div class="flex flex-col min-h-screen">
-  <app-header></app-header>
+  <!-- Header and Footer only for non-admin routes -->
+  <app-header *ngIf="!isAdminRoute"></app-header>
 
-  <main class="flex-grow">
+  <main [class.flex-grow]="!isAdminRoute" [class.h-screen]="isAdminRoute">
     <router-outlet></router-outlet>
   </main>
 
-  <app-footer></app-footer>
+  <app-footer *ngIf="!isAdminRoute"></app-footer>
 
   <!-- Global Components -->
   <app-toast></app-toast>

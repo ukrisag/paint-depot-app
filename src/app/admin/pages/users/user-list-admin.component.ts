@@ -1,9 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminUserService } from '../../services/admin-user.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ReportService } from '../../../services/report.service';
 import { UserDto } from '../../../services/openapi-client/model/userDto';
 
 @Component({
@@ -14,26 +15,26 @@ import { UserDto } from '../../../services/openapi-client/model/userDto';
   styleUrls: ['./user-list-admin.component.css']
 })
 export class UserListAdminComponent implements OnInit {
-  users: UserDto[] = [];
+  users = signal<UserDto[]>([]);
 
-  loading = true;
-  error = '';
+  loading = signal(true);
+  error = signal('');
 
   // Filters
-  searchQuery = '';
-  selectedRole?: string;
-  selectedStatus?: string;
+  searchQuery = signal('');
+  selectedRole = signal<string | undefined>(undefined);
+  selectedStatus = signal<string | undefined>(undefined);
 
   // Pagination
-  currentPage = 1;
-  pageSize = 20;
-  totalItems = 0;
-  totalPages = 1;
+  currentPage = signal(1);
+  pageSize = signal(20);
+  totalItems = signal(0);
+  totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()));
 
   // Ban/Activate confirmation
-  userToToggle?: UserDto;
-  showToggleConfirm = false;
-  toggleAction: 'ban' | 'activate' = 'ban';
+  userToToggle = signal<UserDto | undefined>(undefined);
+  showToggleConfirm = signal(false);
+  toggleAction = signal<'ban' | 'activate'>('ban');
 
   // Available roles
   roles = [
@@ -51,8 +52,8 @@ export class UserListAdminComponent implements OnInit {
   constructor(
     private adminUserService: AdminUserService,
     private notificationService: NotificationService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private reportService: ReportService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -60,13 +61,13 @@ export class UserListAdminComponent implements OnInit {
   }
 
   loadUsers(): void {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
 
     this.adminUserService.getUsers(
-      this.currentPage,
-      this.pageSize,
-      this.searchQuery || undefined
+      this.currentPage(),
+      this.pageSize(),
+      this.searchQuery() || undefined
     ).subscribe({
       next: (response) => {
         let users = response.users || [];
@@ -74,17 +75,14 @@ export class UserListAdminComponent implements OnInit {
         // Apply filters
         users = this.filterUsers(users);
 
-        this.users = users;
-        this.totalItems = users.length;
-        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.users.set(users);
+        this.totalItems.set(users.length);
+        this.loading.set(false);
       },
       error: (err) => {
-        this.error = 'Unable to load users';
+        this.error.set('Unable to load users');
         this.notificationService.error('Unable to load users');
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
         console.error('Error loading users:', err);
       }
     });
@@ -94,31 +92,31 @@ export class UserListAdminComponent implements OnInit {
     let filtered = [...users];
 
     // Filter by role
-    if (this.selectedRole) {
-      filtered = filtered.filter(u => u.role === this.selectedRole);
+    if (this.selectedRole()) {
+      filtered = filtered.filter(u => u.role === this.selectedRole());
     }
 
     // Filter by status
-    if (this.selectedStatus) {
-      filtered = filtered.filter(u => u.status === this.selectedStatus);
+    if (this.selectedStatus()) {
+      filtered = filtered.filter(u => u.status === this.selectedStatus());
     }
 
     return filtered;
   }
 
   onSearch(): void {
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.loadUsers();
   }
 
   onFilterChange(): void {
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.loadUsers();
   }
 
   onPageChange(page: number): void {
-    if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
+    if (page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
     this.loadUsers();
   }
 
@@ -128,45 +126,48 @@ export class UserListAdminComponent implements OnInit {
   }
 
   onToggleStatusClick(user: UserDto): void {
-    this.userToToggle = user;
-    this.toggleAction = user.status === 'Active' ? 'ban' : 'activate';
-    this.showToggleConfirm = true;
+    this.userToToggle.set(user);
+    this.toggleAction.set(user.status === 'Active' ? 'ban' : 'activate');
+    this.showToggleConfirm.set(true);
   }
 
   onConfirmToggleStatus(): void {
-    if (!this.userToToggle?.id) return;
+    if (!this.userToToggle()?.id) return;
 
-    const newStatus = this.toggleAction === 'ban' ? 'Banned' : 'Active';
+    const newStatus = this.toggleAction() === 'ban' ? 'Banned' : 'Active';
 
-    this.adminUserService.updateUserStatus(this.userToToggle.id, { status: newStatus }).subscribe({
+    this.adminUserService.updateUserStatus(this.userToToggle()!.id!, { status: newStatus }).subscribe({
       next: (updatedUser) => {
         if (updatedUser) {
           // Update user in list
-          const index = this.users.findIndex(u => u.id === updatedUser.id);
-          if (index !== -1) {
-            this.users[index] = updatedUser;
-          }
+          this.users.update(users => {
+            const index = users.findIndex(u => u.id === updatedUser.id);
+            if (index !== -1) {
+              const updated = [...users];
+              updated[index] = updatedUser;
+              return updated;
+            }
+            return users;
+          });
           this.notificationService.success(
-            this.toggleAction === 'ban' ? 'User banned successfully' : 'User activated successfully'
+            this.toggleAction() === 'ban' ? 'User banned successfully' : 'User activated successfully'
           );
         }
-        this.showToggleConfirm = false;
-        this.userToToggle = undefined;
-        this.cdr.detectChanges();
+        this.showToggleConfirm.set(false);
+        this.userToToggle.set(undefined);
       },
       error: (err) => {
         this.notificationService.error('Unable to update user status');
-        this.showToggleConfirm = false;
-        this.userToToggle = undefined;
-        this.cdr.detectChanges();
+        this.showToggleConfirm.set(false);
+        this.userToToggle.set(undefined);
         console.error('Error updating user status:', err);
       }
     });
   }
 
   onCancelToggleStatus(): void {
-    this.showToggleConfirm = false;
-    this.userToToggle = undefined;
+    this.showToggleConfirm.set(false);
+    this.userToToggle.set(undefined);
   }
 
   getRoleLabel(role: string | null | undefined): string {
@@ -199,8 +200,8 @@ export class UserListAdminComponent implements OnInit {
   getPageNumbers(): number[] {
     const pages: number[] = [];
     const maxPages = 5;
-    let startPage = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-    let endPage = Math.min(this.totalPages, startPage + maxPages - 1);
+    let startPage = Math.max(1, this.currentPage() - Math.floor(maxPages / 2));
+    let endPage = Math.min(this.totalPages(), startPage + maxPages - 1);
 
     if (endPage - startPage < maxPages - 1) {
       startPage = Math.max(1, endPage - maxPages + 1);
@@ -214,10 +215,21 @@ export class UserListAdminComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.searchQuery = '';
-    this.selectedRole = undefined;
-    this.selectedStatus = undefined;
-    this.currentPage = 1;
+    this.searchQuery.set('');
+    this.selectedRole.set(undefined);
+    this.selectedStatus.set(undefined);
+    this.currentPage.set(1);
     this.loadUsers();
+  }
+
+  // Report downloads
+  downloadExcel(): void {
+    this.reportService.downloadUsersExcel(this.selectedRole());
+    this.notificationService.success('กำลังดาวน์โหลดรายงาน Excel...');
+  }
+
+  downloadPdf(): void {
+    this.reportService.downloadUsersPdf(this.selectedRole());
+    this.notificationService.success('กำลังดาวน์โหลดรายงาน PDF...');
   }
 }

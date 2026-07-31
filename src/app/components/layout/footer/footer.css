@@ -1,0 +1,420 @@
+/* Modern Premium Footer Styles */
+
+/* Blob Animation */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Footer Section Hover Effects */
+.footer-section {
+  transition: transform 0.3s ease;
+}
+
+/* Social Icon Advanced Effects */
+.social-icon {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.social-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(147, 51, 234, 0.3), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.social-icon:hover::before {
+  opacity: 1;
+}
+
+.social-icon:active {
+  transform: scale(0.95);
+}
+
+/* Footer Links Animations */
+.footer-link {
+  position: relative;
+  display: inline-block;
+}
+
+.footer-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #9333ea, #db2777);
+  transition: width 0.3s ease;
+}
+
+.footer-link:hover::after {
+  width: 100%;
+}
+
+/* Newsletter Form Styles */
+.newsletter-form input {
+  transition: all 0.3s ease;
+}
+
+.newsletter-form input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.2);
+}
+
+.newsletter-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.newsletter-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.newsletter-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.newsletter-btn:active {
+  transform: scale(0.98);
+}
+
+/* Payment Icons Hover */
+.payment-icon {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.payment-icon:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Trust Badges */
+.badge {
+  transition: all 0.3s ease;
+}
+
+.badge:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Copyright Bar */
+.copyright-bar {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Back to Top Button */
+.back-to-top {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.back-to-top.show {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.back-to-top:hover {
+  box-shadow: 0 20px 40px rgba(147, 51, 234, 0.6);
+}
+
+.back-to-top:active {
+  transform: scale(0.95);
+}
+
+/* Glassmorphism Effects */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Gradient Text Animation */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-text-animated {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .footer-section {
+    text-align: center;
+  }
+
+  .social-icon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .back-to-top {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .newsletter-form form {
+    flex-direction: column;
+  }
+
+  .newsletter-btn {
+    width: 100%;
+  }
+}
+
+/* Smooth Scrolling */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Dark Mode Enhancements (if needed) */
+@media (prefers-color-scheme: dark) {
+  .footer-section {
+    /* Already dark themed */
+  }
+}
+
+/* Loading Animation for Newsletter */
+.newsletter-btn.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.newsletter-btn.loading svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Focus States for Accessibility */
+.footer-link:focus,
+.social-icon:focus,
+.newsletter-btn:focus,
+.back-to-top:focus {
+  outline: 2px solid rgba(147, 51, 234, 0.6);
+  outline-offset: 2px;
+}
+
+/* Improved Touch Targets for Mobile */
+@media (hover: none) and (pointer: coarse) {
+  .social-icon,
+  .footer-link,
+  .payment-icon,
+  .badge {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Gradient Border Animation */
+@keyframes border-gradient {
+  0% {
+    border-image-source: linear-gradient(90deg, #9333ea, #db2777);
+  }
+  50% {
+    border-image-source: linear-gradient(90deg, #db2777, #f97316);
+  }
+  100% {
+    border-image-source: linear-gradient(90deg, #9333ea, #db2777);
+  }
+}
+
+/* Shimmer Effect for Premium Look */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.5) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 3s infinite;
+}
+
+/* Pulse Animation for Important Elements */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(147, 51, 234, 0.8);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Hover Effect for Contact Items */
+.footer-section a {
+  transition: all 0.3s ease;
+}
+
+.footer-section a:hover {
+  transform: translateX(5px);
+}
+
+/* Newsletter Input Placeholder */
+.newsletter-form input::placeholder {
+  transition: all 0.3s ease;
+}
+
+.newsletter-form input:focus::placeholder {
+  opacity: 0.5;
+  transform: translateX(5px);
+}
+
+/* Stagger Animation Helper */
+.stagger-item {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.5s ease;
+}
+
+.stagger-item.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Custom Scrollbar for Newsletter Input */
+.newsletter-form input::-webkit-scrollbar {
+  width: 4px;
+}
+
+.newsletter-form input::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.newsletter-form input::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #9333ea, #db2777);
+  border-radius: 10px;
+}
+
+/* Loading State */
+@keyframes loading {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: loading 1s linear infinite;
+}
+
+/* Prevent Text Selection on Decorative Elements */
+.social-icon,
+.payment-icon,
+.badge,
+.back-to-top {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+/* Enhanced Focus Ring */
+*:focus-visible {
+  outline: 2px solid rgba(147, 51, 234, 0.8);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* Print Styles */
+@media print {
+  footer {
+    display: none;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .back-to-top {
+    animation: none;
+  }
+}

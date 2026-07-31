@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AdminOrderService } from '../../services/admin-order.service';
@@ -19,6 +19,14 @@ interface SalesChartData {
   amount: number;
 }
 
+interface OrderStatusData {
+  status: string;
+  label: string;
+  count: number;
+  color: string;
+  percentage: number;
+}
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -30,10 +38,9 @@ export class AdminDashboardComponent implements OnInit {
   private adminOrderService = inject(AdminOrderService);
   private adminUserService = inject(AdminUserService);
   private productService = inject(ProductService);
-  private cdr = inject(ChangeDetectorRef);
 
-  loading = true;
-  stats: DashboardStat[] = [
+  loading = signal(true);
+  stats = signal<DashboardStat[]>([
     {
       title: 'ยอดขายวันนี้',
       value: '฿0',
@@ -58,17 +65,18 @@ export class AdminDashboardComponent implements OnInit {
       icon: '👥',
       color: 'bg-orange-500'
     }
-  ];
+  ]);
 
-  recentOrders: OrderDto[] = [];
-  salesChartData: SalesChartData[] = [];
+  recentOrders = signal<OrderDto[]>([]);
+  salesChartData = signal<SalesChartData[]>([]);
+  orderStatusData = signal<OrderStatusData[]>([]);
 
   ngOnInit() {
     this.loadDashboardData();
   }
 
   loadDashboardData() {
-    this.loading = true;
+    this.loading.set(true);
 
     forkJoin({
       orders: this.adminOrderService.getAllOrders(1, 100),
@@ -99,7 +107,7 @@ export class AdminDashboardComponent implements OnInit {
         const newOrders = todayOrders.length;
 
         // Update stats
-        this.stats = [
+        this.stats.set([
           {
             title: 'ยอดขายวันนี้',
             value: `฿${todaySales.toLocaleString('th-TH')}`,
@@ -124,27 +132,32 @@ export class AdminDashboardComponent implements OnInit {
             icon: '👥',
             color: 'bg-orange-500'
           }
-        ];
+        ]);
 
         // Get recent orders (last 5)
-        this.recentOrders = allOrders
+        this.recentOrders.set(allOrders
           .sort((a: OrderDto, b: OrderDto) => {
             const dateA = new Date(a.createdAt || 0).getTime();
             const dateB = new Date(b.createdAt || 0).getTime();
             return dateB - dateA;
           })
-          .slice(0, 5);
+          .slice(0, 5));
 
         // Generate sales chart data (last 7 days)
-        this.salesChartData = this.generateSalesChartData(allOrders);
+        const chartData = this.generateSalesChartData(allOrders);
+        console.log('Sales chart data:', chartData);
+        this.salesChartData.set(chartData);
 
-        this.loading = false;
-        this.cdr.detectChanges();
+        // Generate order status data
+        const statusData = this.generateOrderStatusData(allOrders);
+        console.log('Order status data:', statusData);
+        this.orderStatusData.set(statusData);
+
+        this.loading.set(false);
       },
       error: (error) => {
         console.error('Error loading dashboard data:', error);
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       }
     });
   }
@@ -152,6 +165,9 @@ export class AdminDashboardComponent implements OnInit {
   generateSalesChartData(orders: OrderDto[]): SalesChartData[] {
     const chartData: SalesChartData[] = [];
     const today = new Date();
+
+    // Statuses that mean payment is completed
+    const paidStatuses = ['confirmed', 'processing', 'shipped', 'delivered'];
 
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
@@ -161,9 +177,13 @@ export class AdminDashboardComponent implements OnInit {
       const nextDate = new Date(date);
       nextDate.setDate(nextDate.getDate() + 1);
 
+      // Filter only paid orders (not pending, pending_payment, or cancelled)
       const dayOrders = orders.filter((order: OrderDto) => {
         const orderDate = new Date(order.createdAt || '');
-        return orderDate >= date && orderDate < nextDate && order.status !== 'cancelled';
+        const isInDateRange = orderDate >= date && orderDate < nextDate;
+        const isPaid = paidStatuses.includes(order.status?.toLowerCase() || '');
+
+        return isInDateRange && isPaid;
       });
 
       const dayTotal = dayOrders.reduce((sum: number, order: OrderDto) => sum + (order.totalAmount || 0), 0);
@@ -174,18 +194,30 @@ export class AdminDashboardComponent implements OnInit {
       });
     }
 
+    console.log('Paid statuses used:', paidStatuses);
     return chartData;
   }
 
   getMaxChartValue(): number {
-    if (this.salesChartData.length === 0) return 0;
-    const max = Math.max(...this.salesChartData.map(d => d.amount));
+    if (this.salesChartData().length === 0) return 0;
+    const max = Math.max(...this.salesChartData().map(d => d.amount));
     return max > 0 ? max : 100;
   }
 
   getBarHeight(amount: number): number {
     const max = this.getMaxChartValue();
-    return max > 0 ? (amount / max) * 100 : 0;
+    if (max === 0) return 0;
+
+    // Calculate percentage
+    let percentage = (amount / max) * 100;
+
+    // If amount > 0 but percentage is too small, show minimum 8%
+    if (amount > 0 && percentage < 8) {
+      percentage = 8;
+    }
+
+    console.log(`Bar height for amount ${amount}: ${percentage}% (max: ${max})`);
+    return percentage;
   }
 
   getOrderStatusClass(status?: string): string {
@@ -227,6 +259,39 @@ export class AdminDashboardComponent implements OnInit {
       default:
         return status || 'ไม่ทราบ';
     }
+  }
+
+  generateOrderStatusData(orders: OrderDto[]): OrderStatusData[] {
+    const statusConfig = [
+      { status: 'pending', label: 'รอดำเนินการ', color: 'bg-yellow-500' },
+      { status: 'pending_payment', label: 'รอชำระเงิน', color: 'bg-orange-500' },
+      { status: 'confirmed', label: 'ยืนยันแล้ว', color: 'bg-blue-500' },
+      { status: 'processing', label: 'กำลังเตรียมสินค้า', color: 'bg-purple-500' },
+      { status: 'shipped', label: 'จัดส่งแล้ว', color: 'bg-indigo-500' },
+      { status: 'delivered', label: 'จัดส่งสำเร็จ', color: 'bg-green-500' },
+      { status: 'cancelled', label: 'ยกเลิก', color: 'bg-red-500' }
+    ];
+
+    const totalOrders = orders.length;
+    const statusData: OrderStatusData[] = [];
+
+    statusConfig.forEach(config => {
+      const count = orders.filter(order =>
+        order.status?.toLowerCase() === config.status.toLowerCase()
+      ).length;
+
+      if (count > 0 || config.status === 'pending' || config.status === 'confirmed') {
+        statusData.push({
+          status: config.status,
+          label: config.label,
+          count: count,
+          color: config.color,
+          percentage: totalOrders > 0 ? (count / totalOrders) * 100 : 0
+        });
+      }
+    });
+
+    return statusData;
   }
 
   formatDate(date?: string): string {

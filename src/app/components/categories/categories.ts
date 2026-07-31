@@ -1,23 +1,23 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { Category } from '../../models/product.model';
 
 @Component({
   selector: 'app-categories',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './categories.html',
   styleUrl: './categories.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CategoriesComponent implements OnInit {
-  categories: Category[] = [];
-  loading = true;
+  categories = signal<Category[]>([]);
+  loading = signal(true);
 
   constructor(
     private productService: ProductService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -27,9 +27,8 @@ export class CategoriesComponent implements OnInit {
   loadCategories() {
     this.productService.getCategories().subscribe({
       next: (categories) => {
-        this.categories = categories;
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.categories.set(categories);
+        this.loading.set(false);
       }
     });
   }

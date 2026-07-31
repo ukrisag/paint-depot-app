@@ -1,8 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminCategoryService } from '../../services/admin-category.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ReportService } from '../../../services/report.service';
 import { CategoryDto } from '../../../services/openapi-client/model/categoryDto';
 import { CreateCategoryDto } from '../../../services/openapi-client/model/createCategoryDto';
 
@@ -27,17 +28,17 @@ interface CategoryFormData {
   styleUrls: ['./category-list-admin.component.css']
 })
 export class CategoryListAdminComponent implements OnInit {
-  categories: CategoryWithLevel[] = [];
-  allCategories: CategoryDto[] = [];
-  parentCategories: CategoryDto[] = [];
+  categories = signal<CategoryWithLevel[]>([]);
+  allCategories = signal<CategoryDto[]>([]);
+  parentCategories = signal<CategoryDto[]>([]);
 
-  loading = true;
-  error = '';
+  loading = signal(true);
+  error = signal('');
 
   // Modal state
-  showModal = false;
-  isEditMode = false;
-  editingCategoryId?: number;
+  showModal = signal(false);
+  isEditMode = signal(false);
+  editingCategoryId = signal<number | undefined>(undefined);
 
   // Form data
   formData: CategoryFormData = {
@@ -50,16 +51,16 @@ export class CategoryListAdminComponent implements OnInit {
   };
 
   // Delete confirmation
-  categoryToDelete?: CategoryDto;
-  showDeleteConfirm = false;
+  categoryToDelete = signal<CategoryDto | undefined>(undefined);
+  showDeleteConfirm = signal(false);
 
   // Filter
-  showInactive = true;
+  showInactive = signal(true);
 
   constructor(
     private adminCategoryService: AdminCategoryService,
     private notificationService: NotificationService,
-    private cdr: ChangeDetectorRef
+    private reportService: ReportService
   ) {}
 
   ngOnInit(): void {
@@ -67,35 +68,33 @@ export class CategoryListAdminComponent implements OnInit {
   }
 
   loadCategories(): void {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
 
-    this.adminCategoryService.getCategories(this.showInactive).subscribe({
+    this.adminCategoryService.getCategories(this.showInactive()).subscribe({
       next: (categories) => {
-        this.allCategories = categories;
+        this.allCategories.set(categories);
 
         // Filter active/inactive based on toggle
-        const filteredCategories = this.showInactive
+        const filteredCategories = this.showInactive()
           ? categories
           : categories.filter(c => c.isActive);
 
         // Build tree and flatten for display
         const tree = this.adminCategoryService.buildCategoryTree(filteredCategories);
-        this.categories = this.adminCategoryService.flattenCategoryTree(tree);
+        this.categories.set(this.adminCategoryService.flattenCategoryTree(tree));
 
         // Get parent categories (root level only) for dropdown
-        this.parentCategories = categories.filter(c =>
+        this.parentCategories.set(categories.filter(c =>
           (c.parentId === null || c.parentId === undefined) && c.isActive
-        );
+        ));
 
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
       },
       error: (err) => {
-        this.error = 'ไม่สามารถโหลดข้อมูลหมวดหมู่ได้';
+        this.error.set('ไม่สามารถโหลดข้อมูลหมวดหมู่ได้');
         this.notificationService.error('ไม่สามารถโหลดข้อมูลหมวดหมู่ได้');
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
         console.error('Error loading categories:', err);
       }
     });
@@ -106,8 +105,8 @@ export class CategoryListAdminComponent implements OnInit {
   }
 
   onAddNew(): void {
-    this.isEditMode = false;
-    this.editingCategoryId = undefined;
+    this.isEditMode.set(false);
+    this.editingCategoryId.set(undefined);
     this.formData = {
       name: '',
       slug: '',
@@ -116,14 +115,14 @@ export class CategoryListAdminComponent implements OnInit {
       displayOrder: 0,
       isActive: true
     };
-    this.showModal = true;
+    this.showModal.set(true);
   }
 
   onEdit(category: CategoryDto): void {
     if (!category.id) return;
 
-    this.isEditMode = true;
-    this.editingCategoryId = category.id;
+    this.isEditMode.set(true);
+    this.editingCategoryId.set(category.id);
     this.formData = {
       name: category.name || '',
       slug: category.slug || '',
@@ -132,35 +131,34 @@ export class CategoryListAdminComponent implements OnInit {
       displayOrder: category.displayOrder || 0,
       isActive: category.isActive ?? true
     };
-    this.showModal = true;
+    this.showModal.set(true);
   }
 
   onDeleteClick(category: CategoryDto): void {
-    this.categoryToDelete = category;
-    this.showDeleteConfirm = true;
+    this.categoryToDelete.set(category);
+    this.showDeleteConfirm.set(true);
   }
 
   onConfirmDelete(): void {
-    if (!this.categoryToDelete?.id) return;
+    if (!this.categoryToDelete()?.id) return;
 
-    this.adminCategoryService.deleteCategory(this.categoryToDelete.id).subscribe({
+    this.adminCategoryService.deleteCategory(this.categoryToDelete()!.id!).subscribe({
       next: () => {
         this.notificationService.success('ลบหมวดหมู่เรียบร้อยแล้ว');
-        this.showDeleteConfirm = false;
-        this.categoryToDelete = undefined;
+        this.showDeleteConfirm.set(false);
+        this.categoryToDelete.set(undefined);
         this.loadCategories();
       },
       error: (err) => {
         this.notificationService.error('ไม่สามารถลบหมวดหมู่ได้ อาจมีสินค้าอยู่ในหมวดหมู่นี้');
-        this.cdr.detectChanges();
         console.error('Error deleting category:', err);
       }
     });
   }
 
   onCancelDelete(): void {
-    this.showDeleteConfirm = false;
-    this.categoryToDelete = undefined;
+    this.showDeleteConfirm.set(false);
+    this.categoryToDelete.set(undefined);
   }
 
   onToggleStatus(category: CategoryDto): void {
@@ -176,50 +174,53 @@ export class CategoryListAdminComponent implements OnInit {
       },
       error: (err) => {
         this.notificationService.error('ไม่สามารถเปลี่ยนสถานะหมวดหมู่ได้');
-        this.cdr.detectChanges();
         console.error('Error toggling category status:', err);
       }
     });
   }
 
   onNameChange(): void {
-    if (!this.isEditMode || !this.formData.slug) {
-      this.formData.slug = this.adminCategoryService.generateSlug(this.formData.name);
+    if (!this.isEditMode() || !this.formData.slug) {
+      this.formData = {
+        ...this.formData,
+        slug: this.adminCategoryService.generateSlug(this.formData.name)
+      };
     }
   }
 
   onSaveCategory(): void {
+    const currentFormData = this.formData;
+
     // Validate
-    if (!this.formData.name.trim()) {
+    if (!currentFormData.name.trim()) {
       this.notificationService.error('กรุณากรอกชื่อหมวดหมู่');
       return;
     }
 
-    if (!this.formData.slug.trim()) {
+    if (!currentFormData.slug.trim()) {
       this.notificationService.error('กรุณากรอก Slug');
       return;
     }
 
     const categoryDto: CreateCategoryDto = {
-      name: this.formData.name.trim(),
-      slug: this.formData.slug.trim(),
-      parentId: this.formData.parentId,
-      description: this.formData.description.trim() || null,
-      displayOrder: this.formData.displayOrder,
-      isActive: this.formData.isActive
+      name: currentFormData.name.trim(),
+      slug: currentFormData.slug.trim(),
+      parentId: currentFormData.parentId,
+      description: currentFormData.description.trim() || null,
+      displayOrder: currentFormData.displayOrder,
+      isActive: currentFormData.isActive
     };
 
-    if (this.isEditMode && this.editingCategoryId) {
+    if (this.isEditMode() && this.editingCategoryId()) {
       // Update
-      this.adminCategoryService.updateCategory(this.editingCategoryId, categoryDto).subscribe({
+      this.adminCategoryService.updateCategory(this.editingCategoryId()!, categoryDto).subscribe({
         next: () => {
           this.notificationService.success('แก้ไขหมวดหมู่เรียบร้อยแล้ว');
-          this.showModal = false;
+          this.showModal.set(false);
           this.loadCategories();
         },
         error: (err) => {
           this.notificationService.error('ไม่สามารถแก้ไขหมวดหมู่ได้');
-          this.cdr.detectChanges();
           console.error('Error updating category:', err);
         }
       });
@@ -228,12 +229,11 @@ export class CategoryListAdminComponent implements OnInit {
       this.adminCategoryService.createCategory(categoryDto).subscribe({
         next: () => {
           this.notificationService.success('เพิ่มหมวดหมู่เรียบร้อยแล้ว');
-          this.showModal = false;
+          this.showModal.set(false);
           this.loadCategories();
         },
         error: (err) => {
           this.notificationService.error('ไม่สามารถเพิ่มหมวดหมู่ได้');
-          this.cdr.detectChanges();
           console.error('Error creating category:', err);
         }
       });
@@ -241,7 +241,7 @@ export class CategoryListAdminComponent implements OnInit {
   }
 
   onCancelModal(): void {
-    this.showModal = false;
+    this.showModal.set(false);
     this.formData = {
       name: '',
       slug: '',
@@ -258,7 +258,7 @@ export class CategoryListAdminComponent implements OnInit {
 
   getParentName(parentId: number | null | undefined): string {
     if (!parentId) return '-';
-    const parent = this.allCategories.find(c => c.id === parentId);
+    const parent = this.allCategories().find(c => c.id === parentId);
     return parent?.name || '-';
   }
 
@@ -269,11 +269,22 @@ export class CategoryListAdminComponent implements OnInit {
   }
 
   getAvailableParentCategories(): CategoryDto[] {
-    if (!this.isEditMode) {
-      return this.parentCategories;
+    if (!this.isEditMode()) {
+      return this.parentCategories();
     }
 
     // When editing, exclude the category itself and its descendants
-    return this.parentCategories.filter(c => c.id !== this.editingCategoryId);
+    return this.parentCategories().filter(c => c.id !== this.editingCategoryId());
+  }
+
+  // Report downloads
+  downloadExcel(): void {
+    this.reportService.downloadCategoriesExcel();
+    this.notificationService.success('กำลังดาวน์โหลดรายงาน Excel...');
+  }
+
+  downloadPdf(): void {
+    this.reportService.downloadCategoriesPdf();
+    this.notificationService.success('กำลังดาวน์โหลดรายงาน PDF...');
   }
 }

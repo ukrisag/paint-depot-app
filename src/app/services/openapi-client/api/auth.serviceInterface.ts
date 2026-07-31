@@ -11,10 +11,13 @@ import { HttpHeaders }                                       from '@angular/comm
 
 import { Observable }                                        from 'rxjs';
 
+import { ForgotPasswordDto } from '../model/models';
 import { LoginDto } from '../model/models';
 import { LoginResponseDtoApiResponseDto } from '../model/models';
 import { ObjectApiResponseDto } from '../model/models';
+import { RefreshTokenRequestDto } from '../model/models';
 import { RegisterDto } from '../model/models';
+import { ResetPasswordDto } from '../model/models';
 import { UserDtoApiResponseDto } from '../model/models';
 
 
@@ -29,6 +32,14 @@ export interface AuthServiceInterface {
     /**
      * 
      * 
+     * @endpoint post /api/Auth/forgot-password
+     * @param forgotPasswordDto 
+     */
+    apiAuthForgotPasswordPost(forgotPasswordDto?: ForgotPasswordDto, extraHttpRequestParams?: any): Observable<ObjectApiResponseDto>;
+
+    /**
+     * 
+     * 
      * @endpoint post /api/Auth/login
      * @param loginDto 
      */
@@ -37,9 +48,33 @@ export interface AuthServiceInterface {
     /**
      * 
      * 
+     * @endpoint post /api/Auth/refresh-token
+     * @param refreshTokenRequestDto 
+     */
+    apiAuthRefreshTokenPost(refreshTokenRequestDto?: RefreshTokenRequestDto, extraHttpRequestParams?: any): Observable<LoginResponseDtoApiResponseDto>;
+
+    /**
+     * 
+     * 
      * @endpoint post /api/Auth/register
      * @param registerDto 
      */
     apiAuthRegisterPost(registerDto?: RegisterDto, extraHttpRequestParams?: any): Observable<UserDtoApiResponseDto>;
+
+    /**
+     * 
+     * 
+     * @endpoint post /api/Auth/reset-password
+     * @param resetPasswordDto 
+     */
+    apiAuthResetPasswordPost(resetPasswordDto?: ResetPasswordDto, extraHttpRequestParams?: any): Observable<ObjectApiResponseDto>;
+
+    /**
+     * 
+     * 
+     * @endpoint post /api/Auth/revoke-token
+     * @param refreshTokenRequestDto 
+     */
+    apiAuthRevokeTokenPost(refreshTokenRequestDto?: RefreshTokenRequestDto, extraHttpRequestParams?: any): Observable<ObjectApiResponseDto>;
 
 }

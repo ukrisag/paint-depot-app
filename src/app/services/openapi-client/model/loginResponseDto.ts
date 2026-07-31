@@ -13,6 +13,7 @@ import { UserDto } from './userDto';
 export interface LoginResponseDto { 
     token?: string | null;
     expiresAt?: string;
+    refreshToken?: string | null;
     user?: UserDto;
 }
 

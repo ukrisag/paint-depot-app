@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -13,19 +13,19 @@ import { ImageFallbackDirective } from '../../../directives/image-fallback.direc
   standalone: true,
   imports: [CommonModule, RouterModule, ImageFallbackDirective],
   templateUrl: './wishlist.component.html',
-  styleUrl: './wishlist.component.css'
+  styleUrl: './wishlist.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WishlistComponent implements OnInit, OnDestroy {
-  wishlistItems: WishlistDto[] = [];
-  isLoading = true;
-  error: string | null = null;
+  wishlistItems = signal<WishlistDto[]>([]);
+  isLoading = signal(true);
+  error = signal<string | null>(null);
   private destroy$ = new Subject<void>();
 
   constructor(
     private wishlistService: WishlistService,
     private notificationService: NotificationService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -43,23 +43,20 @@ export class WishlistComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (items) => {
-          this.wishlistItems = items;
-          this.isLoading = false;
-          this.cdr.detectChanges();
+          this.wishlistItems.set(items);
+          this.isLoading.set(false);
         },
         error: (error) => {
           console.error('Error subscribing to wishlist', error);
-          this.error = 'เกิดข้อผิดพลาดในการโหลดรายการโปรด';
-          this.isLoading = false;
-          this.cdr.detectChanges();
+          this.error.set('เกิดข้อผิดพลาดในการโหลดรายการโปรด');
+          this.isLoading.set(false);
         }
       });
   }
 
   loadWishlist(): void {
-    this.isLoading = true;
-    this.error = null;
-    this.cdr.detectChanges();
+    this.isLoading.set(true);
+    this.error.set(null);
     this.wishlistService.loadWishlist();
   }
 
@@ -75,12 +72,10 @@ export class WishlistComponent implements OnInit, OnDestroy {
         this.wishlistService.removeFromWishlist(productId).subscribe({
           next: () => {
             this.notificationService.success('ลบสินค้าออกจากรายการโปรดเรียบร้อยแล้ว');
-            this.cdr.detectChanges();
           },
           error: (error) => {
             console.error('Error removing from wishlist', error);
             this.notificationService.error('เกิดข้อผิดพลาดในการลบสินค้า');
-            this.cdr.detectChanges();
           }
         });
       }

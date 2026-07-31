@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReviewDto } from '../../../services/openapi-client/model/models';
 
@@ -8,6 +8,7 @@ import { ReviewDto } from '../../../services/openapi-client/model/models';
   imports: [CommonModule],
   templateUrl: './review-card.component.html',
   styleUrl: './review-card.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewCardComponent {
   @Input() review!: ReviewDto;

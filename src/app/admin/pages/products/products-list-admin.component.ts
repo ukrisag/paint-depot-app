@@ -1,9 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminProductService } from '../../services/admin-product.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ReportService } from '../../../services/report.service';
 import { ProductDto } from '../../../services/openapi-client/model/productDto';
 import { CategoryDto } from '../../../services/openapi-client/model/categoryDto';
 import { BrandDto } from '../../../services/openapi-client/model/brandDto';
@@ -16,35 +17,35 @@ import { BrandDto } from '../../../services/openapi-client/model/brandDto';
   styleUrls: ['./products-list-admin.component.css']
 })
 export class ProductsListAdminComponent implements OnInit {
-  products: ProductDto[] = [];
-  categories: CategoryDto[] = [];
-  brands: BrandDto[] = [];
+  products = signal<ProductDto[]>([]);
+  categories = signal<CategoryDto[]>([]);
+  brands = signal<BrandDto[]>([]);
 
-  loading = true;
-  error = '';
+  loading = signal(true);
+  error = signal('');
 
   // Filters
-  searchQuery = '';
-  selectedCategoryId?: number;
-  selectedBrandId?: number;
-  selectedStatus?: boolean;
-  sortBy: 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' = 'name-asc';
+  searchQuery = signal('');
+  selectedCategoryId = signal<number | undefined>(undefined);
+  selectedBrandId = signal<number | undefined>(undefined);
+  selectedStatus = signal<boolean | undefined>(undefined);
+  sortBy = signal<'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'>('name-asc');
 
   // Pagination
-  currentPage = 1;
-  pageSize = 20;
-  totalItems = 0;
-  totalPages = 1;
+  currentPage = signal(1);
+  pageSize = signal(20);
+  totalItems = signal(0);
+  totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()));
 
   // Delete confirmation
-  productToDelete?: ProductDto;
-  showDeleteConfirm = false;
+  productToDelete = signal<ProductDto | undefined>(undefined);
+  showDeleteConfirm = signal(false);
 
   constructor(
     private adminProductService: AdminProductService,
     private notificationService: NotificationService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private reportService: ReportService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -56,12 +57,10 @@ export class ProductsListAdminComponent implements OnInit {
   loadCategories(): void {
     this.adminProductService.getCategories().subscribe({
       next: (categories) => {
-        this.categories = categories.filter(c => c.isActive);
-        this.cdr.detectChanges();
+        this.categories.set(categories.filter(c => c.isActive));
       },
       error: (err) => {
         console.error('Error loading categories:', err);
-        this.cdr.detectChanges();
       }
     });
   }
@@ -69,27 +68,25 @@ export class ProductsListAdminComponent implements OnInit {
   loadBrands(): void {
     this.adminProductService.getBrands().subscribe({
       next: (brands) => {
-        this.brands = brands.filter(b => b.isActive);
-        this.cdr.detectChanges();
+        this.brands.set(brands.filter(b => b.isActive));
       },
       error: (err) => {
         console.error('Error loading brands:', err);
-        this.cdr.detectChanges();
       }
     });
   }
 
   loadProducts(): void {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
 
     this.adminProductService.getProducts(
-      this.currentPage,
-      this.pageSize,
-      this.searchQuery || undefined,
-      this.selectedCategoryId,
-      this.selectedBrandId,
-      this.selectedStatus
+      this.currentPage(),
+      this.pageSize(),
+      this.searchQuery() || undefined,
+      this.selectedCategoryId(),
+      this.selectedBrandId(),
+      this.selectedStatus()
     ).subscribe({
       next: (response) => {
         let products = response.products;
@@ -97,17 +94,14 @@ export class ProductsListAdminComponent implements OnInit {
         // Sort products
         products = this.sortProducts(products);
 
-        this.products = products;
-        this.totalItems = response.total;
-        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.products.set(products);
+        this.totalItems.set(response.total);
+        this.loading.set(false);
       },
       error: (err) => {
-        this.error = 'ไม่สามารถโหลดข้อมูลสินค้าได้';
+        this.error.set('ไม่สามารถโหลดข้อมูลสินค้าได้');
         this.notificationService.error('ไม่สามารถโหลดข้อมูลสินค้าได้');
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
         console.error('Error loading products:', err);
       }
     });
@@ -115,7 +109,7 @@ export class ProductsListAdminComponent implements OnInit {
 
   sortProducts(products: ProductDto[]): ProductDto[] {
     return [...products].sort((a, b) => {
-      switch (this.sortBy) {
+      switch (this.sortBy()) {
         case 'name-asc':
           return (a.name || '').localeCompare(b.name || '');
         case 'name-desc':
@@ -131,22 +125,22 @@ export class ProductsListAdminComponent implements OnInit {
   }
 
   onSearch(): void {
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.loadProducts();
   }
 
   onFilterChange(): void {
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.loadProducts();
   }
 
   onSortChange(): void {
-    this.products = this.sortProducts(this.products);
+    this.products.set(this.sortProducts(this.products()));
   }
 
   onPageChange(page: number): void {
-    if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
+    if (page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
     this.loadProducts();
   }
 
@@ -160,18 +154,18 @@ export class ProductsListAdminComponent implements OnInit {
   }
 
   onDeleteClick(product: ProductDto): void {
-    this.productToDelete = product;
-    this.showDeleteConfirm = true;
+    this.productToDelete.set(product);
+    this.showDeleteConfirm.set(true);
   }
 
   onConfirmDelete(): void {
-    if (!this.productToDelete?.id) return;
+    if (!this.productToDelete()?.id) return;
 
-    this.adminProductService.deleteProduct(this.productToDelete.id).subscribe({
+    this.adminProductService.deleteProduct(this.productToDelete()!.id!).subscribe({
       next: () => {
         this.notificationService.success('ลบสินค้าเรียบร้อยแล้ว');
-        this.showDeleteConfirm = false;
-        this.productToDelete = undefined;
+        this.showDeleteConfirm.set(false);
+        this.productToDelete.set(undefined);
         this.loadProducts();
       },
       error: (err) => {
@@ -182,8 +176,8 @@ export class ProductsListAdminComponent implements OnInit {
   }
 
   onCancelDelete(): void {
-    this.showDeleteConfirm = false;
-    this.productToDelete = undefined;
+    this.showDeleteConfirm.set(false);
+    this.productToDelete.set(undefined);
   }
 
   onToggleStatus(product: ProductDto): void {
@@ -196,25 +190,23 @@ export class ProductsListAdminComponent implements OnInit {
         this.notificationService.success(
           newStatus ? 'เปิดใช้งานสินค้าแล้ว' : 'ปิดใช้งานสินค้าแล้ว'
         );
-        this.cdr.detectChanges();
       },
       error: (err) => {
         this.notificationService.error('ไม่สามารถเปลี่ยนสถานะสินค้าได้');
         console.error('Error toggling product status:', err);
-        this.cdr.detectChanges();
       }
     });
   }
 
   getCategoryName(categoryId: number | null | undefined): string {
     if (!categoryId) return '-';
-    const category = this.categories.find(c => c.id === categoryId);
+    const category = this.categories().find(c => c.id === categoryId);
     return category?.name || '-';
   }
 
   getBrandName(brandId: number | null | undefined): string {
     if (!brandId) return '-';
-    const brand = this.brands.find(b => b.id === brandId);
+    const brand = this.brands().find(b => b.id === brandId);
     return brand?.name || '-';
   }
 
@@ -233,8 +225,8 @@ export class ProductsListAdminComponent implements OnInit {
   getPageNumbers(): number[] {
     const pages: number[] = [];
     const maxPages = 5;
-    let startPage = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-    let endPage = Math.min(this.totalPages, startPage + maxPages - 1);
+    let startPage = Math.max(1, this.currentPage() - Math.floor(maxPages / 2));
+    let endPage = Math.min(this.totalPages(), startPage + maxPages - 1);
 
     if (endPage - startPage < maxPages - 1) {
       startPage = Math.max(1, endPage - maxPages + 1);
@@ -248,12 +240,23 @@ export class ProductsListAdminComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.searchQuery = '';
-    this.selectedCategoryId = undefined;
-    this.selectedBrandId = undefined;
-    this.selectedStatus = undefined;
-    this.sortBy = 'name-asc';
-    this.currentPage = 1;
+    this.searchQuery.set('');
+    this.selectedCategoryId.set(undefined);
+    this.selectedBrandId.set(undefined);
+    this.selectedStatus.set(undefined);
+    this.sortBy.set('name-asc');
+    this.currentPage.set(1);
     this.loadProducts();
+  }
+
+  // Report downloads
+  downloadExcel(): void {
+    this.reportService.downloadProductsExcel(this.selectedCategoryId(), this.selectedBrandId());
+    this.notificationService.success('กำลังดาวน์โหลดรายงาน Excel...');
+  }
+
+  downloadPdf(): void {
+    this.reportService.downloadProductsPdf(this.selectedCategoryId(), this.selectedBrandId());
+    this.notificationService.success('กำลังดาวน์โหลดรายงาน PDF...');
   }
 }

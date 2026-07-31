@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
@@ -6,6 +6,7 @@ interface MenuItem {
   label: string;
   icon: string;
   route: string;
+  badge?: number;
   active?: boolean;
 }
 
@@ -14,11 +15,14 @@ interface MenuItem {
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './admin-sidebar.component.html',
-  styleUrls: ['./admin-sidebar.component.css']
+  styleUrls: ['./admin-sidebar.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminSidebarComponent {
   @Input() isOpen: boolean = true;
   @Output() close = new EventEmitter<void>();
+
+  isSettingsOpen = false;
 
   menuItems: MenuItem[] = [
     {
@@ -60,8 +64,27 @@ export class AdminSidebarComponent {
       label: 'แบรนด์',
       icon: '🏷️',
       route: '/admin/brands'
+    },
+    {
+      label: 'คลังภาพ',
+      icon: '🖼️',
+      route: '/admin/gallery'
     }
   ];
+
+  onMenuItemClick(event: Event): void {
+    // Close sidebar on mobile
+    this.onClose();
+  }
+
+  onMenuItemHover(event: Event): void {
+    // Menu item hover effect
+  }
+
+  toggleSettings(): void {
+    this.isSettingsOpen = !this.isSettingsOpen;
+    console.log('Toggle settings menu');
+  }
 
   onClose(): void {
     this.close.emit();

@@ -25,6 +25,14 @@ export interface UploadServiceInterface {
     /**
      * 
      * 
+     * @endpoint post /api/upload/gallery-image
+     * @param file 
+     */
+    apiUploadGalleryImagePost(file?: Blob, extraHttpRequestParams?: any): Observable<StringApiResponseDto>;
+
+    /**
+     * 
+     * 
      * @endpoint post /api/upload/payment-slip
      * @param file 
      */

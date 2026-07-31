@@ -1,9 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminOrderService } from '../../services/admin-order.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ReportService } from '../../../services/report.service';
 import { OrderDto } from '../../../services/openapi-client/model/orderDto';
 
 @Component({
@@ -14,22 +15,22 @@ import { OrderDto } from '../../../services/openapi-client/model/orderDto';
   styleUrls: ['./order-list-admin.component.css']
 })
 export class OrderListAdminComponent implements OnInit {
-  orders: OrderDto[] = [];
+  orders = signal<OrderDto[]>([]);
 
-  loading = true;
-  error = '';
+  loading = signal(true);
+  error = signal('');
 
   // Filters
-  searchQuery = '';
-  selectedStatus?: string;
-  startDate = '';
-  endDate = '';
+  searchQuery = signal('');
+  selectedStatus = signal<string | undefined>(undefined);
+  startDate = signal('');
+  endDate = signal('');
 
   // Pagination
-  currentPage = 1;
-  pageSize = 20;
-  totalItems = 0;
-  totalPages = 1;
+  currentPage = signal(1);
+  pageSize = signal(20);
+  totalItems = signal(0);
+  totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()));
 
   // Order statuses
   orderStatuses = [
@@ -44,8 +45,8 @@ export class OrderListAdminComponent implements OnInit {
   constructor(
     private adminOrderService: AdminOrderService,
     private notificationService: NotificationService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private reportService: ReportService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -53,27 +54,24 @@ export class OrderListAdminComponent implements OnInit {
   }
 
   loadOrders(): void {
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
 
-    this.adminOrderService.getAllOrders(this.currentPage, this.pageSize).subscribe({
+    this.adminOrderService.getAllOrders(this.currentPage(), this.pageSize()).subscribe({
       next: (response) => {
         let orders = response.data;
 
         // Apply filters
         orders = this.applyFilters(orders);
 
-        this.orders = orders;
-        this.totalItems = response.total;
-        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.orders.set(orders);
+        this.totalItems.set(response.total);
+        this.loading.set(false);
       },
       error: (err) => {
-        this.error = 'ไม่สามารถโหลดข้อมูลคำสั่งซื้อได้';
+        this.error.set('ไม่สามารถโหลดข้อมูลคำสั่งซื้อได้');
         this.notificationService.error('ไม่สามารถโหลดข้อมูลคำสั่งซื้อได้');
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
         console.error('Error loading orders:', err);
       }
     });
@@ -83,33 +81,33 @@ export class OrderListAdminComponent implements OnInit {
     let filtered = [...orders];
 
     // Filter by search query (order number)
-    if (this.searchQuery) {
-      const query = this.searchQuery.toLowerCase();
+    if (this.searchQuery()) {
+      const query = this.searchQuery().toLowerCase();
       filtered = filtered.filter(order =>
         order.orderNumber?.toLowerCase().includes(query)
       );
     }
 
     // Filter by status
-    if (this.selectedStatus) {
-      filtered = filtered.filter(order => order.status === this.selectedStatus);
+    if (this.selectedStatus()) {
+      filtered = filtered.filter(order => order.status === this.selectedStatus());
     }
 
     // Filter by date range
-    if (this.startDate) {
+    if (this.startDate()) {
       filtered = filtered.filter(order => {
         if (!order.createdAt) return false;
         const orderDate = new Date(order.createdAt);
-        const start = new Date(this.startDate);
+        const start = new Date(this.startDate());
         return orderDate >= start;
       });
     }
 
-    if (this.endDate) {
+    if (this.endDate()) {
       filtered = filtered.filter(order => {
         if (!order.createdAt) return false;
         const orderDate = new Date(order.createdAt);
-        const end = new Date(this.endDate);
+        const end = new Date(this.endDate());
         end.setHours(23, 59, 59, 999); // Include the entire end date
         return orderDate <= end;
       });
@@ -119,18 +117,18 @@ export class OrderListAdminComponent implements OnInit {
   }
 
   onSearch(): void {
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.loadOrders();
   }
 
   onFilterChange(): void {
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.loadOrders();
   }
 
   onPageChange(page: number): void {
-    if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
+    if (page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
     this.loadOrders();
   }
 
@@ -187,8 +185,8 @@ export class OrderListAdminComponent implements OnInit {
   getPageNumbers(): number[] {
     const pages: number[] = [];
     const maxPages = 5;
-    let startPage = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-    let endPage = Math.min(this.totalPages, startPage + maxPages - 1);
+    let startPage = Math.max(1, this.currentPage() - Math.floor(maxPages / 2));
+    let endPage = Math.min(this.totalPages(), startPage + maxPages - 1);
 
     if (endPage - startPage < maxPages - 1) {
       startPage = Math.max(1, endPage - maxPages + 1);
@@ -202,11 +200,22 @@ export class OrderListAdminComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.searchQuery = '';
-    this.selectedStatus = undefined;
-    this.startDate = '';
-    this.endDate = '';
-    this.currentPage = 1;
+    this.searchQuery.set('');
+    this.selectedStatus.set(undefined);
+    this.startDate.set('');
+    this.endDate.set('');
+    this.currentPage.set(1);
     this.loadOrders();
+  }
+
+  // Report downloads
+  downloadExcel(): void {
+    this.reportService.downloadOrdersExcel(this.startDate() || undefined, this.endDate() || undefined, this.selectedStatus());
+    this.notificationService.success('กำลังดาวน์โหลดรายงาน Excel...');
+  }
+
+  downloadPdf(): void {
+    this.reportService.downloadOrdersPdf(this.startDate() || undefined, this.endDate() || undefined, this.selectedStatus());
+    this.notificationService.success('กำลังดาวน์โหลดรายงาน PDF...');
   }
 }
